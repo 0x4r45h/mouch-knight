@@ -1,6 +1,6 @@
 'use client'
 
-import { wagmiAdapter, projectId, networks } from '@/config'
+import {wagmiAdapter, projectId, networks, monadDevnet} from '@/config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createAppKit } from '@reown/appkit/react'
 import React, { type ReactNode } from 'react'
@@ -15,10 +15,10 @@ if (!projectId) {
 
 // Set up metadata
 const metadata = {
-  name: 'next-reown-appkit',
-  description: 'next-reown-appkit',
-  url: 'https://github.com/0xonerb/next-reown-appkit-ssr', // origin must match your domain & subdomain
-  icons: ['https://avatars.githubusercontent.com/u/179229932']
+  name: 'Mouch Knight',
+  description: 'Mouch Knight is an arcade game for Monad Blockchain',
+  url: 'https://mouch-knight.emberstake.xyz', // origin must match your domain & subdomain
+  icons: ['https://emberstake.xyz/logo.png']
 }
 
 // Create the modal
@@ -26,10 +26,17 @@ export const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
   networks,
+  defaultNetwork: monadDevnet,
   metadata,
   themeMode: 'light',
   features: {
-    analytics: true // Optional - defaults to your Cloud configuration
+    analytics: true,
+    swaps: false,
+    onramp: false,
+    socials: false,
+    email: false,
+    history: false,
+    send: false,
   }
 })
 

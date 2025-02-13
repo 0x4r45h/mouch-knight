@@ -6,259 +6,6 @@ import {
 } from 'wagmi/codegen'
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Counter
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const counterAbi = [
-  {
-    type: 'function',
-    inputs: [],
-    name: 'increment',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'number',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'newNumber', internalType: 'uint256', type: 'uint256' }],
-    name: 'setNumber',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DelegatedMessageStorage
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const delegatedMessageStorageAbi = [
-  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
-  {
-    type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'delegations',
-    outputs: [
-      { name: 'isValid', internalType: 'bool', type: 'bool' },
-      { name: 'expiryTime', internalType: 'uint256', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'deposit',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'deposits',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'message', internalType: 'string', type: 'string' }],
-    name: 'estimateMessageGas',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'user', internalType: 'address', type: 'address' }],
-    name: 'getUserMessages',
-    outputs: [{ name: '', internalType: 'string[]', type: 'string[]' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'owner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'validityDuration', internalType: 'uint256', type: 'uint256' },
-      { name: 'signature', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'setDelegation',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'user', internalType: 'address', type: 'address' },
-      { name: 'message', internalType: 'string', type: 'string' },
-    ],
-    name: 'storeMessage',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '', internalType: 'address', type: 'address' },
-      { name: '', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'userMessages',
-    outputs: [{ name: '', internalType: 'string', type: 'string' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'withdraw',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'user', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'expiryTime',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'DelegationSet',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'user', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Deposited',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'user', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'message',
-        internalType: 'string',
-        type: 'string',
-        indexed: false,
-      },
-      {
-        name: 'gasCost',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'MessageStored',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'user', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Withdrawn',
-  },
-  { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
-  {
-    type: 'error',
-    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
-    name: 'ECDSAInvalidSignatureLength',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
-    name: 'ECDSAInvalidSignatureS',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
-    name: 'OwnableInvalidOwner',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-  },
-  { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ECDSA
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const ecdsaAbi = [
-  { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
-  {
-    type: 'error',
-    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
-    name: 'ECDSAInvalidSignatureLength',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
-    name: 'ECDSAInvalidSignatureS',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IMulticall3
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -559,19 +306,20 @@ export const ownableAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ReentrancyGuard
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const reentrancyGuardAbi = [
-  { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ScoreManager
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const scoreManagerAbi = [
   { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_relayers', internalType: 'address[]', type: 'address[]' },
+    ],
+    name: 'addRelayers',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
   {
     type: 'function',
     inputs: [{ name: 'player', internalType: 'address', type: 'address' }],
@@ -588,10 +336,19 @@ export const scoreManagerAbi = [
   },
   {
     type: 'function',
-    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'relayers',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_relayers', internalType: 'address[]', type: 'address[]' },
+    ],
+    name: 'removeRelayers',
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -645,6 +402,32 @@ export const scoreManagerAbi = [
       },
     ],
     name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'relayer',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'RelayerAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'relayer',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'RelayerRemoved',
   },
   {
     type: 'event',
@@ -787,300 +570,6 @@ export const erc20Abi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // React
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link counterAbi}__
- */
-export const useReadCounter = /*#__PURE__*/ createUseReadContract({
-  abi: counterAbi,
-})
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"number"`
- */
-export const useReadCounterNumber = /*#__PURE__*/ createUseReadContract({
-  abi: counterAbi,
-  functionName: 'number',
-})
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link counterAbi}__
- */
-export const useWriteCounter = /*#__PURE__*/ createUseWriteContract({
-  abi: counterAbi,
-})
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"increment"`
- */
-export const useWriteCounterIncrement = /*#__PURE__*/ createUseWriteContract({
-  abi: counterAbi,
-  functionName: 'increment',
-})
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"setNumber"`
- */
-export const useWriteCounterSetNumber = /*#__PURE__*/ createUseWriteContract({
-  abi: counterAbi,
-  functionName: 'setNumber',
-})
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link counterAbi}__
- */
-export const useSimulateCounter = /*#__PURE__*/ createUseSimulateContract({
-  abi: counterAbi,
-})
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"increment"`
- */
-export const useSimulateCounterIncrement =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: counterAbi,
-    functionName: 'increment',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link counterAbi}__ and `functionName` set to `"setNumber"`
- */
-export const useSimulateCounterSetNumber =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: counterAbi,
-    functionName: 'setNumber',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__
- */
-export const useReadDelegatedMessageStorage =
-  /*#__PURE__*/ createUseReadContract({ abi: delegatedMessageStorageAbi })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"delegations"`
- */
-export const useReadDelegatedMessageStorageDelegations =
-  /*#__PURE__*/ createUseReadContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'delegations',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"deposits"`
- */
-export const useReadDelegatedMessageStorageDeposits =
-  /*#__PURE__*/ createUseReadContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'deposits',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"estimateMessageGas"`
- */
-export const useReadDelegatedMessageStorageEstimateMessageGas =
-  /*#__PURE__*/ createUseReadContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'estimateMessageGas',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"getUserMessages"`
- */
-export const useReadDelegatedMessageStorageGetUserMessages =
-  /*#__PURE__*/ createUseReadContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'getUserMessages',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"owner"`
- */
-export const useReadDelegatedMessageStorageOwner =
-  /*#__PURE__*/ createUseReadContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'owner',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"userMessages"`
- */
-export const useReadDelegatedMessageStorageUserMessages =
-  /*#__PURE__*/ createUseReadContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'userMessages',
-  })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__
- */
-export const useWriteDelegatedMessageStorage =
-  /*#__PURE__*/ createUseWriteContract({ abi: delegatedMessageStorageAbi })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"deposit"`
- */
-export const useWriteDelegatedMessageStorageDeposit =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'deposit',
-  })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"renounceOwnership"`
- */
-export const useWriteDelegatedMessageStorageRenounceOwnership =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'renounceOwnership',
-  })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"setDelegation"`
- */
-export const useWriteDelegatedMessageStorageSetDelegation =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'setDelegation',
-  })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"storeMessage"`
- */
-export const useWriteDelegatedMessageStorageStoreMessage =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'storeMessage',
-  })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"transferOwnership"`
- */
-export const useWriteDelegatedMessageStorageTransferOwnership =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'transferOwnership',
-  })
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"withdraw"`
- */
-export const useWriteDelegatedMessageStorageWithdraw =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'withdraw',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__
- */
-export const useSimulateDelegatedMessageStorage =
-  /*#__PURE__*/ createUseSimulateContract({ abi: delegatedMessageStorageAbi })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"deposit"`
- */
-export const useSimulateDelegatedMessageStorageDeposit =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'deposit',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"renounceOwnership"`
- */
-export const useSimulateDelegatedMessageStorageRenounceOwnership =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'renounceOwnership',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"setDelegation"`
- */
-export const useSimulateDelegatedMessageStorageSetDelegation =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'setDelegation',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"storeMessage"`
- */
-export const useSimulateDelegatedMessageStorageStoreMessage =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'storeMessage',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"transferOwnership"`
- */
-export const useSimulateDelegatedMessageStorageTransferOwnership =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'transferOwnership',
-  })
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `functionName` set to `"withdraw"`
- */
-export const useSimulateDelegatedMessageStorageWithdraw =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: delegatedMessageStorageAbi,
-    functionName: 'withdraw',
-  })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link delegatedMessageStorageAbi}__
- */
-export const useWatchDelegatedMessageStorageEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({ abi: delegatedMessageStorageAbi })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `eventName` set to `"DelegationSet"`
- */
-export const useWatchDelegatedMessageStorageDelegationSetEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: delegatedMessageStorageAbi,
-    eventName: 'DelegationSet',
-  })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `eventName` set to `"Deposited"`
- */
-export const useWatchDelegatedMessageStorageDepositedEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: delegatedMessageStorageAbi,
-    eventName: 'Deposited',
-  })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `eventName` set to `"MessageStored"`
- */
-export const useWatchDelegatedMessageStorageMessageStoredEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: delegatedMessageStorageAbi,
-    eventName: 'MessageStored',
-  })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `eventName` set to `"OwnershipTransferred"`
- */
-export const useWatchDelegatedMessageStorageOwnershipTransferredEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: delegatedMessageStorageAbi,
-    eventName: 'OwnershipTransferred',
-  })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link delegatedMessageStorageAbi}__ and `eventName` set to `"Withdrawn"`
- */
-export const useWatchDelegatedMessageStorageWithdrawnEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: delegatedMessageStorageAbi,
-    eventName: 'Withdrawn',
-  })
 
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link iMulticall3Abi}__
@@ -1426,6 +915,24 @@ export const useWriteScoreManager = /*#__PURE__*/ createUseWriteContract({
 })
 
 /**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"addRelayers"`
+ */
+export const useWriteScoreManagerAddRelayers =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: scoreManagerAbi,
+    functionName: 'addRelayers',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"removeRelayers"`
+ */
+export const useWriteScoreManagerRemoveRelayers =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: scoreManagerAbi,
+    functionName: 'removeRelayers',
+  })
+
+/**
  * Wraps __{@link useWriteContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"renounceOwnership"`
  */
 export const useWriteScoreManagerRenounceOwnership =
@@ -1458,6 +965,24 @@ export const useWriteScoreManagerTransferOwnership =
 export const useSimulateScoreManager = /*#__PURE__*/ createUseSimulateContract({
   abi: scoreManagerAbi,
 })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"addRelayers"`
+ */
+export const useSimulateScoreManagerAddRelayers =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: scoreManagerAbi,
+    functionName: 'addRelayers',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"removeRelayers"`
+ */
+export const useSimulateScoreManagerRemoveRelayers =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: scoreManagerAbi,
+    functionName: 'removeRelayers',
+  })
 
 /**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"renounceOwnership"`
@@ -1499,6 +1024,24 @@ export const useWatchScoreManagerOwnershipTransferredEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
     abi: scoreManagerAbi,
     eventName: 'OwnershipTransferred',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link scoreManagerAbi}__ and `eventName` set to `"RelayerAdded"`
+ */
+export const useWatchScoreManagerRelayerAddedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: scoreManagerAbi,
+    eventName: 'RelayerAdded',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link scoreManagerAbi}__ and `eventName` set to `"RelayerRemoved"`
+ */
+export const useWatchScoreManagerRelayerRemovedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: scoreManagerAbi,
+    eventName: 'RelayerRemoved',
   })
 
 /**

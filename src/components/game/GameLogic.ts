@@ -2,12 +2,12 @@ import { Person } from './Person';
 import { Tree } from './Tree';
 
 // Define the expected detail type for our custom events.
-export interface LumberjackEventDetail {
+export interface GameEventDetail {
     score?: number;
     highScore?: number;
 }
 
-export class Lumberjack {
+export class GameLogic {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private person: Person | null = null;
@@ -26,8 +26,8 @@ export class Lumberjack {
     private static readonly DEFAULT_BOOST_AMOUNT: number =  0.02; // Increase in progress for each move.
     private static readonly DEFAULT_DIFFICULTY_FACTOR: number =  4; // This factor multiplies the depletion; tuning knob for difficulty.
     private static readonly DEFAULT_DIFFICULTY_FACTOR_RATE: number =  0.005;  // This factor increases the difficulty rate over time
-    private progress: number = Lumberjack.DEFAULT_PROGRESS; // Range between 0 (empty) and 1 (full). Starts at half.
-    private difficultyFactor: number = Lumberjack.DEFAULT_DIFFICULTY_FACTOR; // This factor multiplies the depletion; tuning knob for difficulty.
+    private progress: number = GameLogic.DEFAULT_PROGRESS; // Range between 0 (empty) and 1 (full). Starts at half.
+    private difficultyFactor: number = GameLogic.DEFAULT_DIFFICULTY_FACTOR; // This factor multiplies the depletion; tuning knob for difficulty.
     private depletionTimer: number | null = null;
 
     // Public event target to emit custom events.
@@ -82,8 +82,8 @@ export class Lumberjack {
         this.tree = new Tree(this.canvas, this.canvas.width / 2, this.canvas.height - 350);
         this.tree.init();
         this.score = 0;
-        this.progress = Lumberjack.DEFAULT_PROGRESS;
-        this.difficultyFactor = Lumberjack.DEFAULT_DIFFICULTY_FACTOR;
+        this.progress = GameLogic.DEFAULT_PROGRESS;
+        this.difficultyFactor = GameLogic.DEFAULT_DIFFICULTY_FACTOR;
 
         // Start the progress depletion timer.
         this.startProgressTimer();
@@ -91,7 +91,7 @@ export class Lumberjack {
         this.drawBackground();
 
         // Dispatch an event indicating initialization.
-        this.eventTarget.dispatchEvent(new CustomEvent<LumberjackEventDetail>('init', {
+        this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('init', {
             detail: {}
         }));
     }
@@ -197,7 +197,7 @@ export class Lumberjack {
         this.cutSound.play();
 
         // Boost progress on each move.
-        this.progress = Math.min(this.progress + Lumberjack.DEFAULT_BOOST_AMOUNT, 1);
+        this.progress = Math.min(this.progress + GameLogic.DEFAULT_BOOST_AMOUNT, 1);
 
         // Move the person according to the direction.
         if (this.person) {
@@ -217,7 +217,7 @@ export class Lumberjack {
         this.score++;
 
         // Dispatch a scoreUpdate event.
-        this.eventTarget.dispatchEvent(new CustomEvent<LumberjackEventDetail>('scoreChange', {
+        this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('scoreChange', {
             detail: { score: this.score }
         }));
 
@@ -243,7 +243,7 @@ export class Lumberjack {
             localStorage.setItem('highScore', String(this.score));
         }
         const updatedHighScore = Number(localStorage.getItem('highScore')) || 0;
-        this.eventTarget.dispatchEvent(new CustomEvent<LumberjackEventDetail>('gameOver', {
+        this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('gameOver', {
             detail: { score: this.score, highScore: updatedHighScore }
         }));
         // Stop the progress timer.
@@ -262,14 +262,14 @@ export class Lumberjack {
         }
         this.depletionTimer = window.setInterval(() => {
             // Deplete progress.
-            this.progress = Math.max(this.progress - (Lumberjack.DEFAULT_BASE_DEPLETION_RATE * this.difficultyFactor), 0);
+            this.progress = Math.max(this.progress - (GameLogic.DEFAULT_BASE_DEPLETION_RATE * this.difficultyFactor), 0);
             // Increase difficulty over time.
-            this.difficultyFactor += Lumberjack.DEFAULT_DIFFICULTY_FACTOR_RATE;
+            this.difficultyFactor += GameLogic.DEFAULT_DIFFICULTY_FACTOR_RATE;
             // If progress reaches 0, game over.
             if (this.progress <= 0) {
                 this.endGame();
             }
-        }, Lumberjack.DEFAULT_DEPLETION_INTERVAL);
+        }, GameLogic.DEFAULT_DEPLETION_INTERVAL);
     }
 
     /**
@@ -280,8 +280,8 @@ export class Lumberjack {
         // Reset the game state.
         this.score = 0;
         this.highScore = Number(localStorage.getItem('highScore')) || 0;
-        this.progress = Lumberjack.DEFAULT_PROGRESS;
-        this.difficultyFactor = Lumberjack.DEFAULT_DIFFICULTY_FACTOR;
+        this.progress = GameLogic.DEFAULT_PROGRESS;
+        this.difficultyFactor = GameLogic.DEFAULT_DIFFICULTY_FACTOR;
 
         // Reinitialize game entities.
         if (this.person && this.tree) {

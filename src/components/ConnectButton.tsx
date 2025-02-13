@@ -1,9 +1,10 @@
 'use client'
 
 export const ConnectButton = () => {
-  return (
+    return (
     <div >
-        <appkit-button />
+        {/* @ts-expect-error msg */}
+        <appkit-button balance='hide' />
     </div>
   )
 }

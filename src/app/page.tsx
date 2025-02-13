@@ -1,16 +1,20 @@
 'use client'
 import React, { useState } from "react";
-import LumberjackGame from "@/components/game/LumberjackGame";
+import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
-import {Lumberjack} from "@/components/game/Lumberjack";
+import {GameLogic} from "@/components/game/GameLogic";
+import { useAppKitNetwork } from "@reown/appkit/react";
 
 export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameSession, setGameSession] = useState(0);
+  const [gameLoading, setGameLoading] = useState(false)
     const account = useAccount()
+    const { chainId } = useAppKitNetwork()
 
   const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        setGameLoading(true)
         try {
             const response = await fetch('/api/game', {
                 method: 'POST',
@@ -18,7 +22,8 @@ export default function Home() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    from: account.address
+                    from: account.address,
+                    chain_id: chainId
                 })
             })
             if (!response.ok) {
@@ -34,10 +39,12 @@ export default function Home() {
 
         } catch (error) {
             console.error('Error during deposit:', error);
+        } finally {
+            setGameLoading(false)
         }
     }
 
-    const gameOverHandler = (game: Lumberjack, score: number) => {
+    const gameOverHandler = (game: GameLogic, score: number) => {
         // setTimeout as workaround to show last frame. improve this
         setTimeout(() => {
             alert(`Game over! Score is ${score}`);
@@ -46,26 +53,34 @@ export default function Home() {
         }, 10)
     }
 
-  return (
+    return (
     <div className="flex flex-col items-center justify-start min-h-screen py-8">
       <div
         className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center "
       >
-        {gameStarted ? (
+        {account.isConnected && gameStarted ? (
           /* If the game has started, render the LumberjackGame component */
           <div className="w-full h-full">
-            <LumberjackGame sessionId={gameSession} gameOverCallback={gameOverHandler}/>
+            <Game sessionId={gameSession} gameOverCallback={gameOverHandler}/>
           </div>
         ) : (
           /* Otherwise, show a placeholder with a "Start New Game" button */
           <div className="flex items-center justify-center w-full h-full">
-            <button
-              type="button"
-              className=" bg-blue-600 text-white font-semibold px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onClick={handleNewGame}
-            >
-              Start New Game
-            </button>
+              {account.isConnected ? (
+                  <button
+                      type="button"
+                      className=" bg-blue-600 text-white font-semibold px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onClick={handleNewGame}
+                      disabled={gameLoading}
+                  >
+                      {gameLoading ? 'Loading...' : 'Start New Game'}
+                  </button>
+              ) :  (
+                  /* @ts-expect-error msg */
+                  <appkit-connect-button />
+              ) }
+
+
           </div>
         )}
       </div>

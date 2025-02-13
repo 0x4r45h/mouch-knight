@@ -1,18 +1,20 @@
 'use client'
 import React, {useEffect, useRef} from 'react';
-import {Lumberjack, LumberjackEventDetail} from '@/components/game/Lumberjack';
+import {GameLogic, GameEventDetail} from '@/components/game/GameLogic';
 import {useAccount} from "wagmi";
+import { useAppKitNetwork } from "@reown/appkit/react";
 
 interface LumberjackGameProps {
     sessionId: number;
-    gameOverCallback: (game: Lumberjack, score: number) => void;
+    gameOverCallback: (game: GameLogic, score: number) => void;
 }
 
-const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
+const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
     const account = useAccount()
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const btnLeftRef = useRef<HTMLButtonElement>(null);
     const btnRightRef = useRef<HTMLButtonElement>(null);
+    const { chainId } = useAppKitNetwork()
 
     useEffect(() => {
         console.log('GameFrame Effect!');
@@ -27,7 +29,8 @@ const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallb
                         },
                         body: JSON.stringify({
                             player: account.address,
-                            session_id: sessionId
+                            session_id: sessionId,
+                            chain_id: chainId
                         })
                     })
                     if (!response.ok) {
@@ -41,7 +44,7 @@ const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallb
                 }
             }
 
-            const game = new Lumberjack(
+            const game = new GameLogic(
                 canvasRef.current,
                 btnLeftRef.current,
                 btnRightRef.current,
@@ -52,7 +55,7 @@ const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallb
 
             // Define event handlers separately so we can remove them later
             const handleScoreChange = (event: Event) => {
-                const customEvent = event as CustomEvent<LumberjackEventDetail>;
+                const customEvent = event as CustomEvent<GameEventDetail>;
                 const score = customEvent.detail.score;
                 console.log('Score updated:', score);
                 if (score) {
@@ -61,7 +64,7 @@ const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallb
             };
 
             const handleGameOver = (event: Event) => {
-                const customEvent = event as CustomEvent<LumberjackEventDetail>;
+                const customEvent = event as CustomEvent<GameEventDetail>;
                 console.log('Game over! Final score:', customEvent.detail.score);
                 console.log('Highscore:', customEvent.detail.highScore);
                 gameOverCallback(game, customEvent.detail.score as number)
@@ -91,10 +94,10 @@ const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallb
         <>
             <canvas ref={canvasRef} className="w-full" />
             <div className="h-[150px] flex items-center justify-center bg-[#d3f7ff]">
-                <button ref={btnLeftRef} className="btn-lumberjack mx-2">
+                <button ref={btnLeftRef} className="btn-game-control mx-2">
                     LEFT
                 </button>
-                <button ref={btnRightRef} className="btn-lumberjack mx-2">
+                <button ref={btnRightRef} className="btn-game-control mx-2">
                     RIGHT
                 </button>
             </div>
@@ -102,4 +105,4 @@ const LumberjackGame: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallb
     );
 };
 
-export default LumberjackGame;
+export default Game;

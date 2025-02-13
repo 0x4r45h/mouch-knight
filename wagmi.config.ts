@@ -1,5 +1,5 @@
 import { defineConfig } from '@wagmi/cli'
-import { etherscan, react, foundry } from '@wagmi/cli/plugins'
+import {  react, foundry } from '@wagmi/cli/plugins'
 import { erc20Abi } from 'viem'
 
 export default defineConfig({
@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   plugins: [
     foundry({
-      project: '../../evm/hello_foundry'
+      project: process.env.FOUNDRY_PROJECT_PATH || '../../evm/mouch-knight-contracts'
     }),
     react(),
   ],

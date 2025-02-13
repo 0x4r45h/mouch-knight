@@ -1,6 +1,4 @@
-# Reown AppKit Example using wagmi (next.js with App Router)
-
-This is a Next.js project.
+# Mouch Knight
 
 ## Usage
 
@@ -10,7 +8,18 @@ This is a Next.js project.
 4. Run `pnpm install` to install dependencies
 5. Run `pnpm run dev` to start the development server
 
-## Resources
 
-- [Reown — Docs](https://docs.reown.com)
-- [Next.js — Docs](https://nextjs.org/docs)
+# Local Development
+
+## Get contracts ABIs
+Install WAGMI CLI too
+
+Clone the contracts repo from -TBA- and follow its readme file to compile the contracts.    
+
+set the path to the contracts repo using `NEXT_FOUNDRY_PROJECT_PATH` variable
+
+then in this project run 
+```bash
+FOUNDRY_PROJECT_PATH='/path/to-foundry-project' wagmi generate
+```
+
