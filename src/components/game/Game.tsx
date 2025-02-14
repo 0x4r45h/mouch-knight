@@ -89,7 +89,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
                 }
             };
         }
-    }, [account.address, gameOverCallback, sessionId]);
+    }, [account.address, chainId, gameOverCallback, sessionId]);
     return (
         <>
             <canvas ref={canvasRef} className="w-full" />

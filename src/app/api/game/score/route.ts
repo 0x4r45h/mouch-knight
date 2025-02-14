@@ -1,4 +1,4 @@
-import { PrivateKeyAccount, PublicClient, WalletClient} from 'viem';
+import {createPublicClient, PrivateKeyAccount, WalletClient} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {NextRequest, NextResponse} from 'next/server';
 import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString} from "@/config";
@@ -31,7 +31,7 @@ async function getAvailableKey(): Promise<HexString | undefined> {
     console.log("Available keys:", PRIVATE_KEYS.filter(key => !busyKeys.has(key)).length);
     return key;
 }
-async function getAccountNonce(address: HexString, pubClient: PublicClient) {
+async function getAccountNonce(address: HexString, pubClient: ReturnType<typeof createPublicClient>) {
     if (relayersNonce.has(address)) {
         const currentNonce =  relayersNonce.get(address);
         if (currentNonce) {
@@ -74,7 +74,7 @@ async function processSingleTransaction(privateKey: HexString, tx: QueuedTx) {
         console.log("Freed key:", privateKey.slice(-4), "Time taken:", Date.now() - startTime, "ms");
     }
 }
-async function reportTxStatus(hash : HexString, pubClient: PublicClient) {
+async function reportTxStatus(hash : HexString, pubClient: ReturnType<typeof createPublicClient>) {
     const receipt = await pubClient.waitForTransactionReceipt({ hash });
     console.log(`Transaction ${receipt.transactionHash} confirmed in block:`,  receipt.blockNumber);
 }
@@ -129,8 +129,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: "Tx Failed", data:{ error : e } }, { status: 500 });
     }
 }
-const storeScoreOnChain = async (player: HexString, sessionIndex: bigint, account: PrivateKeyAccount, chainId: number,  nonce: number, signerClient): Promise<HexString> => {
+const storeScoreOnChain = async (player: HexString, sessionIndex: bigint, account: PrivateKeyAccount, chainId: number,  nonce: number, signerClient: WalletClient): Promise<HexString> => {
     const { abi, address } = getContractConfig('ScoreManager', chainId)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     return await signerClient.writeContract({
         address,
         abi,

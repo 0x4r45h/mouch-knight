@@ -3,7 +3,7 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import {anvil, defineChain} from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 import {scoreManagerAbi} from "@/generated";
-import {Abi, createPublicClient, createWalletClient, http} from "viem";
+import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
 
 // Get projectId from https://cloud.reown.com
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
@@ -97,7 +97,7 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
     transport: http(),
   });
 }
-export const getSignerClientByChainId = (chainId: number): ReturnType<typeof createWalletClient> => {
+export const getSignerClientByChainId = (chainId: number): WalletClient => {
   const chainConfigMap = {
     [monadDevnet.id]: monadDevnet,
     [anvil.id]: anvil,
