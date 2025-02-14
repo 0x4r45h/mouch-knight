@@ -14,7 +14,7 @@
 ## Get contracts ABIs
 Install WAGMI CLI too
 
-Clone the contracts repo from -TBA- and follow its readme file to compile the contracts.    
+Clone the contracts repo from [Mouch-Knight-Contracts](https://github.com/0x4r45h/mouch-knight-contracts) and follow its readme file to compile the contracts.    
 
 set the path to the contracts repo using `NEXT_FOUNDRY_PROJECT_PATH` variable
 

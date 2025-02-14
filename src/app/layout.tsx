@@ -34,13 +34,13 @@ export default async function RootLayout({
 
           <footer className="bg-gray-800 text-white py-4 px-4 md:px-6 lg:px-8">
             <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-4 md:justify-end">
-              <a href="#" className="hover:text-blue-400">
+              <a href="https://emberstake.xyz" className="hover:text-blue-400">
                 Website
               </a>
-              <a href="#" className="hover:text-blue-400">
+              <a href="https://x.com/Ember_Stake" className="hover:text-blue-400">
                 Twitter
               </a>
-              <a href="#" className="hover:text-blue-400">
+              <a href="https://github.com/0x4r45h/mouch-knight" className="hover:text-blue-400">
                 GitHub
               </a>
             </div>
