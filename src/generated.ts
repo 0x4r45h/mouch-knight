@@ -322,6 +322,20 @@ export const scoreManagerAbi = [
   },
   {
     type: 'function',
+    inputs: [],
+    name: 'getAllRelayers',
+    outputs: [{ name: '', internalType: 'address[]', type: 'address[]' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'player', internalType: 'address', type: 'address' }],
+    name: 'getPlayerHighscore',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     inputs: [{ name: 'player', internalType: 'address', type: 'address' }],
     name: 'getPlayerNextSession',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
@@ -337,8 +351,12 @@ export const scoreManagerAbi = [
   {
     type: 'function',
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'relayers',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    name: 'players',
+    outputs: [
+      { name: 'initialized', internalType: 'bool', type: 'bool' },
+      { name: 'highscore', internalType: 'uint256', type: 'uint256' },
+      { name: 'lastSession', internalType: 'uint256', type: 'uint256' },
+    ],
     stateMutability: 'view',
   },
   {
@@ -360,16 +378,6 @@ export const scoreManagerAbi = [
   {
     type: 'function',
     inputs: [
-      { name: '', internalType: 'address', type: 'address' },
-      { name: '', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'scores',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
       { name: 'player', internalType: 'address', type: 'address' },
       { name: 'sessionIndex', internalType: 'uint256', type: 'uint256' },
     ],
@@ -383,6 +391,38 @@ export const scoreManagerAbi = [
     name: 'transferOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'player', internalType: 'address', type: 'address' }],
+    name: 'updateHighScore',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'player',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'session',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'score',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'HighScoreUpdated',
   },
   {
     type: 'event',
@@ -875,6 +915,24 @@ export const useReadScoreManager = /*#__PURE__*/ createUseReadContract({
 })
 
 /**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"getAllRelayers"`
+ */
+export const useReadScoreManagerGetAllRelayers =
+  /*#__PURE__*/ createUseReadContract({
+    abi: scoreManagerAbi,
+    functionName: 'getAllRelayers',
+  })
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"getPlayerHighscore"`
+ */
+export const useReadScoreManagerGetPlayerHighscore =
+  /*#__PURE__*/ createUseReadContract({
+    abi: scoreManagerAbi,
+    functionName: 'getPlayerHighscore',
+  })
+
+/**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"getPlayerNextSession"`
  */
 export const useReadScoreManagerGetPlayerNextSession =
@@ -892,19 +950,11 @@ export const useReadScoreManagerOwner = /*#__PURE__*/ createUseReadContract({
 })
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"relayers"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"players"`
  */
-export const useReadScoreManagerRelayers = /*#__PURE__*/ createUseReadContract({
+export const useReadScoreManagerPlayers = /*#__PURE__*/ createUseReadContract({
   abi: scoreManagerAbi,
-  functionName: 'relayers',
-})
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"scores"`
- */
-export const useReadScoreManagerScores = /*#__PURE__*/ createUseReadContract({
-  abi: scoreManagerAbi,
-  functionName: 'scores',
+  functionName: 'players',
 })
 
 /**
@@ -960,6 +1010,15 @@ export const useWriteScoreManagerTransferOwnership =
   })
 
 /**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"updateHighScore"`
+ */
+export const useWriteScoreManagerUpdateHighScore =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: scoreManagerAbi,
+    functionName: 'updateHighScore',
+  })
+
+/**
  * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link scoreManagerAbi}__
  */
 export const useSimulateScoreManager = /*#__PURE__*/ createUseSimulateContract({
@@ -1012,10 +1071,28 @@ export const useSimulateScoreManagerTransferOwnership =
   })
 
 /**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link scoreManagerAbi}__ and `functionName` set to `"updateHighScore"`
+ */
+export const useSimulateScoreManagerUpdateHighScore =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: scoreManagerAbi,
+    functionName: 'updateHighScore',
+  })
+
+/**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link scoreManagerAbi}__
  */
 export const useWatchScoreManagerEvent =
   /*#__PURE__*/ createUseWatchContractEvent({ abi: scoreManagerAbi })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link scoreManagerAbi}__ and `eventName` set to `"HighScoreUpdated"`
+ */
+export const useWatchScoreManagerHighScoreUpdatedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: scoreManagerAbi,
+    eventName: 'HighScoreUpdated',
+  })
 
 /**
  * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link scoreManagerAbi}__ and `eventName` set to `"OwnershipTransferred"`
