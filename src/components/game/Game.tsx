@@ -20,7 +20,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
         console.log('GameFrame Effect!');
 
         if (canvasRef.current && btnLeftRef.current && btnRightRef.current) {
-            const handleScoreUpdate = async () => {
+            const handleScoreUpdate = async (score: number) => {
                 try {
                     const response = await fetch('/api/game/score', {
                         method: 'POST',
@@ -30,7 +30,8 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
                         body: JSON.stringify({
                             player: account.address,
                             session_id: sessionId,
-                            chain_id: chainId
+                            chain_id: chainId,
+                            score
                         })
                     })
                     if (!response.ok) {
@@ -59,7 +60,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
                 const score = customEvent.detail.score;
                 console.log('Score updated:', score);
                 if (score) {
-                    handleScoreUpdate();
+                    handleScoreUpdate(score);
                 }
             };
 
