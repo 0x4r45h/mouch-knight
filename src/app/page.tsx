@@ -1,18 +1,24 @@
 'use client'
-import React, { useState } from "react";
+import React, { useCallback, useState} from "react";
 import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
-import { useAppKitNetwork } from "@reown/appkit/react";
+import {useAppKitNetwork} from "@reown/appkit/react";
+import {Table} from "flowbite-react";
 
 export default function Home() {
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameSession, setGameSession] = useState(0);
-  const [gameLoading, setGameLoading] = useState(false)
+    type ScoreTx = {
+        scoreId: number,
+        txHash : undefined | string
+    }
+    const [gameStarted, setGameStarted] = useState(false);
+    const [gameSession, setGameSession] = useState(0);
+    const [gameLoading, setGameLoading] = useState(false);
+    const [scoreTx,setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
-    const { chainId } = useAppKitNetwork()
+    const {chainId} = useAppKitNetwork()
 
-  const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
+    const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setGameLoading(true)
         try {
@@ -44,64 +50,123 @@ export default function Home() {
         }
     }
 
-    const gameOverHandler = (game: GameLogic, score: number) => {
+    const gameOverHandler = useCallback((game: GameLogic, score: number) => {
         // setTimeout as workaround to show last frame. improve this
         setTimeout(() => {
             alert(`Game over! Score is ${score}`);
             game.restartGame();
             setGameStarted(false)
         }, 10)
-    }
+    }, []);
+    const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
 
+        try {
+            const tx : ScoreTx = {
+                scoreId : score,
+                txHash: undefined
+            }
+            setScoreTx((prevScoreTx) => [...prevScoreTx, tx]);
+            const response = await fetch('/api/game/score', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    player: account.address,
+                    session_id: sessionId,
+                    chain_id: chainId,
+                    score
+                })
+            })
+
+            if (!response.ok) {
+                console.error('Network response was not ok', response)
+            }
+            const result = await response.json();
+            setScoreTx(prevScoreTx =>
+                prevScoreTx.map(tx =>
+                    tx.scoreId === score ? { ...tx, txHash: result.data.txHash } : tx
+                )
+            );
+            console.log('Result is ', result)
+
+        } catch (error) {
+            console.error('Error during submit score:', error);
+        }
+    }, [account.address, chainId])
     return (
-    <div className="flex flex-col items-center justify-start min-h-screen py-8">
-      <div
-        className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center "
-      >
-        {account.isConnected && gameStarted ? (
-          /* If the game has started, render the LumberjackGame component */
-          <div className="w-full h-full">
-            <Game sessionId={gameSession} gameOverCallback={gameOverHandler}/>
-          </div>
-        ) : (
-          /* Otherwise, show a placeholder with a "Start New Game" button */
-          <div className="flex items-center justify-center w-full h-full">
-              {account.isConnected ? (
-                  <button
-                      type="button"
-                      className=" bg-blue-600 text-white font-semibold px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      onClick={handleNewGame}
-                      disabled={gameLoading}
-                  >
-                      {gameLoading ? 'Loading...' : 'Start New Game'}
-                  </button>
-              ) :  (
-                  /* @ts-expect-error msg */
-                  <appkit-connect-button />
-              ) }
+        <div className="flex flex-col items-center justify-start min-h-screen py-8">
+            <div
+                className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center "
+            >
+                {account.isConnected && gameStarted ? (
+                    /* If the game has started, render the LumberjackGame component */
+                    <div className="w-full h-full">
+                        <Game
+                            sessionId={gameSession}
+                            gameOverCallback={gameOverHandler}
+                            scoreUpdateCallback={handleScoreUpdate}
+                        />
+                    </div>
+                ) : (
+                    /* Otherwise, show a placeholder with a "Start New Game" button */
+                    <div className="flex items-center justify-center w-full h-full">
+                        {account.isConnected ? (
+                            <button
+                                type="button"
+                                className=" bg-blue-600 text-white font-semibold px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onClick={handleNewGame}
+                                disabled={gameLoading}
+                            >
+                                {gameLoading ? 'Loading...' : 'Start New Game'}
+                            </button>
+                        ) : (
+                            /* @ts-expect-error msg */
+                            <appkit-connect-button/>
+                        )}
 
 
-          </div>
-        )}
-      </div>
+                    </div>
+                )}
+            </div>
+            {/*  Tx Table*/}
 
-      {/* Section for other buttons (leaderboard, how to play, etc.) */}
-      <div
-        className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"
-      >
-        <button
-          type="button"
-          className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
-        >
-          Leaderboard
-        </button>
-        <button
-          type="button"
-          className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
-        >
-          How to Play
-        </button>
-      </div>
-    </div>
-  );
+            <div className="w-full overflow-x-auto">
+                <Table striped>
+                    <Table.Head>
+                        <Table.HeadCell>Score</Table.HeadCell>
+                        <Table.HeadCell>Tx Link</Table.HeadCell>
+                    </Table.Head>
+                    <Table.Body className="divide-y">
+                        {scoreTx.map((scoreTx,key) => (
+                            <Table.Row key={key} className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                    {scoreTx.scoreId}
+                                </Table.Cell>
+                                <Table.Cell>{scoreTx.txHash ? scoreTx.txHash : 'Pending...'}</Table.Cell>
+                            </Table.Row>
+                        ))}
+
+                    </Table.Body>
+                </Table>
+            </div>
+            {/* Section for other buttons (leaderboard, how to play, etc.) */}
+            <div
+                className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"
+            >
+                <button
+                    type="button"
+                    className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                >
+                    Leaderboard
+                </button>
+                <button
+                    type="button"
+                    className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                >
+                    How to Play
+                </button>
+            </div>
+        </div>
+    );
 }
