@@ -19,10 +19,12 @@ export default function Home() {
     const [scoreTx,setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
+    const { chain } = useAccount()
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setGameLoading(true)
+        setScoreTx([]);
         try {
             const response = await fetch('/api/game', {
                 method: 'POST',
@@ -145,7 +147,15 @@ export default function Home() {
                                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                     {scoreTx.scoreId}
                                 </Table.Cell>
-                                <Table.Cell>{scoreTx.txHash ? scoreTx.txHash : 'Pending...'}</Table.Cell>
+                                <Table.Cell>{
+                                    scoreTx.txHash ? (
+                                    <a className="underline" target="_blank" href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
+                                        <span className="block sm:hidden">Link</span>
+                                        <span className="hidden sm:block">{scoreTx.txHash}</span>
+                                    </a>
+                                ) : (<span>Pending...</span>)
+                                }
+                            </Table.Cell>
                             </Table.Row>
                         ))}
                     </Table.Body>
