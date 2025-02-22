@@ -14,6 +14,8 @@ export default function Home() {
     const [gameStarted, setGameStarted] = useState(false);
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5;
     const [scoreTx,setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
@@ -138,7 +140,7 @@ export default function Home() {
                         <Table.HeadCell>Tx Link</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {scoreTx.map((scoreTx,key) => (
+                        {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
                             <Table.Row key={key} className="bg-white dark:border-gray-700 dark:bg-gray-800">
                                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                     {scoreTx.scoreId}
@@ -146,9 +148,29 @@ export default function Home() {
                                 <Table.Cell>{scoreTx.txHash ? scoreTx.txHash : 'Pending...'}</Table.Cell>
                             </Table.Row>
                         ))}
-
                     </Table.Body>
                 </Table>
+                <div className="flex justify-between mt-4">
+                    <button
+                        type="button"
+                        className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                        onClick={() => setCurrentPage((prev) => prev - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </button>
+                    <span>
+    Page {currentPage} of {Math.ceil(scoreTx.length / rowsPerPage)}
+  </span>
+                    <button
+                        type="button"
+                        className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                        onClick={() => setCurrentPage((prev) => prev + 1)}
+                        disabled={currentPage * rowsPerPage >= scoreTx.length}
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
             {/* Section for other buttons (leaderboard, how to play, etc.) */}
             <div
