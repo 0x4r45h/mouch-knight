@@ -240,11 +240,10 @@ export class GameLogic {
      */
     private endGame(): void {
         if (this.score > this.highScore) {
-            localStorage.setItem('highScore', String(this.score));
+            this.highScore = this.score;
         }
-        const updatedHighScore = Number(localStorage.getItem('highScore')) || 0;
         this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('gameOver', {
-            detail: { score: this.score, highScore: updatedHighScore }
+            detail: { score: this.score, highScore: this.highScore }
         }));
         // Stop the progress timer.
         if (this.depletionTimer !== null) {

@@ -48,8 +48,8 @@ const contractsConfig = {
   ScoreManager: {
     abi: scoreManagerAbi,
     addresses: {
-      [anvil.id]: process.env.NEXT_CONTRACT_ADDR__ANVIL__SCORE_MANAGER as HexString,
-      [monadDevnet.id]: process.env.NEXT_CONTRACT_ADDR__MONAD_DEVNET__SCORE_MANAGER as HexString,
+      [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_MANAGER as HexString,
+      [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_MANAGER as HexString,
     },
   },
 } as const;
@@ -63,9 +63,12 @@ type ContractConfig = {
 type ContractsConfig = {
   [contractName: string]: ContractConfig;
 };
-
+export type SingleContractConfig = {
+  address: HexString,
+  abi: Abi
+}
 // Export the function to get contract configuration
-export const getContractConfig = (contractName: string, chainId: number) => {
+export const getContractConfig = (contractName: string, chainId: number): SingleContractConfig => {
   const contract = (contractsConfig as ContractsConfig)[contractName];
   if (!contract) {
     throw new Error(`Contract ${contractName} not found in config`);

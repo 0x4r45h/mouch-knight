@@ -1,11 +1,13 @@
 'use client'
-import React, { useCallback, useState} from "react";
+import React, { useCallback, useEffect, useState} from "react";
 import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork} from "@reown/appkit/react";
 import {Table} from "flowbite-react";
-
+import {useReadScoreManagerGetPlayerHighscore} from "@/generated";
+import {HexString} from "@/config";
+import {useContractConfig} from "@/hooks/custom";
 export default function Home() {
     type ScoreTx = {
         scoreId: number,
@@ -20,6 +22,39 @@ export default function Home() {
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
     const { chain } = useAccount()
+    const [scoreManagerAddr, setScoreManagerAddr] = useState<HexString>("0x");
+    const {contract: scoreManagerConfig, error: scoreManagerConfigError }= useContractConfig('ScoreManager', chain?.id)
+    const { data: playerHighscore, refetch: refetchHighScore } = useReadScoreManagerGetPlayerHighscore({
+        address: scoreManagerAddr ,
+        args: [account.address as HexString],
+        query: {
+            enabled: !!account.address
+        }
+    });
+    // get contract address on
+    useEffect(() => {
+        if (scoreManagerConfig) {
+            setScoreManagerAddr(scoreManagerConfig.address);
+        }
+        if (scoreManagerConfigError) {
+            console.log('Cant get scoreManagerContract address - ', scoreManagerConfigError)
+        }
+
+    }, [scoreManagerConfig, scoreManagerConfigError]);
+
+    // update highscore after game finishes
+    useEffect(() => {
+        if (!gameStarted) {
+            refetchHighScore();
+        }
+    }, [gameStarted, refetchHighScore]);
+    //set highscore to localstorage
+    useEffect(() => {
+        if (playerHighscore) {
+            console.log('set highscore on localstorage ', playerHighscore);
+            localStorage.setItem('highScore', String(playerHighscore));
+        }
+    }, [playerHighscore]);
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
