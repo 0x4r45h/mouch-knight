@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
@@ -8,24 +8,29 @@ import {Table} from "flowbite-react";
 import {useReadScoreManagerGetPlayerHighscore} from "@/generated";
 import {HexString} from "@/config";
 import {useContractConfig} from "@/hooks/custom";
+
 export default function Home() {
     type ScoreTx = {
         scoreId: number,
-        txHash : undefined | string
+        txHash: undefined | string
     }
     const [gameStarted, setGameStarted] = useState(false);
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
-    const [scoreTx,setScoreTx] = useState<ScoreTx[]>([]);
+    const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
-    const { chain } = useAccount()
+    const {chain} = useAccount()
     const [scoreManagerAddr, setScoreManagerAddr] = useState<HexString>("0x");
-    const {contract: scoreManagerConfig, error: scoreManagerConfigError }= useContractConfig('ScoreManager', chain?.id)
-    const { data: playerHighscore, refetch: refetchHighScore } = useReadScoreManagerGetPlayerHighscore({
-        address: scoreManagerAddr ,
+    const {contract: scoreManagerConfig, error: scoreManagerConfigError} = useContractConfig('ScoreManager', chain?.id)
+    const {
+        data: playerHighscore,
+        refetch: refetchHighScore,
+        error: playerHighScoreError
+    } = useReadScoreManagerGetPlayerHighscore({
+        address: scoreManagerAddr,
         args: [account.address as HexString],
         query: {
             enabled: !!account.address
@@ -44,17 +49,26 @@ export default function Home() {
 
     // update highscore after game finishes
     useEffect(() => {
+        console.log(`refetch highscore on game reset`)
+
         if (!gameStarted) {
             refetchHighScore();
         }
     }, [gameStarted, refetchHighScore]);
+    // update highscore on init
+
+    useEffect(() => {
+        console.log(`update highscore on init`)
+        refetchHighScore();
+    }, [chain, refetchHighScore, scoreManagerAddr]);
     //set highscore to localstorage
     useEffect(() => {
-        if (playerHighscore) {
+        console.log(`player high score is ${playerHighscore} , error is ${playerHighScoreError}`)
+        if (playerHighscore != undefined) {
             console.log('set highscore on localstorage ', playerHighscore);
             localStorage.setItem('highScore', String(playerHighscore));
         }
-    }, [playerHighscore]);
+    }, [playerHighscore, playerHighScoreError]);
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -89,19 +103,38 @@ export default function Home() {
         }
     }
 
-    const gameOverHandler = useCallback((game: GameLogic, score: number) => {
+    const gameOverHandler = useCallback((game: GameLogic, score: number, highScore: number) => {
+        console.log(`score is ${score} and highscore is ${highScore}`)
+        if (score == highScore) {
+            try {
+                fetch('/api/game/score/highscore', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        player: account.address,
+                        chain_id: chainId
+                    })
+                })
+
+            } catch (error) {
+                console.error('Error during updating high score:', error);
+            }
+        }
+
         // setTimeout as workaround to show last frame. improve this
         setTimeout(() => {
             alert(`Game over! Score is ${score}`);
             game.restartGame();
             setGameStarted(false)
         }, 10)
-    }, []);
+    }, [account.address, chainId]);
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
 
         try {
-            const tx : ScoreTx = {
-                scoreId : score,
+            const tx: ScoreTx = {
+                scoreId: score,
                 txHash: undefined
             }
             setScoreTx((prevScoreTx) => [...prevScoreTx, tx]);
@@ -124,7 +157,7 @@ export default function Home() {
             const result = await response.json();
             setScoreTx(prevScoreTx =>
                 prevScoreTx.map(tx =>
-                    tx.scoreId === score ? { ...tx, txHash: result.data.txHash } : tx
+                    tx.scoreId === score ? {...tx, txHash: result.data.txHash} : tx
                 )
             );
             console.log('Result is ', result)
@@ -184,13 +217,14 @@ export default function Home() {
                                 </Table.Cell>
                                 <Table.Cell>{
                                     scoreTx.txHash ? (
-                                    <a className="underline" target="_blank" href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
-                                        <span className="block sm:hidden">Link</span>
-                                        <span className="hidden sm:block">{scoreTx.txHash}</span>
-                                    </a>
-                                ) : (<span>Pending...</span>)
+                                        <a className="underline" target="_blank"
+                                           href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
+                                            <span className="block sm:hidden">Link</span>
+                                            <span className="hidden sm:block">{scoreTx.txHash}</span>
+                                        </a>
+                                    ) : (<span>Pending...</span>)
                                 }
-                            </Table.Cell>
+                                </Table.Cell>
                             </Table.Row>
                         ))}
                     </Table.Body>

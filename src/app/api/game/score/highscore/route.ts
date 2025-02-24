@@ -1,25 +1,20 @@
 import {NextRequest, NextResponse} from "next/server";
-import {PRIVATE_KEYS, processQueue, txQueue} from "@/app/api/game/queue";
+import { processQueue, txQueue} from "@/app/api/game/queue";
 import {getContractConfig, HexString} from "@/config";
 import {PrivateKeyAccount, WalletClient} from "viem";
 
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    // TODO: prevent replay attacks and perform validations
     const body = await request.json();
     const player = body.player;
-    const sessionId = body.session_id;
     const chainId = body.chain_id;
-    if (PRIVATE_KEYS.length === 0) {
-        return NextResponse.json({ error: "No private keys configured" }, { status: 500 });
-    }
     try {
         // Create a promise that resolves when the transaction executes.
         const txPromise: Promise<HexString> = new Promise((resolve, reject) => {
             txQueue.push({
                 chainId,
                 execute: async (account, nonce, signerClient, chainId) => {
-                    return await storeScoreOnChain(player as HexString, BigInt(sessionId), account, chainId, nonce, signerClient);
+                    return await invokeOnchainHighscoreUpdater(player as HexString, account, chainId, nonce, signerClient);
                 },
                 resolve,
                 reject,
@@ -30,16 +25,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         processQueue();
         // Await the promise so we can return the tx hash.
         const txHash = await txPromise;
-        return NextResponse.json({ message: 'Score Submitted', data: { txHash } });
+        return NextResponse.json({ message: 'Highscore update submitted', data: { txHash } });
     } catch (e) {
         console.error(e);
         return NextResponse.json({ success: false, message: "Tx Failed", data: { error: e } }, { status: 500 });
     }
 }
 
-const storeScoreOnChain = async (
+const invokeOnchainHighscoreUpdater = async (
     player: HexString,
-    sessionIndex: bigint,
     account: PrivateKeyAccount,
     chainId: number,
     nonce: number,
@@ -51,8 +45,8 @@ const storeScoreOnChain = async (
     return await signerClient.writeContract({
         address,
         abi,
-        functionName: "storeScore",
-        args: [player, sessionIndex],
+        functionName: "updateHighScore",
+        args: [player],
         account,
         nonce,
     });
