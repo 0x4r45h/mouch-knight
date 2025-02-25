@@ -14,7 +14,7 @@ if (!projectId) {
 export type HexString = `0x${string}`
 
 export const monadDevnet = defineChain({
-  id: Number(process.env.NEXT_PUBLIC_MONAD_CHAIN_ID),
+  id: Number(process.env.NEXT_PUBLIC_MONAD_DEVNET_CHAIN_ID),
   caipNetworkId: 'eip155:123456789',
   chainNamespace: 'eip155',
   name: 'Monad Devnet',
@@ -25,15 +25,34 @@ export const monadDevnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_MONAD_RPC_URL || ""],
+      http: [process.env.NEXT_PUBLIC_MONAD_DEVNET_RPC_URL || ""],
     },
   },
   blockExplorers: {
-    default: { name: 'Monad Devnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_BLOCKSCOUT_URL || "" },
+    default: { name: 'Monad Devnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_DEVNET_BLOCKSCOUT_URL || "" },
+  },
+})
+export const monadTestnet = defineChain({
+  id: Number(process.env.NEXT_PUBLIC_MONAD_TESTNET_CHAIN_ID),
+  caipNetworkId: 'eip155:223456789',
+  chainNamespace: 'eip155',
+  name: 'Monad Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Monad',
+    symbol: 'MON',
+  },
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_MONAD_TESTNET_RPC_URL || ""],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'Monad Testnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_TESTNET_BLOCKSCOUT_URL || "" },
   },
 })
 
-export const networks = [monadDevnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
+export const networks = [monadDevnet,monadTestnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
@@ -50,12 +69,13 @@ const contractsConfig = {
     addresses: {
       [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_MANAGER as HexString,
       [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_MANAGER as HexString,
+      [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__SCORE_MANAGER as HexString,
     },
     deployedBlock: {
       [anvil.id]: BigInt(1),
       [monadDevnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_DEVNET__SCORE_MANAGER || 1),
+      [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__SCORE_MANAGER || 1),
     }
-    //add deployed block per chain
   },
 } as const;
 
@@ -94,6 +114,7 @@ export const getContractConfig = (contractName: string, chainId: number): Single
 export const getPublicClientByChainId = (chainId: number): ReturnType<typeof createPublicClient> => {
   const chainConfigMap = {
     [monadDevnet.id]: monadDevnet,
+    [monadTestnet.id]: monadTestnet,
     [anvil.id]: anvil,
   };
 
@@ -110,6 +131,7 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
 }
 export const getSignerClientByChainId = (chainId: number): WalletClient => {
   const chainConfigMap = {
+    [monadTestnet.id]: monadTestnet,
     [monadDevnet.id]: monadDevnet,
     [anvil.id]: anvil,
   };
