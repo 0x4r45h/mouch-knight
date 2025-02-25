@@ -2,7 +2,23 @@ import {NextRequest, NextResponse} from "next/server";
 import { processQueue, txQueue} from "@/app/api/game/queue";
 import {getContractConfig, HexString} from "@/config";
 import {PrivateKeyAccount, WalletClient} from "viem";
+import {highScores} from "@/app/utils/fetchEvents";
 
+export async function GET(): Promise<NextResponse> {
+    const scores = Array.from(highScores.entries()).map(([player,score]: [string, bigint]) => (
+        {
+            player,
+            score: score.toString(),
+        }
+    )).sort((a, b) => {
+        const diff = BigInt(b.score) - BigInt(a.score);
+        if (diff > BigInt(0)) return 1;
+        if (diff < BigInt(0)) return -1;
+        return 0;
+    });
+    return NextResponse.json({ message: 'Leaderboard fetched', data: {leaderboard: scores} });
+
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json();
