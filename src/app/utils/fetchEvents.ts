@@ -69,6 +69,7 @@ async function listenForHighScores(chainId : number) {
             });
 
             currentBlock = endBlock + BigInt(1);
+            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for 3s before proceeding to prevent rate-limit
         } catch (error) {
             console.error(`chain '${chainId}' - Error fetching events:`, error);
             await new Promise(resolve => setTimeout(resolve, 10000)); // Wait for 10s before retrying
