@@ -1,15 +1,14 @@
 import {getContractConfig, getPublicClientByChainId} from "@/config";
-import {anvil} from "@reown/appkit/networks";
-
-// Configure the client
-const client = getPublicClientByChainId(anvil.id)
 
 // Start and Step Block
 const STEP = BigInt(1000);
 // In-memory store for high scores
-export const highScores = new Map<string, bigint>();
-async function listenForHighScores() {
-    const contractConfig = getContractConfig('ScoreManager', anvil.id);
+export const highScores = new Map<number, Map<string, bigint>>();
+
+async function listenForHighScores(chainId : number) {
+    // Configure the client
+    const client = getPublicClientByChainId(chainId)
+    const contractConfig = getContractConfig('ScoreManager', chainId);
     let currentBlock = contractConfig.deployedBlock;
 
     while (true) {
@@ -61,13 +60,12 @@ async function listenForHighScores() {
                 const score = log.args.score;
                 const session = log.args.session;
                 console.log(`Player: ${playerAddress}, Score: ${score} on session ${session}`);
-
-                highScores.set(playerAddress, score);
-                // Store or update high score
-                const previousScore = highScores.get(playerAddress) || 0;
-                if (score > previousScore) {
-                    highScores.set(playerAddress, score);
+                let chainScore = highScores.get(chainId);
+                if (chainScore == undefined) {
+                    highScores.set(chainId,new Map<string, bigint>());
+                    chainScore = highScores.get(chainId);
                 }
+                chainScore?.set(playerAddress, score);
             });
 
             currentBlock = endBlock + BigInt(1);
@@ -83,8 +81,15 @@ async function listenForHighScores() {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 if (typeof window === 'undefined' && !globalThis.isHighScoreListenerRunning) {
+    // THE CODE INS THIS BLOCK IS RUN ONLY ONCE, SO THE CHANGES WONT BE REFLECTED AFTER HOT-RELOAD
+    const backendChainIds = (process.env.NEXT_BACKEND_CHAIN_IDS || '')
+        .split(',')
+        .map(id => id.trim())  // Remove any extra spaces
+        .filter(id => id)      // Filter out empty strings
+        .map(id => Number(id));
+    console.log('backend chains', backendChainIds);
+    backendChainIds.forEach(id => listenForHighScores(id))
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
     globalThis.isHighScoreListenerRunning = true;
-    listenForHighScores();
 }
