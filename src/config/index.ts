@@ -15,7 +15,7 @@ export type HexString = `0x${string}`
 
 export const monadDevnet = defineChain({
   id: Number(process.env.NEXT_PUBLIC_MONAD_DEVNET_CHAIN_ID),
-  caipNetworkId: 'eip155:123456789',
+  caipNetworkId: 'eip155:123456700',
   chainNamespace: 'eip155',
   name: 'Monad Devnet',
   nativeCurrency: {
@@ -34,7 +34,7 @@ export const monadDevnet = defineChain({
 })
 export const monadTestnet = defineChain({
   id: Number(process.env.NEXT_PUBLIC_MONAD_TESTNET_CHAIN_ID),
-  caipNetworkId: 'eip155:123456788',
+  caipNetworkId: 'eip155:123456800',
   chainNamespace: 'eip155',
   name: 'Monad Testnet',
   nativeCurrency: {
@@ -52,7 +52,7 @@ export const monadTestnet = defineChain({
   },
 })
 
-export const networks = [monadDevnet, monadTestnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
+export const networks = [monadTestnet, monadDevnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
