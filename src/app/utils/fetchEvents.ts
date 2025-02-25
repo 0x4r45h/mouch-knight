@@ -1,7 +1,7 @@
 import {getContractConfig, getPublicClientByChainId} from "@/config";
 
 // Start and Step Block
-const STEP = BigInt(1000);
+const STEP = BigInt(100);
 // In-memory store for high scores
 export const highScores = new Map<number, Map<string, bigint>>();
 
@@ -15,13 +15,13 @@ async function listenForHighScores(chainId : number) {
         try {
             const latestBlock = await client.getBlockNumber();
             if (currentBlock >= latestBlock) {
-                console.log(`current start block is ${currentBlock} and latest block is ${latestBlock}`)
+                console.log(`chain '${chainId}' - current start block is ${currentBlock} and latest block is ${latestBlock}`)
                 await new Promise(resolve => setTimeout(resolve, 10000)); // Wait for 10s
                 continue;
             }
             const endBlock = currentBlock + BigInt(STEP) < latestBlock ? currentBlock + BigInt(STEP) : latestBlock;
 
-            console.log(`Fetching events from ${currentBlock} to ${endBlock}`);
+            console.log(`chain '${chainId}' - Fetching events from ${currentBlock} to ${endBlock}`);
             // Fetch events
             const logs = await client.getLogs({
                 fromBlock: currentBlock,
@@ -59,7 +59,7 @@ async function listenForHighScores(chainId : number) {
                 const playerAddress = log.args.player;
                 const score = log.args.score;
                 const session = log.args.session;
-                console.log(`Player: ${playerAddress}, Score: ${score} on session ${session}`);
+                console.log(`chain '${chainId}' - Player: ${playerAddress}, Score: ${score} on session ${session} `);
                 let chainScore = highScores.get(chainId);
                 if (chainScore == undefined) {
                     highScores.set(chainId,new Map<string, bigint>());
@@ -70,7 +70,7 @@ async function listenForHighScores(chainId : number) {
 
             currentBlock = endBlock + BigInt(1);
         } catch (error) {
-            console.error('Error fetching events:', error);
+            console.error(`chain '${chainId}' - Error fetching events:`, error);
             await new Promise(resolve => setTimeout(resolve, 10000)); // Wait for 10s before retrying
         }
     }
