@@ -5,14 +5,12 @@ import {anvil} from "@reown/appkit/networks";
 const client = getPublicClientByChainId(anvil.id)
 
 // Start and Step Block
-const START_BLOCK = BigInt(1);
-const STEP = BigInt(3);
-
+const STEP = BigInt(1000);
 // In-memory store for high scores
 export const highScores = new Map<string, bigint>();
-
 async function listenForHighScores() {
-    let currentBlock = START_BLOCK;
+    const contractConfig = getContractConfig('ScoreManager', anvil.id);
+    let currentBlock = contractConfig.deployedBlock;
 
     while (true) {
         try {
@@ -27,9 +25,9 @@ async function listenForHighScores() {
             console.log(`Fetching events from ${currentBlock} to ${endBlock}`);
             // Fetch events
             const logs = await client.getLogs({
-                fromBlock: BigInt(currentBlock),
-                toBlock: BigInt(endBlock),
-                address: getContractConfig('ScoreManager', anvil.id).address,
+                fromBlock: currentBlock,
+                toBlock: endBlock,
+                address: contractConfig.address,
                 strict: true,
                 event:  {
                     type: 'event',
@@ -75,12 +73,18 @@ async function listenForHighScores() {
             currentBlock = endBlock + BigInt(1);
         } catch (error) {
             console.error('Error fetching events:', error);
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5s before retrying
+            await new Promise(resolve => setTimeout(resolve, 10000)); // Wait for 10s before retrying
         }
     }
 }
 
 // Start the loop once when the server starts
-if (typeof window === 'undefined') {
+// Register the listener only once
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+if (typeof window === 'undefined' && !globalThis.isHighScoreListenerRunning) {
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+    globalThis.isHighScoreListenerRunning = true;
     listenForHighScores();
 }
