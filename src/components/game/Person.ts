@@ -5,6 +5,8 @@ export class Person {
     private characterPositions: Record<string, { x: number; y: number }>;
     private characterWidth: number;
     private characterHeight: number;
+    private characterImage: HTMLImageElement;
+
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -22,11 +24,11 @@ export class Person {
         };
         this.characterWidth = 100;
         this.characterHeight = 180;
+        this.characterImage = new Image();
+        this.characterImage.src = '/images/character.png';
     }
 
     draw(): void {
-        const character = new Image();
-        character.src = '/images/character.png';
 
         const characterPosition = this.characterPositions[this.characterPosition];
         if (this.characterPosition === 'right') {
@@ -42,11 +44,11 @@ export class Person {
             );
         }
         this.ctx.drawImage(
-            character,
+            this.characterImage,
             0,
             0,
-            character.width,
-            character.height,
+            this.characterImage.width,
+            this.characterImage.height,
             characterPosition.x,
             characterPosition.y,
             this.characterWidth,
