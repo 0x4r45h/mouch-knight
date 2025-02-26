@@ -4,16 +4,19 @@ import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork} from "@reown/appkit/react";
-import {Table} from "flowbite-react";
+import {Button, Modal, Table} from "flowbite-react";
 import {useReadScoreManagerGetPlayerHighscore} from "@/generated";
 import {HexString} from "@/config";
 import {useContractConfig} from "@/hooks/custom";
+import Leaderboard from "@/components/Leaderboard";
 
 export default function Home() {
     type ScoreTx = {
         scoreId: number,
         txHash: undefined | string
     }
+    const [leaderboardModal, setLeaderboardModal ] = useState(false)
+    const [tipsModal, setTipsModal ] = useState(false)
     const [gameStarted, setGameStarted] = useState(false);
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
@@ -74,6 +77,7 @@ export default function Home() {
         e.preventDefault();
         setGameLoading(true)
         setScoreTx([]);
+        setCurrentPage(1)
         try {
             const response = await fetch('/api/game', {
                 method: 'POST',
@@ -165,9 +169,31 @@ export default function Home() {
         } catch (error) {
             console.error('Error during submit score:', error);
         }
-    }, [account.address, chainId])
+    }, [account.address, chainId]);
+    // const closeModal = () => setLeaderboardModal(false)
     return (
         <div className="flex flex-col items-center justify-start min-h-screen py-8">
+            {chainId ? (<Leaderboard chainId={Number(chainId)} openModal={leaderboardModal} closeModalAction={() => setLeaderboardModal(false)}  />) : <></>}
+            <Modal dismissible show={tipsModal} onClose={() => setTipsModal(false)}>
+                <Modal.Header>How to play?</Modal.Header>
+                <Modal.Body>
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            Game Instructions
+                        </h3>
+                        <ul className="list-disc list-inside text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                            <li>Connect a wallet on the Monad Network and start a new game.</li>
+                            <li>On desktop, use the Left/Right Arrow keys or A & D keys to move.</li>
+                            <li>On mobile, touch the two large buttons to move the character.</li>
+                            <li>Your goal is to avoid branches and keep moving, or time will run out.</li>
+                            <li>Every move is a transaction on the Monad blockchain, with fees covered by our relayer account.</li>
+                        </ul>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={() => setTipsModal(false)}>Let&#39;s Go!</Button>
+                </Modal.Footer>
+            </Modal>
             <div
                 className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center "
             >
@@ -258,12 +284,14 @@ export default function Home() {
                 <button
                     type="button"
                     className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    onClick={() => setLeaderboardModal(true)}
                 >
                     Leaderboard
                 </button>
                 <button
                     type="button"
                     className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    onClick={() => setTipsModal(true)}
                 >
                     How to Play
                 </button>

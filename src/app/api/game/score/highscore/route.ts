@@ -6,9 +6,9 @@ import {highScores} from "@/app/utils/fetchEvents";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
-    const chainId = searchParams.get('chainId');
+    const chainId = searchParams.get('chain_id');
     if (!chainId) {
-        return NextResponse.json({ success: false, message: "chainId is required" }, { status: 422 });
+        return NextResponse.json({ success: false, message: "chain_id is required" }, { status: 422 });
     }
     let scores: { player: string; score: string; }[] = [];
     const chainScores = highScores.get(Number(chainId));
@@ -26,7 +26,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
     }
     return NextResponse.json({ message: 'Leaderboard fetched', data: {leaderboard: scores} });
-
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
