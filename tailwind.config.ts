@@ -25,6 +25,7 @@ export default {
         'monad-blue': '#200052',
         'monad-berry': '#A0055D',
         'monad-black': '#0E100F',
+        'monad-light-blue': '#3c048e',
       },
       fontFamily: {
         'sans': ['Inter', 'ui-sans-serif', 'system-ui'],

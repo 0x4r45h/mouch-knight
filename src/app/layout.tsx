@@ -27,7 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
     <Flowbite theme={{ theme: customTheme }}>
-      <body className="flex flex-col min-h-screen bg-background text-monad-off-white" >
+      <body className="flex flex-col min-h-screen  bg-gradient-to-b from-monad-blue via-monad-light-blue to-monad-blue   text-monad-off-white" >
       <ContextProvider cookies={cookies}>
         <Header/>
         <main className="flex-1 w-full max-w-screen-xl mx-auto px-4 py-6 md:px-6 lg:px-8">
