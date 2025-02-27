@@ -6,6 +6,7 @@ import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork} from "@reown/appkit/react";
 import {Button, Modal, Table} from "flowbite-react";
 import {useReadScoreManagerGetPlayerHighscore} from "@/generated";
+import {useReadScoreTokenBalanceOf} from "@/generated";
 import {HexString} from "@/config";
 import {useContractConfig} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
@@ -27,13 +28,26 @@ export default function Home() {
     const {chainId} = useAppKitNetwork()
     const {chain} = useAccount()
     const [scoreManagerAddr, setScoreManagerAddr] = useState<HexString>("0x");
+    const [scoreTokenAddr, setScoreTokenAddr] = useState<HexString>("0x");
     const {contract: scoreManagerConfig, error: scoreManagerConfigError} = useContractConfig('ScoreManager', chain?.id)
+    const {contract: scoreTokenConfig, error: scoreTokenConfigError} = useContractConfig('ScoreToken', chain?.id)
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
         error: playerHighScoreError
     } = useReadScoreManagerGetPlayerHighscore({
         address: scoreManagerAddr,
+        args: [account.address as HexString],
+        query: {
+            enabled: !!account.address
+        }
+    });
+    const {
+        data: playerBalance,
+        refetch: refetchBalance,
+        error: playerBalanceError
+    } = useReadScoreTokenBalanceOf({
+        address: scoreTokenAddr,
         args: [account.address as HexString],
         query: {
             enabled: !!account.address
@@ -49,21 +63,34 @@ export default function Home() {
         }
 
     }, [scoreManagerConfig, scoreManagerConfigError]);
+    useEffect(() => {
+        if (scoreTokenConfig) {
+            setScoreTokenAddr(scoreTokenConfig.address);
+        }
+        if (scoreTokenConfigError) {
+            console.log('Cant get scoreTokenContract address - ', scoreTokenConfigError)
+        }
+
+    }, [scoreTokenConfig, scoreTokenConfigError]);
 
     // update highscore after game finishes
     useEffect(() => {
-        console.log(`refetch highscore on game reset`)
+        console.log(`refetch highscore & balance on game reset`)
 
         if (!gameStarted) {
             refetchHighScore();
+            refetchBalance();
         }
-    }, [gameStarted, refetchHighScore]);
+    }, [gameStarted, refetchBalance, refetchHighScore]);
     // update highscore on init
 
     useEffect(() => {
         console.log(`update highscore on init`)
         refetchHighScore();
-    }, [chain, refetchHighScore, scoreManagerAddr]);
+        refetchBalance();
+    }, [chain, refetchBalance, refetchHighScore, scoreManagerAddr]);
+
+
     //set highscore to localstorage
     useEffect(() => {
         console.log(`player high score is ${playerHighscore} , error is ${playerHighScoreError}`)
@@ -73,6 +100,12 @@ export default function Home() {
         }
     }, [playerHighscore, playerHighScoreError]);
 
+    useEffect(() => {
+        console.log(`player balance is ${playerBalance} , error is ${playerBalanceError}`)
+        if (playerBalance != undefined) {
+            console.log('set balance on localstorage ', playerBalance);
+        }
+    }, [playerBalance, playerBalanceError]);
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setGameLoading(true)
@@ -210,14 +243,13 @@ export default function Home() {
                     /* Otherwise, show a placeholder with a "Start New Game" button */
                     <div className="flex items-center justify-center w-full h-full">
                         {account.isConnected ? (
-                            <button
-                                type="button"
-                                className=" bg-blue-600 text-white font-semibold px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            <Button
+                                className=" font-semibold px-4 py-2 rounded-md  focus:outline-none focus:ring-2 "
                                 onClick={handleNewGame}
                                 disabled={gameLoading}
                             >
                                 {gameLoading ? 'Loading...' : 'Start New Game'}
-                            </button>
+                            </Button>
                         ) : (
                             /* @ts-expect-error msg */
                             <appkit-connect-button/>
@@ -281,20 +313,18 @@ export default function Home() {
             <div
                 className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"
             >
-                <button
-                    type="button"
+                <Button
                     className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
                     onClick={() => setLeaderboardModal(true)}
                 >
                     Leaderboard
-                </button>
-                <button
-                    type="button"
+                </Button>
+                <Button
                     className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
                     onClick={() => setTipsModal(true)}
                 >
                     How to Play
-                </button>
+                </Button>
             </div>
         </div>
     );

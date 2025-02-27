@@ -2,7 +2,7 @@ import { cookieStorage, createStorage } from 'wagmi'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import {anvil, defineChain} from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
-import {scoreManagerAbi} from "@/generated";
+import {scoreManagerAbi, scoreTokenAbi} from "@/generated";
 import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
 
 // Get projectId from https://cloud.reown.com
@@ -75,6 +75,19 @@ const contractsConfig = {
       [anvil.id]: BigInt(1),
       [monadDevnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_DEVNET__SCORE_MANAGER || 1),
       [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__SCORE_MANAGER || 1),
+    }
+  },
+  ScoreToken: {
+    abi: scoreTokenAbi,
+    addresses: {
+      [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_TOKEN as HexString,
+      [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_TOKEN as HexString,
+      [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__SCORE_TOKEN as HexString,
+    },
+    deployedBlock: {
+      [anvil.id]: BigInt(0),
+      [monadDevnet.id]:  BigInt(0),
+      [monadTestnet.id]:  BigInt(0),
     }
   },
 } as const;
