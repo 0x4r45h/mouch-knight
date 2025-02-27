@@ -182,7 +182,7 @@ export default function Home() {
                 </div>
             ) : (<></>)}
             <div
-                className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center mt-5 mb-5 "
+                className=" relative w-full max-w-[540px] mx-auto flex items-center justify-center mt-5 mb-5 "
             >
                 {account.isConnected && gameStarted ? (
                     /* If the game has started, render the LumberjackGame component */
@@ -195,23 +195,29 @@ export default function Home() {
                     </div>
                 ) : (
                     /* Otherwise, show a placeholder with a "Start New Game" button */
-                    <div className="flex items-center justify-center w-full h-full">
+                    <div className="flex items-center justify-center w-full flex-col space-y-4 ">
+                        <h1 className="text-2xl font-bold w-full">
+                            Can You Break the Monad with Mouch Knight?
+                        </h1>
+                        <h2 className="text-lg w-full">
+                            Calling all Nads! The Monad network claims it’s unbreakable—but can Mouch Knight prove it wrong? Dash up the tower, dodge pesky obstacles, and climb faster than a caffeinated squire. (Seriously, is it even *possible* to break this thing?)
+                        </h2>
+                        <h3 className="text-md w-full">
+                            Race to the top of the leaderboard and stack MKT tokens! The higher you climb in a session, the juicier the multiplier—more MKT for every epic ascent!
+                        </h3>
                         {account.isConnected ? (
                             <Button
                                 size="xl"
-                                color="primary"
-                                className="rounded-md  focus:outline-none focus:ring-2"
+                                className="bg-monad-berry  rounded-md focus:outline-none focus:ring-2 w-full"
                                 onClick={handleNewGame}
                                 disabled={gameLoading}
                             >
-                                {gameLoading ? 'Loading...' : 'Start New Game'}
+                                {gameLoading ? 'Loading...' : 'Start Climbing!'}
                             </Button>
                         ) : (
                             /* @ts-expect-error msg */
-                            <appkit-connect-button/>
+                            <appkit-connect-button className="" />
                         )}
-
-
                     </div>
                 )}
             </div>
