@@ -19,6 +19,9 @@ export default function Home() {
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [lastGameRef, setLastGameRef] = useState<GameLogic>();
+    const [lastGameScore, setLastGameScore] = useState(0);
+    const [gameOverModal, setGameOverModal] = useState(false);
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
@@ -103,14 +106,18 @@ export default function Home() {
                 console.error('Error during updating high score:', error);
             }
         }
+        setLastGameRef(game);
+        setLastGameScore(score);
+        setGameOverModal(true)
 
-        // setTimeout as workaround to show last frame. improve this
-        setTimeout(() => {
-            alert(`Game over! Score is ${score}`);
-            game.restartGame();
-            setGameStarted(false)
-        }, 10)
     }, [account.address, chainId]);
+    const finishGame = () => {
+        lastGameRef?.restartGame();
+        setLastGameRef(undefined);
+        setGameStarted(false)
+        setLastGameScore(0);
+        setGameOverModal(false)
+    }
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
 
         try {
@@ -172,6 +179,27 @@ export default function Home() {
                             color="primary"
                             className="rounded disabled:opacity-50"
                             onClick={() => setTipsModal(false)}>Let&#39;s Go!
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={gameOverModal} onClose={() => finishGame()}>
+                <Modal.Header>Game Over!</Modal.Header>
+                <Modal.Body>
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            Your Score: {lastGameScore}
+                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            Your Highest Score: {playerHighscore}
+                        </h3>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => finishGame()}>Okay!
                     </Button>
                 </Modal.Footer>
             </Modal>
