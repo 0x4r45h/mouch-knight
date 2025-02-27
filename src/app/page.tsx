@@ -214,14 +214,14 @@ export default function Home() {
             {/*  Tx Table*/}
 
             <div className="w-full overflow-x-auto">
-                <Table striped>
-                    <Table.Head>
-                        <Table.HeadCell>Score</Table.HeadCell>
-                        <Table.HeadCell>Tx Link</Table.HeadCell>
+                <Table striped className="text-monad-black font-bold ">
+                    <Table.Head >
+                        <Table.HeadCell className="bg-purple-500">Score</Table.HeadCell>
+                        <Table.HeadCell className="bg-purple-500">Tx Link</Table.HeadCell>
                     </Table.Head>
-                    <Table.Body className="divide-y">
+                    <Table.Body className="divide-y ">
                         {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
-                            <Table.Row key={key} className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                            <Table.Row key={key} className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
                                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                     {scoreTx.scoreId}
                                 </Table.Cell>
