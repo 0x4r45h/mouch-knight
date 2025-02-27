@@ -1,12 +1,11 @@
-import { Person } from './Person';
-import { Tree } from './Tree';
+import {Person} from "@/components/game/Person";
+import {Tree} from "@/components/game/Tree";
 
 // Define the expected detail type for our custom events.
 export interface GameEventDetail {
     score?: number;
     highScore?: number;
 }
-
 export class GameLogic {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
@@ -18,7 +17,7 @@ export class GameLogic {
     private btnLeft: HTMLButtonElement;
     private btnRight: HTMLButtonElement;
     private cutSound: HTMLAudioElement;
-    // Time/progress bar related properties.
+    private landImage: HTMLImageElement;
 
     private static readonly DEFAULT_PROGRESS: number =  0.5; // Range between 0 (empty) and 1 (full). Starts at half.
     private static readonly DEFAULT_BASE_DEPLETION_RATE: number =  0.002; // Base depletion rate per interval tick.
@@ -32,15 +31,7 @@ export class GameLogic {
 
     // Public event target to emit custom events.
     public eventTarget: EventTarget = new EventTarget();
-    /**
-     * Constructs the Lumberjack game.
-     *
-     * @param canvas - The canvas element where the game is rendered.
-     * @param btnLeft - The left movement control button.
-     * @param btnRight - The right movement control button.
-     * @param canvasWidth - The width to assign to the canvas (provided by the parent).
-     * @param canvasHeight - The height to assign to the canvas (provided by the parent).
-     */
+
     constructor(
         canvas: HTMLCanvasElement,
         btnLeft: HTMLButtonElement,
@@ -52,7 +43,6 @@ export class GameLogic {
         this.btnLeft = btnLeft;
         this.btnRight = btnRight;
 
-        // Set canvas dimensions based on values provided by the parent.
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
 
@@ -62,35 +52,26 @@ export class GameLogic {
         }
         this.ctx = context;
 
-        // Initialize the cut sound (ensure the audio file exists in /public/audio/).
         this.cutSound = new Audio('/audio/cut.wav');
-
-        // Initialize highScore from local storage.
         this.highScore = Number(localStorage.getItem('highScore')) || 0;
+
+        this.landImage = new Image();
+        this.landImage.src = '/images/land.png'; // Load the image once
 
         this.setupListeners();
     }
 
-    /**
-     * Initializes game entities and resets state.
-     * Assumes that the canvas dimensions are already set by the parent.
-     */
     init(): void {
-        // Initialize the person instance.
         this.person = new Person(this.canvas);
-        // Initialize the tree instance, positioned at the center horizontally and with an offset from the bottom.
         this.tree = new Tree(this.canvas, this.canvas.width / 2, this.canvas.height - 350);
         this.tree.init();
         this.score = 0;
         this.progress = GameLogic.DEFAULT_PROGRESS;
         this.difficultyFactor = GameLogic.DEFAULT_DIFFICULTY_FACTOR;
 
-        // Start the progress depletion timer.
         this.startProgressTimer();
-
         this.drawBackground();
 
-        // Dispatch an event indicating initialization.
         this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('init', {
             detail: {}
         }));
@@ -104,24 +85,14 @@ export class GameLogic {
         requestAnimationFrame(() => this.render());
     }
 
-    /**
-     * Draws the game background.
-     */
     drawBackground(): void {
-        // Draw sky background.
         this.ctx.fillStyle = '#d3f7ff';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw floating land using an image asset.
-        const land = new Image();
-        land.src = '/images/land.png';
-        // For a basic implementation, draw the image immediately.
-        this.ctx.drawImage(land, 0, this.canvas.height - 300, this.canvas.width, 350);
+        // Use the preloaded land image
+        this.ctx.drawImage(this.landImage, 0, this.canvas.height - 300, this.canvas.width, 350);
     }
 
-    /**
-     * Displays the current score and highscore.
-     */
     drawScore(): void {
         this.ctx.fillStyle = '#333';
         this.ctx.font = '24px Arial';
@@ -143,7 +114,6 @@ export class GameLogic {
      * Red below 25%, Purple between 26%-74%, Green above 75%.
      */
     private drawProgressBar(): void {
-        // Define progress bar dimensions.
         const barWidth = 100;
         const barHeight = 10;
         const margin = 20;
@@ -240,11 +210,10 @@ export class GameLogic {
      */
     private endGame(): void {
         if (this.score > this.highScore) {
-            localStorage.setItem('highScore', String(this.score));
+            this.highScore = this.score;
         }
-        const updatedHighScore = Number(localStorage.getItem('highScore')) || 0;
         this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('gameOver', {
-            detail: { score: this.score, highScore: updatedHighScore }
+            detail: { score: this.score, highScore: this.highScore }
         }));
         // Stop the progress timer.
         if (this.depletionTimer !== null) {
@@ -291,14 +260,11 @@ export class GameLogic {
     }
 
     destroy(): void {
-        // Remove event listeners for buttons.
         this.btnLeft.removeEventListener('click', this.handleLeftClick);
         this.btnRight.removeEventListener('click', this.handleRightClick);
 
-        // Remove event listener for keyboard controls.
         window.removeEventListener('keydown', this.handleKeyDown);
 
-        // Stop any ongoing audio.
         this.cutSound.pause();
         this.cutSound.currentTime = 0;
 
@@ -316,23 +282,14 @@ export class GameLogic {
         this.tree = null;
     }
 
-    /**
-     * Handles left button click.
-     */
     private handleLeftClick = () => {
         this.move('left');
     };
 
-    /**
-     * Handles right button click.
-     */
     private handleRightClick = () => {
         this.move('right');
     };
 
-    /**
-     * Handles keydown events for movement.
-     */
     private handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'a' || e.key === 'ArrowLeft') this.move('left');
         else if (e.key === 'd' || e.key === 'ArrowRight') this.move('right');

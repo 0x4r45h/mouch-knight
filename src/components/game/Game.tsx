@@ -6,10 +6,11 @@ import { useAppKitNetwork } from "@reown/appkit/react";
 
 interface LumberjackGameProps {
     sessionId: number;
-    gameOverCallback: (game: GameLogic, score: number) => void;
+    gameOverCallback: (game: GameLogic, score: number, highScore: number) => void;
+    scoreUpdateCallback: (score: number, sessionId: number) => void;
 }
 
-const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
+const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, scoreUpdateCallback}) => {
     const account = useAccount()
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const btnLeftRef = useRef<HTMLButtonElement>(null);
@@ -20,30 +21,6 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
         console.log('GameFrame Effect!');
 
         if (canvasRef.current && btnLeftRef.current && btnRightRef.current) {
-            const handleScoreUpdate = async () => {
-                try {
-                    const response = await fetch('/api/game/score', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            player: account.address,
-                            session_id: sessionId,
-                            chain_id: chainId
-                        })
-                    })
-                    if (!response.ok) {
-                        console.error('Network response was not ok', response)
-                    }
-                    const result = await response.json();
-                    console.log('Result is ', result)
-
-                } catch (error) {
-                    console.error('Error during deposit:', error);
-                }
-            }
-
             const game = new GameLogic(
                 canvasRef.current,
                 btnLeftRef.current,
@@ -59,7 +36,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
                 const score = customEvent.detail.score;
                 console.log('Score updated:', score);
                 if (score) {
-                    handleScoreUpdate();
+                    scoreUpdateCallback(score, sessionId);
                 }
             };
 
@@ -67,7 +44,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
                 const customEvent = event as CustomEvent<GameEventDetail>;
                 console.log('Game over! Final score:', customEvent.detail.score);
                 console.log('Highscore:', customEvent.detail.highScore);
-                gameOverCallback(game, customEvent.detail.score as number)
+                gameOverCallback(game, customEvent.detail.score as number, customEvent.detail.highScore as number)
             };
 
             // Add event listeners
@@ -89,7 +66,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback}) => {
                 }
             };
         }
-    }, [account.address, chainId, gameOverCallback, sessionId]);
+    }, [account.address, chainId, gameOverCallback, scoreUpdateCallback, sessionId]);
     return (
         <>
             <canvas ref={canvasRef} className="w-full" />

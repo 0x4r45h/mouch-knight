@@ -2,7 +2,7 @@ import { cookieStorage, createStorage } from 'wagmi'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import {anvil, defineChain} from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
-import {scoreManagerAbi} from "@/generated";
+import {scoreManagerAbi, scoreTokenAbi} from "@/generated";
 import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
 
 // Get projectId from https://cloud.reown.com
@@ -14,8 +14,8 @@ if (!projectId) {
 export type HexString = `0x${string}`
 
 export const monadDevnet = defineChain({
-  id: Number(process.env.NEXT_PUBLIC_MONAD_CHAIN_ID),
-  caipNetworkId: 'eip155:123456789',
+  id: Number(process.env.NEXT_PUBLIC_MONAD_DEVNET_CHAIN_ID),
+  caipNetworkId: 'eip155:123456700',
   chainNamespace: 'eip155',
   name: 'Monad Devnet',
   nativeCurrency: {
@@ -25,15 +25,34 @@ export const monadDevnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_MONAD_RPC_URL || ""],
+      http: [process.env.NEXT_PUBLIC_MONAD_DEVNET_RPC_URL || ""],
     },
   },
   blockExplorers: {
-    default: { name: 'Monad Devnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_BLOCKSCOUT_URL || "" },
+    default: { name: 'Monad Devnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_DEVNET_BLOCKSCOUT_URL || "" },
+  },
+})
+export const monadTestnet = defineChain({
+  id: Number(process.env.NEXT_PUBLIC_MONAD_TESTNET_CHAIN_ID),
+  caipNetworkId: 'eip155:123456800',
+  chainNamespace: 'eip155',
+  name: 'Monad Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Monad',
+    symbol: 'MON',
+  },
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_MONAD_TESTNET_RPC_URL || ""],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'Monad Testnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_TESTNET_BLOCKSCOUT_URL || "" },
   },
 })
 
-export const networks = [monadDevnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
+export const networks = [monadTestnet, monadDevnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
@@ -48,24 +67,48 @@ const contractsConfig = {
   ScoreManager: {
     abi: scoreManagerAbi,
     addresses: {
-      [anvil.id]: process.env.NEXT_CONTRACT_ADDR__ANVIL__SCORE_MANAGER as HexString,
-      [monadDevnet.id]: process.env.NEXT_CONTRACT_ADDR__MONAD_DEVNET__SCORE_MANAGER as HexString,
+      [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_MANAGER as HexString,
+      [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_MANAGER as HexString,
+      [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__SCORE_MANAGER as HexString,
     },
+    deployedBlock: {
+      [anvil.id]: BigInt(1),
+      [monadDevnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_DEVNET__SCORE_MANAGER || 1),
+      [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__SCORE_MANAGER || 1),
+    }
+  },
+  ScoreToken: {
+    abi: scoreTokenAbi,
+    addresses: {
+      [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_TOKEN as HexString,
+      [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_TOKEN as HexString,
+      [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__SCORE_TOKEN as HexString,
+    },
+    deployedBlock: {
+      [anvil.id]: BigInt(0),
+      [monadDevnet.id]:  BigInt(0),
+      [monadTestnet.id]:  BigInt(0),
+    }
   },
 } as const;
 
 type ContractConfig = {
   abi: Abi;
   addresses: Record<number, HexString>; // Maps chain IDs to contract addresses
+  deployedBlock: Record<number, bigint>; // Maps chain IDs to contract deployed Block number
 };
 
 // Define a type for the contracts configuration object
 type ContractsConfig = {
   [contractName: string]: ContractConfig;
 };
-
+export type SingleContractConfig = {
+  address: HexString,
+  abi: Abi
+  deployedBlock: bigint,
+}
 // Export the function to get contract configuration
-export const getContractConfig = (contractName: string, chainId: number) => {
+export const getContractConfig = (contractName: string, chainId: number): SingleContractConfig => {
   const contract = (contractsConfig as ContractsConfig)[contractName];
   if (!contract) {
     throw new Error(`Contract ${contractName} not found in config`);
@@ -77,12 +120,14 @@ export const getContractConfig = (contractName: string, chainId: number) => {
   return {
     address,
     abi: contract.abi,
+    deployedBlock: contract.deployedBlock[chainId]
   };
 };
 
 export const getPublicClientByChainId = (chainId: number): ReturnType<typeof createPublicClient> => {
   const chainConfigMap = {
     [monadDevnet.id]: monadDevnet,
+    [monadTestnet.id]: monadTestnet,
     [anvil.id]: anvil,
   };
 
@@ -99,6 +144,7 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
 }
 export const getSignerClientByChainId = (chainId: number): WalletClient => {
   const chainConfigMap = {
+    [monadTestnet.id]: monadTestnet,
     [monadDevnet.id]: monadDevnet,
     [anvil.id]: anvil,
   };
