@@ -10,8 +10,8 @@ export default {
     extend: {
       colors: {
         // Role-based colors
-        'background': '#FBFAF9', // default background
-        'text': '#0E100F', // default text color
+        'background': '#200052', // default background
+        'text': '#FBFAF9', // default text color
         'primary': '#836EF9', // main action color
         'secondary': '#200052', // secondary action color
         'accent': '#A0055D', // accent color

@@ -27,14 +27,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
     <Flowbite theme={{ theme: customTheme }}>
-      <body className="flex flex-col min-h-screen bg-gray-100">
+      <body className="flex flex-col min-h-screen bg-background text-monad-off-white" >
       <ContextProvider cookies={cookies}>
         <Header/>
         <main className="flex-1 w-full max-w-screen-xl mx-auto px-4 py-6 md:px-6 lg:px-8">
           {children}
         </main>
 
-        <footer className="bg-gray-800 text-white py-4 px-4 md:px-6 lg:px-8">
+        <footer className="dark-background py-4 px-4 md:px-6 lg:px-8">
           <div className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-4 md:justify-end">
             <a href="https://emberstake.xyz" className="hover:text-blue-400">
               Website

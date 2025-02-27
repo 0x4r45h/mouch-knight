@@ -8,7 +8,7 @@ export const Header = () => {
         data: playerBalance,
     } = useScoreTokenBalanceOfPlayer();
     return (
-        <header className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white md:px-6 lg:px-8">
+        <header className="flex items-center justify-between px-4 py-3 dark-background  md:px-6 lg:px-8">
             <h1 className="text-lg font-semibold sm:text-xl md:text-2xl">
                 Mouch Knight
             </h1>
