@@ -7,7 +7,30 @@ export default {
     flowbite.content(),
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        // Role-based colors
+        'background': '#3c048e', // default background
+        'text': '#FBFAF9', // default text color
+        'primary': '#836EF9', // main action color
+        'secondary': '#200052', // secondary action color
+        'accent': '#A0055D', // accent color
+        'dark-background': '#200052', // for dark-themed sections
+        'light-text': '#FBFAF9', // text color on dark background
+        'white': '#FFFFFF',
+
+        // Brand colors
+        'monad-off-white': '#FBFAF9',
+        'monad-purple': '#836EF9',
+        'monad-blue': '#200052',
+        'monad-berry': '#A0055D',
+        'monad-black': '#0E100F',
+        'monad-light-blue': '#3c048e',
+      },
+      fontFamily: {
+        'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+      },
+    },
   },
   plugins: [
     flowbite.plugin(),

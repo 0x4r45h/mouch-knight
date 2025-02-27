@@ -19,6 +19,9 @@ export default function Home() {
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [lastGameRef, setLastGameRef] = useState<GameLogic>();
+    const [lastGameScore, setLastGameScore] = useState(0);
+    const [gameOverModal, setGameOverModal] = useState(false);
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
@@ -103,14 +106,18 @@ export default function Home() {
                 console.error('Error during updating high score:', error);
             }
         }
+        setLastGameRef(game);
+        setLastGameScore(score);
+        setGameOverModal(true)
 
-        // setTimeout as workaround to show last frame. improve this
-        setTimeout(() => {
-            alert(`Game over! Score is ${score}`);
-            game.restartGame();
-            setGameStarted(false)
-        }, 10)
     }, [account.address, chainId]);
+    const finishGame = () => {
+        lastGameRef?.restartGame();
+        setLastGameRef(undefined);
+        setGameStarted(false)
+        setLastGameScore(0);
+        setGameOverModal(false)
+    }
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
 
         try {
@@ -168,11 +175,42 @@ export default function Home() {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => setTipsModal(false)}>Let&#39;s Go!</Button>
+                    <Button size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => setTipsModal(false)}>Let&#39;s Go!
+                    </Button>
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={gameOverModal} onClose={() => finishGame()}>
+                <Modal.Header>Game Over!</Modal.Header>
+                <Modal.Body>
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            Your Score: {lastGameScore}
+                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            Your Highest Score: {playerHighscore}
+                        </h3>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => finishGame()}>Okay!
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            {account.isConnected && (
+                <div className="flex justify-between w-full max-w-[540px]">
+                    <span>MKT Balance: {playerBalance}</span>
+                    <span>Highscore: {playerHighscore}</span>
+                </div>
+            )}
             <div
-                className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center "
+                className=" relative w-full max-w-[540px] mx-auto flex items-center justify-center mt-5 mb-5 "
             >
                 {account.isConnected && gameStarted ? (
                     /* If the game has started, render the LumberjackGame component */
@@ -185,88 +223,100 @@ export default function Home() {
                     </div>
                 ) : (
                     /* Otherwise, show a placeholder with a "Start New Game" button */
-                    <div className="flex items-center justify-center w-full h-full">
+                    <div className="flex items-center justify-center w-full flex-col space-y-4 ">
+                        <h1 className="text-2xl font-bold w-full">
+                            Can You Break the Monad with Mouch Knight?
+                        </h1>
+                        <h2 className="text-lg w-full">
+                            Calling all Nads! The Monad network claims it’s unbreakable—but can Mouch Knight prove it wrong? Dash up the tower, dodge pesky obstacles, and climb faster than a caffeinated squire. (Seriously, is it even *possible* to break this thing?)
+                        </h2>
+                        <h3 className="text-md w-full">
+                            Race to the top of the leaderboard and stack MKT tokens! The higher you climb in a session, the juicier the multiplier—more MKT for every epic ascent!
+                        </h3>
                         {account.isConnected ? (
                             <Button
-                                className=" font-semibold px-4 py-2 rounded-md  focus:outline-none focus:ring-2 "
+                                color="primary"
+                                size="xl"
+                                className="bg-monad-berry  rounded-md focus:outline-none focus:ring-2 w-full"
                                 onClick={handleNewGame}
                                 disabled={gameLoading}
                             >
-                                {gameLoading ? 'Loading...' : 'Start New Game'}
+                                {gameLoading ? 'Loading...' : 'Start Climbing!'}
                             </Button>
                         ) : (
                             /* @ts-expect-error msg */
-                            <appkit-connect-button/>
+                            <appkit-connect-button className="" />
                         )}
-
-
                     </div>
                 )}
             </div>
-            <p>Balance is {playerBalance}</p>
-            <p>Highscore is {playerHighscore}</p>
             {/*  Tx Table*/}
-
-            <div className="w-full overflow-x-auto">
-                <Table striped>
-                    <Table.Head>
-                        <Table.HeadCell>Score</Table.HeadCell>
-                        <Table.HeadCell>Tx Link</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y">
-                        {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
-                            <Table.Row key={key} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                    {scoreTx.scoreId}
-                                </Table.Cell>
-                                <Table.Cell>{
-                                    scoreTx.txHash ? (
-                                        <a className="underline" target="_blank"
-                                           href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
-                                            <span className="block sm:hidden">Link</span>
-                                            <span className="hidden sm:block">{scoreTx.txHash}</span>
-                                        </a>
-                                    ) : (<span>Pending...</span>)
-                                }
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-                <div className="flex justify-between mt-4">
-                    <button
-                        type="button"
-                        className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-                        onClick={() => setCurrentPage((prev) => prev - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </button>
-                    <span>
+            {scoreTx.length !== 0 && (
+                <div className="w-full overflow-x-auto">
+                    <Table striped className="text-monad-black font-bold ">
+                        <Table.Head >
+                            <Table.HeadCell className="bg-purple-500">Score</Table.HeadCell>
+                            <Table.HeadCell className="bg-purple-500">Tx Link</Table.HeadCell>
+                        </Table.Head>
+                        <Table.Body className="divide-y ">
+                            {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
+                                <Table.Row key={key} className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
+                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        {scoreTx.scoreId}
+                                    </Table.Cell>
+                                    <Table.Cell>{
+                                        scoreTx.txHash ? (
+                                            <a className="underline" target="_blank"
+                                               href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
+                                                <span className="block sm:hidden">Link</span>
+                                                <span className="hidden sm:block">{scoreTx.txHash}</span>
+                                            </a>
+                                        ) : (<span>Pending...</span>)
+                                    }
+                                    </Table.Cell>
+                                </Table.Row>
+                            ))}
+                        </Table.Body>
+                    </Table>
+                    <div className="flex justify-between mt-4">
+                        <Button
+                            size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => setCurrentPage((prev) => prev - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span>
     Page {currentPage} of {Math.ceil(scoreTx.length / rowsPerPage)}
   </span>
-                    <button
-                        type="button"
-                        className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-                        onClick={() => setCurrentPage((prev) => prev + 1)}
-                        disabled={currentPage * rowsPerPage >= scoreTx.length}
-                    >
-                        Next
-                    </button>
+                        <Button
+                            size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => setCurrentPage((prev) => prev + 1)}
+                            disabled={currentPage * rowsPerPage >= scoreTx.length}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            )}
             {/* Section for other buttons (leaderboard, how to play, etc.) */}
             <div
                 className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"
             >
                 <Button
-                    className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    color="primary"
+                    className=" bg-monad-berry  rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500"
                     onClick={() => setLeaderboardModal(true)}
                 >
                     Leaderboard
                 </Button>
                 <Button
-                    className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    color="primary"
+                    className=" bg-monad-berry rounded-md px-4 py-2  focus:outline-none focus:ring-2 focus:ring-stone-500"
                     onClick={() => setTipsModal(true)}
                 >
                     How to Play
