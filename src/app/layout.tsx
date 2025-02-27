@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { headers } from "next/headers";
 import ContextProvider from "@/context";
-import { ConnectButton } from "@/components/ConnectButton";
+import {Header} from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Mouch Knight",
@@ -21,13 +21,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className="flex flex-col min-h-screen bg-gray-100">
         <ContextProvider cookies={cookies}>
-          <header className="flex items-center justify-between px-4 py-3 bg-gray-800 text-white md:px-6 lg:px-8">
-            <h1 className="text-lg font-semibold sm:text-xl md:text-2xl">
-              Mouch Knight
-            </h1>
-            <ConnectButton />
-          </header>
-
+          <Header/>
           <main className="flex-1 w-full max-w-screen-xl mx-auto px-4 py-6 md:px-6 lg:px-8">
             {children}
           </main>

@@ -5,10 +5,7 @@ import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork} from "@reown/appkit/react";
 import {Button, Modal, Table} from "flowbite-react";
-import {useReadScoreManagerGetPlayerHighscore} from "@/generated";
-import {useReadScoreTokenBalanceOf} from "@/generated";
-import {HexString} from "@/config";
-import {useContractConfig} from "@/hooks/custom";
+import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
 
 export default function Home() {
@@ -27,68 +24,21 @@ export default function Home() {
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
     const {chain} = useAccount()
-    const [scoreManagerAddr, setScoreManagerAddr] = useState<HexString>("0x");
-    const [scoreTokenAddr, setScoreTokenAddr] = useState<HexString>("0x");
-    const {contract: scoreManagerConfig, error: scoreManagerConfigError} = useContractConfig('ScoreManager', chain?.id)
-    const {contract: scoreTokenConfig, error: scoreTokenConfigError} = useContractConfig('ScoreToken', chain?.id)
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
         error: playerHighScoreError
-    } = useReadScoreManagerGetPlayerHighscore({
-        address: scoreManagerAddr,
-        args: [account.address as HexString],
-        query: {
-            enabled: !!account.address
-        }
-    });
+    } = useGetPlayerHighscore();
     const {
         data: playerBalance,
         refetch: refetchBalance,
-        error: playerBalanceError
-    } = useReadScoreTokenBalanceOf({
-        address: scoreTokenAddr,
-        args: [account.address as HexString],
-        query: {
-            enabled: !!account.address
-        }
-    });
-    // get contract address on
-    useEffect(() => {
-        if (scoreManagerConfig) {
-            setScoreManagerAddr(scoreManagerConfig.address);
-        }
-        if (scoreManagerConfigError) {
-            console.log('Cant get scoreManagerContract address - ', scoreManagerConfigError)
-        }
-
-    }, [scoreManagerConfig, scoreManagerConfigError]);
-    useEffect(() => {
-        if (scoreTokenConfig) {
-            setScoreTokenAddr(scoreTokenConfig.address);
-        }
-        if (scoreTokenConfigError) {
-            console.log('Cant get scoreTokenContract address - ', scoreTokenConfigError)
-        }
-
-    }, [scoreTokenConfig, scoreTokenConfigError]);
-
-    // update highscore after game finishes
-    useEffect(() => {
-        console.log(`refetch highscore & balance on game reset`)
-
-        if (!gameStarted) {
-            refetchHighScore();
-            refetchBalance();
-        }
-    }, [gameStarted, refetchBalance, refetchHighScore]);
-    // update highscore on init
+    } = useScoreTokenBalanceOfPlayer();
 
     useEffect(() => {
         console.log(`update highscore on init`)
         refetchHighScore();
         refetchBalance();
-    }, [chain, refetchBalance, refetchHighScore, scoreManagerAddr]);
+    }, [chain, refetchBalance, refetchHighScore, gameStarted]);
 
 
     //set highscore to localstorage
@@ -100,12 +50,6 @@ export default function Home() {
         }
     }, [playerHighscore, playerHighScoreError]);
 
-    useEffect(() => {
-        console.log(`player balance is ${playerBalance} , error is ${playerBalanceError}`)
-        if (playerBalance != undefined) {
-            console.log('set balance on localstorage ', playerBalance);
-        }
-    }, [playerBalance, playerBalanceError]);
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setGameLoading(true)
@@ -259,6 +203,8 @@ export default function Home() {
                     </div>
                 )}
             </div>
+            <p>Balance is {playerBalance}</p>
+            <p>Highscore is {playerHighscore}</p>
             {/*  Tx Table*/}
 
             <div className="w-full overflow-x-auto">
