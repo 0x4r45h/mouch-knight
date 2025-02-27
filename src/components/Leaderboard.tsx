@@ -86,9 +86,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({openModal, closeModalAc
                         </Table>
                     </div>
                 </Modal.Body>
-                <Modal.Footer>
-                    <div className="flex justify-between">
+                <Modal.Footer className="flex justify-between">
                         <Button
+                            size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
                             onClick={() => setCurrentPage((prev) => prev - 1)}
                             disabled={currentPage === 1}
                         >
@@ -98,13 +100,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({openModal, closeModalAc
     Page {currentPage} of {Math.ceil(scores.length / rowsPerPage)}
   </span>
                         <Button
+                            size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
                             onClick={() => setCurrentPage((prev) => prev + 1)}
                             disabled={currentPage * rowsPerPage >= scores.length}
                         >
                             Next
                         </Button>
-                    </div>
-
                 </Modal.Footer>
             </Modal>
         </>

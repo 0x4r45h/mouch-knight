@@ -168,7 +168,11 @@ export default function Home() {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => setTipsModal(false)}>Let&#39;s Go!</Button>
+                    <Button size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => setTipsModal(false)}>Let&#39;s Go!
+                    </Button>
                 </Modal.Footer>
             </Modal>
             <div
@@ -188,7 +192,9 @@ export default function Home() {
                     <div className="flex items-center justify-center w-full h-full">
                         {account.isConnected ? (
                             <Button
-                                className=" font-semibold px-4 py-2 rounded-md  focus:outline-none focus:ring-2 "
+                                size="xl"
+                                color="primary"
+                                className="rounded-md  focus:outline-none focus:ring-2"
                                 onClick={handleNewGame}
                                 disabled={gameLoading}
                             >
@@ -234,25 +240,27 @@ export default function Home() {
                     </Table.Body>
                 </Table>
                 <div className="flex justify-between mt-4">
-                    <button
-                        type="button"
-                        className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                    <Button
+                        size="lg"
+                        color="primary"
+                        className="rounded disabled:opacity-50"
                         onClick={() => setCurrentPage((prev) => prev - 1)}
                         disabled={currentPage === 1}
                     >
                         Previous
-                    </button>
+                    </Button>
                     <span>
     Page {currentPage} of {Math.ceil(scoreTx.length / rowsPerPage)}
   </span>
-                    <button
-                        type="button"
-                        className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+                    <Button
+                        size="lg"
+                        color="primary"
+                        className="rounded disabled:opacity-50"
                         onClick={() => setCurrentPage((prev) => prev + 1)}
                         disabled={currentPage * rowsPerPage >= scoreTx.length}
                     >
                         Next
-                    </button>
+                    </Button>
                 </div>
             </div>
             {/* Section for other buttons (leaderboard, how to play, etc.) */}
@@ -260,13 +268,15 @@ export default function Home() {
                 className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"
             >
                 <Button
-                    className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    color="primary"
+                    className=" bg-monad-berry  rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500"
                     onClick={() => setLeaderboardModal(true)}
                 >
                     Leaderboard
                 </Button>
                 <Button
-                    className=" bg-stone-300 rounded-md px-4 py-2 text-black hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    color="primary"
+                    className=" bg-monad-berry rounded-md px-4 py-2  focus:outline-none focus:ring-2 focus:ring-stone-500"
                     onClick={() => setTipsModal(true)}
                 >
                     How to Play
