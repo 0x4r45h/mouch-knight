@@ -109,12 +109,12 @@ export default function Home() {
         setLastGameRef(game);
         setLastGameScore(score);
         setGameOverModal(true)
+        setGameStarted(false);
 
     }, [account.address, chainId]);
     const finishGame = () => {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
-        setGameStarted(false)
         setLastGameScore(0);
         setGameOverModal(false)
     }
