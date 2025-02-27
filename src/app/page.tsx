@@ -205,7 +205,7 @@ export default function Home() {
             </Modal>
             {account.isConnected && (
                 <div className="flex justify-between w-full max-w-[540px]">
-                    <span>MKT Balance: {playerBalance}</span>
+                    <span>MKT Balance: {playerBalance ? playerBalance / (BigInt(10) ** BigInt(18)) : 0}</span>
                     <span>Highscore: {playerHighscore}</span>
                 </div>
             )}
