@@ -175,8 +175,14 @@ export default function Home() {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            {account.isConnected ? (
+                <div className="flex justify-between w-full max-w-[540px]">
+                    <span>MKT Balance: {playerBalance}</span>
+                    <span>Highscore: {playerHighscore}</span>
+                </div>
+            ) : (<></>)}
             <div
-                className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center "
+                className=" relative w-full max-w-[540px] h-[885px] bg-gray-200 mx-auto flex items-center justify-center mt-5 mb-5 "
             >
                 {account.isConnected && gameStarted ? (
                     /* If the game has started, render the LumberjackGame component */
@@ -209,8 +215,6 @@ export default function Home() {
                     </div>
                 )}
             </div>
-            <p>Balance is {playerBalance}</p>
-            <p>Highscore is {playerHighscore}</p>
             {/*  Tx Table*/}
 
             <div className="w-full overflow-x-auto">
