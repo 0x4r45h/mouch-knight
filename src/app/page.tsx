@@ -175,12 +175,12 @@ export default function Home() {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            {account.isConnected ? (
+            {account.isConnected && (
                 <div className="flex justify-between w-full max-w-[540px]">
                     <span>MKT Balance: {playerBalance}</span>
                     <span>Highscore: {playerHighscore}</span>
                 </div>
-            ) : (<></>)}
+            )}
             <div
                 className=" relative w-full max-w-[540px] mx-auto flex items-center justify-center mt-5 mb-5 "
             >
@@ -207,6 +207,7 @@ export default function Home() {
                         </h3>
                         {account.isConnected ? (
                             <Button
+                                color="primary"
                                 size="xl"
                                 className="bg-monad-berry  rounded-md focus:outline-none focus:ring-2 w-full"
                                 onClick={handleNewGame}
@@ -222,57 +223,58 @@ export default function Home() {
                 )}
             </div>
             {/*  Tx Table*/}
-
-            <div className="w-full overflow-x-auto">
-                <Table striped className="text-monad-black font-bold ">
-                    <Table.Head >
-                        <Table.HeadCell className="bg-purple-500">Score</Table.HeadCell>
-                        <Table.HeadCell className="bg-purple-500">Tx Link</Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body className="divide-y ">
-                        {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
-                            <Table.Row key={key} className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
-                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                    {scoreTx.scoreId}
-                                </Table.Cell>
-                                <Table.Cell>{
-                                    scoreTx.txHash ? (
-                                        <a className="underline" target="_blank"
-                                           href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
-                                            <span className="block sm:hidden">Link</span>
-                                            <span className="hidden sm:block">{scoreTx.txHash}</span>
-                                        </a>
-                                    ) : (<span>Pending...</span>)
-                                }
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-                <div className="flex justify-between mt-4">
-                    <Button
-                        size="lg"
-                        color="primary"
-                        className="rounded disabled:opacity-50"
-                        onClick={() => setCurrentPage((prev) => prev - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </Button>
-                    <span>
+            {scoreTx.length !== 0 && (
+                <div className="w-full overflow-x-auto">
+                    <Table striped className="text-monad-black font-bold ">
+                        <Table.Head >
+                            <Table.HeadCell className="bg-purple-500">Score</Table.HeadCell>
+                            <Table.HeadCell className="bg-purple-500">Tx Link</Table.HeadCell>
+                        </Table.Head>
+                        <Table.Body className="divide-y ">
+                            {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
+                                <Table.Row key={key} className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
+                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        {scoreTx.scoreId}
+                                    </Table.Cell>
+                                    <Table.Cell>{
+                                        scoreTx.txHash ? (
+                                            <a className="underline" target="_blank"
+                                               href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
+                                                <span className="block sm:hidden">Link</span>
+                                                <span className="hidden sm:block">{scoreTx.txHash}</span>
+                                            </a>
+                                        ) : (<span>Pending...</span>)
+                                    }
+                                    </Table.Cell>
+                                </Table.Row>
+                            ))}
+                        </Table.Body>
+                    </Table>
+                    <div className="flex justify-between mt-4">
+                        <Button
+                            size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => setCurrentPage((prev) => prev - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span>
     Page {currentPage} of {Math.ceil(scoreTx.length / rowsPerPage)}
   </span>
-                    <Button
-                        size="lg"
-                        color="primary"
-                        className="rounded disabled:opacity-50"
-                        onClick={() => setCurrentPage((prev) => prev + 1)}
-                        disabled={currentPage * rowsPerPage >= scoreTx.length}
-                    >
-                        Next
-                    </Button>
+                        <Button
+                            size="lg"
+                            color="primary"
+                            className="rounded disabled:opacity-50"
+                            onClick={() => setCurrentPage((prev) => prev + 1)}
+                            disabled={currentPage * rowsPerPage >= scoreTx.length}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            )}
             {/* Section for other buttons (leaderboard, how to play, etc.) */}
             <div
                 className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"

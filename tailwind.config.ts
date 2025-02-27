@@ -10,7 +10,7 @@ export default {
     extend: {
       colors: {
         // Role-based colors
-        'background': '#200052', // default background
+        'background': '#3c048e', // default background
         'text': '#FBFAF9', // default text color
         'primary': '#836EF9', // main action color
         'secondary': '#200052', // secondary action color
