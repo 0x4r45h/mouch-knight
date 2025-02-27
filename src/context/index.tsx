@@ -29,6 +29,12 @@ export const modal = createAppKit({
   defaultNetwork: monadTestnet,
   metadata,
   themeMode: 'light',
+  themeVariables: {
+    '--w3m-accent': '#A0055D',
+    '--w3m-color-mix': '#836EF9',
+    '--w3m-color-mix-strength': 40,
+    '--w3m-border-radius-master': '1px',
+  },
   features: {
     analytics: true,
     swaps: false,
