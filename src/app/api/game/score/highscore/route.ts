@@ -14,7 +14,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     try {
         // Fetch leaderboard from database using Prisma
-        const scores = await highScoreService.getLeaderboard(Number(chainId));
+        const scores = await highScoreService.getLeaderboard(Number(chainId),100000);
 
         return NextResponse.json({
             message: 'Leaderboard fetched',

@@ -3,52 +3,27 @@ import prisma from '@/db/client';
 export interface HighScore {
   chainId: number;
   playerAddress: string;
-  score: bigint;
-  sessionId: bigint;
+  score: number;
+  sessionId: number;
 }
 
 export class HighScoreService {
-  /**
-   * Upsert a high score (insert or update if higher)
-   */
-  async upsertHighScore(highScore: HighScore): Promise<void> {
+
+  async insertHighScore(highScore: HighScore): Promise<void> {
     const { chainId, playerAddress, score, sessionId } = highScore;
 
     try {
-      // First try to find the existing record
-      const existingScore = await prisma.highScore.findUnique({
-        where: {
-          chainId_playerAddress: {
-            chainId,
-            playerAddress
-          }
+      // Directly insert the new high score entry
+      await prisma.highScore.create({
+        data: {
+          chainId,
+          playerAddress,
+          score,
+          sessionId
         }
       });
-
-      // Only update if the new score is higher or no record exists
-      if (!existingScore || existingScore.score < score) {
-        await prisma.highScore.upsert({
-          where: {
-            chainId_playerAddress: {
-              chainId,
-              playerAddress
-            }
-          },
-          update: {
-            score,
-            sessionId,
-            updatedAt: new Date()
-          },
-          create: {
-            chainId,
-            playerAddress,
-            score,
-            sessionId
-          }
-        });
-      }
     } catch (error) {
-      console.error('Error upserting high score:', error);
+      console.error('Error inserting high score:', error);
       throw error;
     }
   }
@@ -65,10 +40,11 @@ export class HighScoreService {
         orderBy: {
           score: 'desc'
         },
+        distinct: ['playerAddress'],
         take: limit,
         select: {
           playerAddress: true,
-          score: true
+          score: true,
         }
       });
 
