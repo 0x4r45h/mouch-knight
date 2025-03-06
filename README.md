@@ -1,5 +1,14 @@
 # Mouch Knight
 
+
+Run migrations to create the database schema:
+```bash
+pnpx prisma migrate dev --name init
+```
+to reset database in dev use this 
+```bash
+pnpm prisma db push --force-reset
+```
 ## Usage
 
 1. Go to [Reown Cloud](https://cloud.reown.com) and create a new project.

@@ -35,6 +35,22 @@ services:
     networks:
       - app
     restart: unless-stopped
+  event-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["pnpm", "run", "event-worker"]
+    env_file:
+      - .env
+    logging:
+      options:
+        max-size: "12m"
+        max-file: "5"
+    environment:
+      NODE_ENV: production
+    networks:
+      - app
+    restart: unless-stopped
 
 volumes:
   postgres_data:

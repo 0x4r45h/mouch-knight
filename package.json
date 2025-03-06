@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "listener": "tsx src/scripts/bootstrap.ts --script src/scripts/listenForHighScores.ts",
+    "event-worker": "tsx src/scripts/bootstrap.ts --script src/scripts/listenForHighScores.ts",
     "bootstrap": "tsx src/scripts/bootstrap.ts"
   },
   "dependencies": {
