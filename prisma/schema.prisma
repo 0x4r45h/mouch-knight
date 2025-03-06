@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HighScore {
+  id            Int      @id @default(autoincrement())
+  chainId       Int      @map("chain_id")
+  playerAddress String   @map("player_address") @db.VarChar(42)
+  score         BigInt
+  sessionId     BigInt   @map("session_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([chainId, playerAddress])
+  @@index([chainId])
+  @@index([playerAddress])
+  @@map("high_scores")
+}

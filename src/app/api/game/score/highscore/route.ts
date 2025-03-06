@@ -2,30 +2,31 @@ import {NextRequest, NextResponse} from "next/server";
 import { processQueue, txQueue} from "@/app/api/game/queue";
 import {getContractConfig, HexString} from "@/config";
 import {PrivateKeyAccount, WalletClient} from "viem";
-import {highScores} from "@/app/utils/fetchEvents";
+import highScoreService from '@/services/highScoreService';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const chainId = searchParams.get('chain_id');
+
     if (!chainId) {
         return NextResponse.json({ success: false, message: "chain_id is required" }, { status: 422 });
     }
-    let scores: { player: string; score: string; }[] = [];
-    const chainScores = highScores.get(Number(chainId));
-    if (chainScores != undefined) {
-        scores = Array.from(chainScores.entries()).map(([player,score]: [string, bigint]) => (
-            {
-                player,
-                score: score.toString(),
-            }
-        )).sort((a, b) => {
-            const diff = BigInt(b.score) - BigInt(a.score);
-            if (diff > BigInt(0)) return 1;
-            if (diff < BigInt(0)) return -1;
-            return 0;
+
+    try {
+        // Fetch leaderboard from database using Prisma
+        const scores = await highScoreService.getLeaderboard(Number(chainId));
+
+        return NextResponse.json({
+            message: 'Leaderboard fetched',
+            data: { leaderboard: scores }
         });
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        return NextResponse.json({
+            success: false,
+            message: "Failed to fetch leaderboard"
+        }, { status: 500 });
     }
-    return NextResponse.json({ message: 'Leaderboard fetched', data: {leaderboard: scores} });
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {

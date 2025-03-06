@@ -6,14 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "listener": "tsx src/scripts/bootstrap.ts --script src/scripts/listenForHighScores.ts",
+    "bootstrap": "tsx src/scripts/bootstrap.ts"
   },
   "dependencies": {
+    "@next/env": "^15.2.1",
+    "@prisma/client": "^6.4.1",
     "@reown/appkit": "^1.6.7",
     "@reown/appkit-adapter-wagmi": "^1.6.7",
     "@tanstack/react-query": "^5.66.0",
     "@wagmi/core": "^2.16.4",
+    "dotenv": "^16.4.7",
     "next": "15.1.6",
+    "prisma": "^6.4.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "viem": "^2.22.23",
@@ -31,6 +37,9 @@
     "pino-pretty": "^13.0.0",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   }
 }

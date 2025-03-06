@@ -1,4 +1,25 @@
+version: '3.8'
+
 services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-highscores}
+    networks:
+      - app
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+#      - ./db/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
@@ -9,10 +30,13 @@ services:
       options:
         max-size: "12m"
         max-file: "5"
-    networks:
-      - app
     environment:
       NODE_ENV: production
+    networks:
+      - app
     restart: unless-stopped
+
+volumes:
+  postgres_data:
 networks:
   app:
