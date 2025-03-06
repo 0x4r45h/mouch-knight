@@ -24,3 +24,17 @@ model HighScore {
   @@index([playerAddress])
   @@map("high_scores")
 }
+
+// Add this model to your existing Prisma schema
+
+model BlockTracker {
+  id               Int      @id @default(autoincrement())
+  chainId          Int
+  contractName     String
+  lastScannedBlock String
+  updatedAt        DateTime @updatedAt
+
+  @@unique([chainId, contractName])
+  @@map("block_tracker")
+
+}
