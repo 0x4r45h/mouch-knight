@@ -15,7 +15,7 @@ interface GameVerificationModule {
       currentScore: number,
       chainId: number,
       sessionId: number,
-      timestamp: number
+      timestamp: bigint
   ) => string;
 }
 
@@ -87,7 +87,7 @@ export async function generateTimedVerificationHash(
         currentScore,
         chainId,
         sessionId,
-        timestamp
+        BigInt(timestamp)
     ),
     timestamp
   };

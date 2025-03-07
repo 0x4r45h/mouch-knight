@@ -16,9 +16,9 @@ function verifyHash(
     timestamp: number,
     clientHash: string
 ): boolean {
-    // Allow a 5-minute window for the timestamp to prevent replay attacks
+    // Allow a 10sec window for the timestamp to prevent replay attacks
     const currentTime = Math.floor(Date.now() / 1000);
-    if (Math.abs(currentTime - timestamp) > 300) {
+    if (Math.abs(currentTime - timestamp) > 10) {
         console.error("Timestamp is too old or from the future");
         return false;
     }

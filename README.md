@@ -19,6 +19,27 @@ pnpm prisma db push --force-reset
 
 
 # Local Development
+# wasm
+
+Setup Instructions
+Set up the Rust/WASM environment:
+First, make sure you have Rust and wasm-pack installed:
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install wasm-pack
+Copy
+Insert
+
+Create the WASM module directory structure:
+mkdir -p wasm/src
+Copy
+Insert
+
+Place the Rust code in /wasm/src/lib.rs and the Cargo.toml in /wasm/Cargo.toml
+Build the WASM module:
+cd wasm
+wasm-pack build --target web
+
 
 ## Get contracts ABIs
 Install WAGMI CLI too
