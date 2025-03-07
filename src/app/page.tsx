@@ -267,7 +267,7 @@ export default function Home() {
                                     <Table.Cell>{
                                         scoreTx.txHash ? (
                                             <a className="underline" target="_blank"
-                                               href={`${chain?.blockExplorers?.default.url ?? "http://localhost:3000/"}tx/${scoreTx.txHash}`}>
+                                               href={`${chain?.blockExplorers?.default.url ?? "http://testnet.monadexplorer.com/"}tx/${scoreTx.txHash}`}>
                                                 <span className="block sm:hidden">Link</span>
                                                 <span className="hidden sm:block">{scoreTx.txHash}</span>
                                             </a>
