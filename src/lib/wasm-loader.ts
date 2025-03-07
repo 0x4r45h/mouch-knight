@@ -2,6 +2,7 @@
 
 // Define an interface for our WASM module
 interface GameVerificationModule {
+  default: () => Promise<void>;
   generate_verification_hash: (
       playerAddress: string,
       currentScore: number,
@@ -19,11 +20,12 @@ interface GameVerificationModule {
 }
 
 let wasmModule: GameVerificationModule | null = null;
+let isInitialized = false;
 let isLoading = false;
 let loadingPromise: Promise<GameVerificationModule> | null = null;
 
 export async function loadWasmModule(): Promise<GameVerificationModule> {
-  if (wasmModule) {
+  if (wasmModule && isInitialized) {
     return wasmModule;
   }
 
@@ -35,8 +37,11 @@ export async function loadWasmModule(): Promise<GameVerificationModule> {
   loadingPromise = (async () => {
     try {
       // Dynamic import of the WASM module
-      // Renamed from 'module' to 'wasmImport' to avoid Next.js linter error
       const wasmImport = await import('@/../../wasm/pkg/game_verification');
+
+      // Initialize the WASM module
+      await wasmImport.default();
+      isInitialized = true;
 
       // Cast the imported module to our interface
       wasmModule = wasmImport as unknown as GameVerificationModule;
