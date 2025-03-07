@@ -4,6 +4,7 @@ import {Tree} from "@/components/game/Tree";
 // Define the expected detail type for our custom events.
 export interface GameEventDetail {
     score?: number;
+    mkt?: number;
     highScore?: number;
 }
 export class GameLogic {
@@ -12,6 +13,7 @@ export class GameLogic {
     private person: Person | null = null;
     private tree: Tree | null = null;
     private score: number = 0;
+    private mkt: number = 0;
     private highScore: number;
 
     private btnLeft: HTMLButtonElement;
@@ -95,17 +97,25 @@ export class GameLogic {
 
     drawScore(): void {
         this.ctx.fillStyle = '#333';
-        this.ctx.font = '24px Arial';
+        this.ctx.textAlign = "start";
+
+        this.ctx.font = 'bold 24px Arial';
         this.ctx.fillText('Score', 30, 30);
 
-        this.ctx.font = '32px Arial';
-        this.ctx.fillText(String(this.score), 30, 70);
+        this.ctx.font = 'bold 32px Arial';
+        this.ctx.fillText(String(this.score), 30, 60);
 
-        this.ctx.font = '24px Arial';
-        this.ctx.fillText('Highscore', 30, 120);
+        this.ctx.font = 'bold 24px Arial';
+        this.ctx.fillText('MKT', 30, 100);
 
-        this.ctx.font = '32px Arial';
-        this.ctx.fillText(String(this.highScore), 30, 170);
+        this.ctx.font = 'bold 32px Arial';
+        this.ctx.fillText(String(this.mkt), 30, 130);
+
+        this.ctx.font = 'bold 24px Arial';
+        this.ctx.fillText('Highscore', 30, 170);
+
+        this.ctx.font = 'bold 32px Arial';
+        this.ctx.fillText(String(this.highScore), 30, 200);
     }
 
     /**
@@ -115,7 +125,7 @@ export class GameLogic {
      */
     private drawProgressBar(): void {
         const barWidth = 100;
-        const barHeight = 10;
+        const barHeight = 20;
         const margin = 20;
         const x = this.canvas.width - barWidth - margin;
         const y = margin;
@@ -146,7 +156,7 @@ export class GameLogic {
     draw(): void {
         this.drawBackground();
         if (this.tree) {
-            this.tree.draw();
+            this.tree.draw(this.calcMultiplier());
         }
         if (this.person) {
             this.person.draw();
@@ -155,6 +165,9 @@ export class GameLogic {
         this.drawProgressBar();
     }
 
+    private calcMultiplier() {
+        return Math.floor(this.getScore() / 10);
+    }
     /**
      * Handles player's move actions.
      * Plays the cut sound, updates the game state, and checks for collisions.
@@ -185,7 +198,7 @@ export class GameLogic {
             this.tree.createNewTrunk();
         }
         this.score++;
-
+        this.updateMKT(this.score);
         // Dispatch a scoreUpdate event.
         this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('scoreChange', {
             detail: { score: this.score }
@@ -203,7 +216,13 @@ export class GameLogic {
             }
         }
     }
+    private updateMKT(currentScore : number) {
+        if (currentScore < 11) {
+            return;
+        }
+        this.mkt += this.calcMultiplier()
 
+    }
     /**
      * Ends the game when a collision or time out occurs.
      * Dispatches a gameOver event and stops the progress timer.
@@ -213,7 +232,7 @@ export class GameLogic {
             this.highScore = this.score;
         }
         this.eventTarget.dispatchEvent(new CustomEvent<GameEventDetail>('gameOver', {
-            detail: { score: this.score, highScore: this.highScore }
+            detail: { score: this.score, highScore: this.highScore, mkt: this.mkt }
         }));
         // Stop the progress timer.
         if (this.depletionTimer !== null) {
@@ -281,7 +300,9 @@ export class GameLogic {
         this.person = null;
         this.tree = null;
     }
-
+    public getScore() {
+        return this.score
+    }
     private handleLeftClick = () => {
         this.move('left');
     };

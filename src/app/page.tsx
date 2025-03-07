@@ -21,6 +21,7 @@ export default function Home() {
     const [currentPage, setCurrentPage] = useState(1);
     const [lastGameRef, setLastGameRef] = useState<GameLogic>();
     const [lastGameScore, setLastGameScore] = useState(0);
+    const [lastGameMKT, setLastGameMKT] = useState(0);
     const [gameOverModal, setGameOverModal] = useState(false);
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
@@ -87,7 +88,7 @@ export default function Home() {
         }
     }
 
-    const gameOverHandler = useCallback((game: GameLogic, score: number, highScore: number) => {
+    const gameOverHandler = useCallback((game: GameLogic, score: number, highScore: number, mkt: number) => {
         console.log(`score is ${score} and highscore is ${highScore}`)
         if (score == highScore) {
             try {
@@ -108,6 +109,7 @@ export default function Home() {
         }
         setLastGameRef(game);
         setLastGameScore(score);
+        setLastGameMKT(mkt);
         setGameOverModal(true)
         setGameStarted(false);
 
@@ -116,6 +118,7 @@ export default function Home() {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
         setLastGameScore(0);
+        setLastGameMKT(0);
         setGameOverModal(false)
     }
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
@@ -189,6 +192,9 @@ export default function Home() {
                     <div className="space-y-6">
                         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                             Your Score: {lastGameScore}
+                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                            Your Minted MKT: {lastGameMKT}
                         </h3>
                         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                             Your Highest Score: {playerHighscore}

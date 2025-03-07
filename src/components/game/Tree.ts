@@ -68,13 +68,25 @@ export class Tree {
     }
 
     // Draws the tree trunks and additional elements on the canvas.
-    draw(): void {
+    draw(multiplier: number): void {
         // Center x-coordinate based on the canvas width and tree trunk width.
         const x = this.canvas.width / 2 - this.width / 2;
         this.trees.forEach((tree, index) => {
             this.ctx.fillStyle = tree.color;
             // Draw the main tree trunk.
             this.ctx.fillRect(x, this.startY - (index * this.height), this.width, this.height);
+
+            // Add "10x" text in the center of the rectangle
+            this.ctx.fillStyle = "white"; // Text color
+            this.ctx.font = "bold 24px Arial"; // Text font and size
+            this.ctx.textAlign = "center";
+            this.ctx.textBaseline = "middle";
+            const textX = x + this.width / 2;
+            const textY = this.startY - (index * this.height) + this.height / 2;
+            this.ctx.fillText(`${multiplier}x`, textX, textY);
+
+            // Reset fill style to the tree color for subsequent drawing operations
+            this.ctx.fillStyle = tree.color;
 
             // Draw left extension if applicable.
             if (tree.value === 'left') {

@@ -6,7 +6,7 @@ import { useAppKitNetwork } from "@reown/appkit/react";
 
 interface LumberjackGameProps {
     sessionId: number;
-    gameOverCallback: (game: GameLogic, score: number, highScore: number) => void;
+    gameOverCallback: (game: GameLogic, score: number, highScore: number, mkt: number) => void;
     scoreUpdateCallback: (score: number, sessionId: number) => void;
 }
 
@@ -44,7 +44,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, score
                 const customEvent = event as CustomEvent<GameEventDetail>;
                 console.log('Game over! Final score:', customEvent.detail.score);
                 console.log('Highscore:', customEvent.detail.highScore);
-                gameOverCallback(game, customEvent.detail.score as number, customEvent.detail.highScore as number)
+                gameOverCallback(game, customEvent.detail.score as number, customEvent.detail.highScore as number,  customEvent.detail.mkt as number)
             };
 
             // Add event listeners
