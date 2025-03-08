@@ -8,3 +8,6 @@ wasm/pkg
 docker-compose*
 next-env.d.ts
 README.md
+docker/Dockerfile
+.git
+.gitignore
