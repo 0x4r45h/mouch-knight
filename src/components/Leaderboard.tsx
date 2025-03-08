@@ -12,7 +12,8 @@ interface LeaderboardProps {
 export const Leaderboard: React.FC<LeaderboardProps> = ({openModal, closeModalAction, chainId}) => {
     type Score = {
         address: string,
-        score: string
+        score: string,
+        sessionId: string,
     }
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
@@ -35,18 +36,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({openModal, closeModalAc
                     }
                     const result = await response.json();
                     const leaderboard = result.data.leaderboard;
-                    const highScores = leaderboard.map((value: {player: string, score: string}) => {
+                    const highScores = leaderboard.map((value: {player: string, score: string, sessionId: string}) => {
                         const score: Score = {
                             address: value.player,
                             score: value.score,
+                            sessionId: value.sessionId,
                         }
                         return score;
                     })
                     setScores(highScores);
-                    console.log('Result is ', result)
 
                 } catch (error) {
-                    console.error('Error during submit score:', error);
+                    console.error('Error during loading highscore:', error);
                 }
             }
             fetchHighscores()
@@ -64,6 +65,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({openModal, closeModalAc
                                 <Table.HeadCell>Rank</Table.HeadCell>
                                 <Table.HeadCell>Address</Table.HeadCell>
                                 <Table.HeadCell>Score</Table.HeadCell>
+                                <Table.HeadCell>On Attempt</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
                                 {scores.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scores, key: number) => (
@@ -78,6 +80,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({openModal, closeModalAc
                                         </Table.Cell>
                                         <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                             {scores.score}
+                                        </Table.Cell>
+                                        <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                            {scores.sessionId}
                                         </Table.Cell>
 
                                     </Table.Row>

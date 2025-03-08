@@ -45,12 +45,18 @@ export class HighScoreService {
         select: {
           playerAddress: true,
           score: true,
+          sessionId: true,
         }
       });
 
-      return leaderboard.map((entry: { playerAddress: string; score: { toString: () => string; }; }) => ({
+      return leaderboard.map((entry: {
+        playerAddress: string;
+        score: { toString: () => string;  };
+        sessionId: { toString: () => string;  };
+      }) => ({
         player: entry.playerAddress,
-        score: entry.score.toString()
+        score: entry.score.toString(),
+        sessionId: entry.sessionId.toString(),
       }));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
