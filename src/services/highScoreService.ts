@@ -58,5 +58,5 @@ export class HighScoreService {
     }
   }
 }
-
-export default new HighScoreService();
+const highScoreService = new HighScoreService();
+export default highScoreService;

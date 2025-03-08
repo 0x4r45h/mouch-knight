@@ -122,13 +122,22 @@ export default function Home() {
         setGameOverModal(false)
     }
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
-
         try {
             const tx: ScoreTx = {
                 scoreId: score,
                 txHash: undefined
             }
             setScoreTx((prevScoreTx) => [...prevScoreTx, tx]);
+
+            // Generate verification hash using WASM
+            const { generateTimedVerificationHash } = await import('@/lib/wasm-loader');
+            const { hash, timestamp } = await generateTimedVerificationHash(
+                account.address as string,
+                score,
+                Number(chainId),
+                sessionId
+            );
+
             const response = await fetch('/api/game/score', {
                 method: 'POST',
                 headers: {
@@ -138,12 +147,16 @@ export default function Home() {
                     player: account.address,
                     session_id: sessionId,
                     chain_id: chainId,
-                    score
+                    score,
+                    verification: {
+                        hash,
+                        timestamp
+                    }
                 })
-            })
+            });
 
             if (!response.ok) {
-                console.error('Network response was not ok', response)
+                console.error('Network response was not ok', response);
             }
             const result = await response.json();
             setScoreTx(prevScoreTx =>
@@ -151,13 +164,12 @@ export default function Home() {
                     tx.scoreId === score ? {...tx, txHash: result.data.txHash} : tx
                 )
             );
-            console.log('Result is ', result)
+            console.log('Result is ', result);
 
         } catch (error) {
             console.error('Error during submit score:', error);
         }
     }, [account.address, chainId]);
-    // const closeModal = () => setLeaderboardModal(false)
     return (
         <div className="flex flex-col items-center justify-start min-h-screen py-8">
             {chainId ? (<Leaderboard chainId={Number(chainId)} openModal={leaderboardModal} closeModalAction={() => setLeaderboardModal(false)}  />) : <></>}
