@@ -59,10 +59,12 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
+#COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+#COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+#COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+#COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
+# all files are  and next server required for event-worker
+COPY --from=builder --chown=nextjs:nodejs /app/. ./
 
 COPY --chown=nextjs:nextjs --chmod=744 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN pnpm run prisma:generate
