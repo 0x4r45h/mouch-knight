@@ -37,5 +37,31 @@ model BlockTracker {
 
   @@unique([chainId, contractName])
   @@map("block_tracker")
+}
 
+model Player {
+  id        Int          @id @default(autoincrement())
+  address   String       @unique @db.VarChar(42)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
+  moves     PlayerMove[]
+
+  @@index([address])
+  @@map("players")
+}
+
+model PlayerMove {
+  id               Int      @id @default(autoincrement())
+  playerId         Int      @map("player_id")
+  chainId          Int      @map("chain_id")
+  score            Int
+  sessionId        Int      @map("session_id")
+  verificationHash String   @unique @map("verification_hash")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+  player           Player   @relation(fields: [playerId], references: [id])
+
+  @@index([chainId])
+  @@index([playerId])
+  @@map("player_moves")
 }
