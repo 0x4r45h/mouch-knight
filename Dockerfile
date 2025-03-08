@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:18 AS base
+FROM node:18-alpine AS base
 RUN npm install -g pnpm
 
 # Install Rust and wasm-pack
