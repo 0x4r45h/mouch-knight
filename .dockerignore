@@ -1,0 +1,10 @@
+.next
+.qodo
+node_modules
+overrides
+temp
+wasm/target
+wasm/pkg
+docker-compose*
+next-env.d.ts
+README.md

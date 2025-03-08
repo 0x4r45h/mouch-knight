@@ -26,6 +26,7 @@ RUN pnpm install
 
 COPY . .
 COPY --from=wasm-builder /app/wasm/pkg ./wasm/pkg
+RUN pnpm run prisma:generate
 RUN pnpm run build
 
 # Production image
@@ -38,13 +39,16 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./
 COPY --from=builder --chown=nextjs:nodejs /app/wasm/pkg ./wasm/pkg
 
+COPY --chown=nextjs:nextjs --chmod=744 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 USER nextjs
 
 # Expose port 3000 to the outside world
 EXPOSE 3000
 
+ENTRYPOINT [ "docker-entrypoint.sh" ]
 # Start the application
 CMD ["pnpm", "start"]

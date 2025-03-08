@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "event-worker": "tsx src/scripts/bootstrap.ts --script src/scripts/listenForHighScores.ts",
-    "bootstrap": "tsx src/scripts/bootstrap.ts"
+    "bootstrap": "tsx src/scripts/bootstrap.ts",
+    "prisma:generate": "prisma generate"
+
   },
   "dependencies": {
     "@next/env": "^15.2.1",

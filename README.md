@@ -1,6 +1,10 @@
 # Mouch Knight
 
+on production to migrate run :
 
+```bash
+pnpx prisma migrate deploy
+```
 Run migrations to create the database schema:
 ```bash
 pnpx prisma migrate dev --name init
