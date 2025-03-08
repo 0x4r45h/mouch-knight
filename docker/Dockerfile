@@ -60,13 +60,13 @@ COPY --from=builder /app/public ./public
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
 
 COPY --chown=nextjs:nextjs --chmod=744 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
 RUN pnpm run prisma:generate
+
 USER nextjs
 
 # Expose port 3000 to the outside world
