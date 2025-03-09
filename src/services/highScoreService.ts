@@ -13,11 +13,18 @@ export class HighScoreService {
     const { chainId, playerAddress, score, sessionId } = highScore;
 
     try {
-      // Directly insert the new high score entry
+      // Find or create the player first
+      const player = await prisma.player.upsert({
+        where: { address: playerAddress },
+        update: {},
+        create: { address: playerAddress }
+      });
+
+      // Insert high score with the player ID
       await prisma.highScore.create({
         data: {
           chainId,
-          playerAddress,
+          playerId: player.id,
           score,
           sessionId
         }
@@ -40,17 +47,23 @@ export class HighScoreService {
         orderBy: {
           score: 'desc'
         },
-        distinct: ['playerAddress'],
+        distinct: ['playerId'],
         take: limit,
         select: {
-          playerAddress: true,
+          player: {
+            select: {
+              address: true
+            }
+          },
           score: true,
+          sessionId: true,
         }
       });
 
-      return leaderboard.map((entry: { playerAddress: string; score: { toString: () => string; }; }) => ({
-        player: entry.playerAddress,
-        score: entry.score.toString()
+      return leaderboard.map((entry) => ({
+        player: entry.player.address,
+        score: entry.score.toString(),
+        sessionId: entry.sessionId.toString(),
       }));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
@@ -58,5 +71,6 @@ export class HighScoreService {
     }
   }
 }
+
 const highScoreService = new HighScoreService();
 export default highScoreService;

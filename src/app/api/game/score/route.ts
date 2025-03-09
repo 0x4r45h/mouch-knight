@@ -3,6 +3,9 @@ import {PRIVATE_KEYS, processQueue, txQueue} from "@/app/api/game/queue";
 import {getContractConfig, HexString} from "@/config";
 import {PrivateKeyAccount, WalletClient} from "viem";
 import crypto from 'crypto';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // The same secret key used in the WASM module
 const SECRET_KEY = "f3a9b5c7d1e8f2a4b6c8d0e2f4a6b8c0"; // Replace with your own secret key
@@ -16,9 +19,9 @@ function verifyHash(
     timestamp: number,
     clientHash: string
 ): boolean {
-    // Allow a 10sec window for the timestamp to prevent replay attacks
+    // Allow a 60sec window for the timestamp to prevent replay attacks
     const currentTime = Math.floor(Date.now() / 1000);
-    if (Math.abs(currentTime - timestamp) > 10) {
+    if (Math.abs(currentTime - timestamp) > 60) {
         console.error("Timestamp is too old or from the future");
         return false;
     }
@@ -59,6 +62,42 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!isValid) {
         return NextResponse.json({ error: "Invalid verification hash" }, { status: 403 });
     }
+
+    // Check if verification hash already exists
+    const existingMove = await prisma.playerMove.findUnique({
+        where: {
+            verificationHash: verification.hash
+        }
+    });
+
+    if (existingMove) {
+        return NextResponse.json({ error: "Duplicate move detected" }, { status: 409 });
+    }
+
+    // Get or create player
+    let playerRecord = await prisma.player.findUnique({
+        where: {
+            address: player
+        }
+    });
+
+    if (!playerRecord) {
+        playerRecord = await prisma.player.create({
+            data: {
+                address: player
+            }
+        });
+    }
+    // Store the player move
+    await prisma.playerMove.create({
+        data: {
+            playerId: playerRecord.id,
+            chainId,
+            score,
+            sessionId: Number(sessionId),
+            verificationHash: verification.hash
+        }
+    });
 
     if (PRIVATE_KEYS.length === 0) {
         return NextResponse.json({ error: "No private keys configured" }, { status: 500 });

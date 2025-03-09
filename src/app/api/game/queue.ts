@@ -16,6 +16,9 @@ export const PRIVATE_KEYS = [
     process.env.RELAYER_PRIVATE_KEY_10,
 ].filter((key): key is HexString => !!key);
 
+// Create a mutable copy of private keys for round-robin rotation
+let rotatingKeys: HexString[] = [...PRIVATE_KEYS];
+
 export type QueuedTx = {
     chainId: number;
     execute: (account: PrivateKeyAccount, nonce: number, signerClient: WalletClient, chainId: number) => Promise<HexString>;
@@ -29,9 +32,22 @@ let isCheckingQueue = false;
 const relayersNonce = new Map<HexString, number>();
 
 async function getAvailableKey(): Promise<HexString | undefined> {
-    const availableKeys = PRIVATE_KEYS.filter(key => !busyKeys.has(key));
+    const availableKeys = rotatingKeys.filter(key => !busyKeys.has(key));
     console.log("Available keys:", availableKeys.length);
-    return availableKeys[0];
+
+    if (availableKeys.length === 0) return undefined;
+
+    // Get the first available key
+    const selectedKey = availableKeys[0];
+
+    // Remove the selected key from its current position
+    rotatingKeys = rotatingKeys.filter(key => key !== selectedKey);
+
+    // Add the selected key to the end of the array for round-robin rotation
+    rotatingKeys.push(selectedKey);
+
+    console.log("Selected key:", selectedKey.slice(-4), "- moved to end of rotation");
+    return selectedKey;
 }
 
 async function getAccountNonce(address: HexString, pubClient: ReturnType<typeof createPublicClient>): Promise<number> {

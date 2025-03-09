@@ -26,7 +26,7 @@ export class GameLogic {
     private static readonly DEFAULT_DEPLETION_INTERVAL: number =  100; // Time in milliseconds between each depletion tick.
     private static readonly DEFAULT_BOOST_AMOUNT: number =  0.02; // Increase in progress for each move.
     private static readonly DEFAULT_DIFFICULTY_FACTOR: number =  4; // This factor multiplies the depletion; tuning knob for difficulty.
-    private static readonly DEFAULT_DIFFICULTY_FACTOR_RATE: number =  0.005;  // This factor increases the difficulty rate over time
+    private static readonly DEFAULT_DIFFICULTY_FACTOR_RATE: number =  0.01;  // This factor increases the difficulty rate over time
     private progress: number = GameLogic.DEFAULT_PROGRESS; // Range between 0 (empty) and 1 (full). Starts at half.
     private difficultyFactor: number = GameLogic.DEFAULT_DIFFICULTY_FACTOR; // This factor multiplies the depletion; tuning knob for difficulty.
     private depletionTimer: number | null = null;

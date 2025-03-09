@@ -51,8 +51,12 @@ export const monadTestnet = defineChain({
     default: { name: 'Monad Testnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_TESTNET_BLOCKSCOUT_URL || "" },
   },
 })
+export const networks = [monadTestnet] as [AppKitNetwork, ...AppKitNetwork[]]
 
-export const networks = [monadTestnet, monadDevnet, anvil] as [AppKitNetwork, ...AppKitNetwork[]]
+if (process.env.NODE_ENV !== 'production') {
+  networks.push(anvil)
+}
+
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
