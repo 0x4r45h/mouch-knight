@@ -286,7 +286,7 @@ export default function Home() {
                                         scoreTx.txHash ? (
                                             <a className="underline" target="_blank"
                                                href={`${chain?.blockExplorers?.default.url ?? "http://testnet.monadexplorer.com/"}tx/${scoreTx.txHash}`}>
-                                                <span className="block sm:hidden">Link</span>
+                                                <span className="block sm:hidden">{`${scoreTx.txHash.slice(0, 4)}...${scoreTx.txHash.slice(-4)}`}</span>
                                                 <span className="hidden sm:block">{scoreTx.txHash}</span>
                                             </a>
                                         ) : (<span>Pending...</span>)
