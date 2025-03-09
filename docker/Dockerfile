@@ -66,7 +66,7 @@ COPY --from=builder /app/public ./public
 # all files are  and next server required for event-worker
 COPY --from=builder --chown=nextjs:nodejs /app/. ./
 
-COPY --chown=nextjs:nextjs --chmod=744 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --chown=nextjs:nextjs --chmod=744 docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN pnpm run prisma:generate
 
 USER nextjs
