@@ -92,7 +92,7 @@ async function processSingleTransaction(privateKey: HexString, queuedTx: QueuedT
         queuedTx.reject(error);
     } finally {
         // wait a bit to prevent DDOSing RPCs, each job executes ~5 calls to the rpc
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, Number(process.env.NEXT_QUEUE_JOBS_DELAY) ?? 5000));
 
         busyKeys.delete(privateKey);
         console.log("Freed key:", privateKey.slice(-4), "Time taken:", Date.now() - startTime, "ms");
