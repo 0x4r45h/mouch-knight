@@ -148,12 +148,9 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
   return createPublicClient({
     chain: chainConfig,
     transport: http(paidRPC, {
-      timeout: 60_000,
-      retryCount: 7,
+      timeout: 30_000,
+      retryCount: 3,
     }),
-    batch : {
-      multicall: false,
-    },
   });
 }
 export const getSignerClientByChainId = (chainId: number): WalletClient => {

@@ -7,6 +7,7 @@ import {useAppKitNetwork} from "@reown/appkit/react";
 import {Button, Modal, Table} from "flowbite-react";
 import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
+import {startNewGameSession} from "@/services/newGameService";
 
 export default function Home() {
     type ScoreTx = {
@@ -59,30 +60,19 @@ export default function Home() {
         setGameLoading(true)
         setScoreTx([]);
         setCurrentPage(1)
+
+        if (!account.address || !chainId) {
+            console.log('Wallet not connected');
+            return;
+        }
         try {
-            const response = await fetch('/api/game', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    from: account.address,
-                    chain_id: chainId
-                })
-            })
-            if (!response.ok) {
-                // TODO: show an error alert
-                console.error('Network response was not ok', response)
-                return;
-            }
-            const result = await response.json();
+
+            const result = await startNewGameSession(account.address, Number(chainId));
             setGameSession(result.data.session_id)
-            console.log('Result is ', result)
-            console.log('new game session is ', gameSession)
             setGameStarted(true)
 
         } catch (error) {
-            console.error('Error during deposit:', error);
+            console.error('Failed to start game', error);
         } finally {
             setGameLoading(false)
         }
