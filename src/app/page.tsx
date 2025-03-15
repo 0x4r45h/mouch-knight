@@ -67,7 +67,19 @@ export default function Home() {
         }
         try {
 
-            const result = await startNewGameSession(account.address, Number(chainId));
+            // const result = await startNewGameSession(account.address, Number(chainId));
+            const response = await fetch('/api/game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    from: account.address,
+                    chain_id: chainId
+                })
+            })
+            const result = await response.json();
+
             setGameSession(result.data.session_id)
             setGameStarted(true)
 
