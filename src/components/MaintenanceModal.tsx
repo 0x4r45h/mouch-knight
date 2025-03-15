@@ -11,7 +11,7 @@ const MaintenanceModal: React.FC = () => {
                         <span className="text-amber-600 dark:text-amber-400">🛡️ Our Knight is on a Well-Deserved Break</span>
                     </h3>
                     <p className="text-base leading-relaxed text-gray-600 dark:text-gray-300">
-                        The Break Monad program has been <span className="font-medium text-blue-600 dark:text-blue-400">temporarily suspended</span> for a few weeks. We'll bring the website back online as soon as the event resumes, with <span className="font-medium text-green-600 dark:text-green-400">improved UX and performance</span>!
+                        The Break Monad program has been <span className="font-medium text-blue-600 dark:text-blue-400">temporarily suspended</span> for a few weeks. We&#39;ll bring the website back online as soon as the event resumes, with <span className="font-medium text-green-600 dark:text-green-400">improved UX and performance</span>!
                     </p>
                     <p className="text-sm italic text-purple-600 dark:text-purple-400">
                         ✨ Thank you for your patience and continued support! ✨
