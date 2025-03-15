@@ -7,7 +7,6 @@ import {useAppKitNetwork} from "@reown/appkit/react";
 import {Button, Modal, Table} from "flowbite-react";
 import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
-import {startNewGameSession} from "@/services/newGameService";
 
 export default function Home() {
     type ScoreTx = {
