@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getContractConfig, getPublicClientByChainId, HexString } from "@/config";
+import { HexString } from "@/config";
 import { PrismaClient } from '@prisma/client';
+import {fetchPlayerSessionId} from "@/services/newGameService";
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const from: HexString = body.from;
     const chainId: number = body.chain_id;
+    // const sessionId: string = body.session_id;
 
     try {
         // Get or create player when starting a new game
@@ -24,25 +26,17 @@ export async function POST(request: NextRequest) {
                 }
             });
         }
-
         const sessionId = await fetchPlayerSessionId(from, chainId);
-        return NextResponse.json({ message: 'new session generated', data: { session_id: sessionId.toString() } });
+        return NextResponse.json({
+            message: 'new session registered',
+            data: { session_id: sessionId }
+        });
     } catch (e) {
         console.log(e);
-        return NextResponse.json({ success: false, message: "query Failed", data: { error: e } }, { status: 500 });
+        return NextResponse.json({
+            success: false,
+            message: "new game failed",
+            data: { error: e }
+        }, { status: 500 });
     }
-}
-
-async function fetchPlayerSessionId(player: HexString, chainId: number): Promise<string> {
-    const { abi, address } = getContractConfig('ScoreManager', chainId);
-    const pubClient = getPublicClientByChainId(chainId);
-    const sessionId = await pubClient.readContract({
-        address,
-        abi,
-        functionName: "getPlayerNextSession",
-        args: [player]
-    });
-
-    // Assuming sessionId is returned as a string or can be converted to a string
-    return sessionId as string;
 }

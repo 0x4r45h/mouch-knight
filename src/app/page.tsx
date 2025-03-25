@@ -59,7 +59,14 @@ export default function Home() {
         setGameLoading(true)
         setScoreTx([]);
         setCurrentPage(1)
+
+        if (!account.address || !chainId) {
+            console.log('Wallet not connected');
+            return;
+        }
         try {
+
+            // const result = await startNewGameSession(account.address, Number(chainId));
             const response = await fetch('/api/game', {
                 method: 'POST',
                 headers: {
@@ -70,19 +77,13 @@ export default function Home() {
                     chain_id: chainId
                 })
             })
-            if (!response.ok) {
-                // TODO: show an error alert
-                console.error('Network response was not ok', response)
-                return;
-            }
             const result = await response.json();
+
             setGameSession(result.data.session_id)
-            console.log('Result is ', result)
-            console.log('new game session is ', gameSession)
             setGameStarted(true)
 
         } catch (error) {
-            console.error('Error during deposit:', error);
+            console.error('Failed to start game', error);
         } finally {
             setGameLoading(false)
         }

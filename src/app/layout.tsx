@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import ContextProvider from "@/context";
 import {Header} from "@/components/Header";
 import {CustomFlowbiteTheme, Flowbite} from "flowbite-react";
+import MaintenanceCheck from "@/components/MaintenanceCheck";
 
 export const metadata: Metadata = {
   title: "Mouch Knight",
@@ -48,6 +49,7 @@ export default async function RootLayout({
           </div>
         </footer>
       </ContextProvider>
+      <MaintenanceCheck />
       </body>
     </Flowbite>
     </html>

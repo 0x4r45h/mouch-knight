@@ -141,9 +141,16 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
     throw new Error(`No client has defined for chain ${chainId}`);
   }
 
+  let paidRPC = '';
+  if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
+    paidRPC = process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL
+  }
   return createPublicClient({
     chain: chainConfig,
-    transport: http(),
+    transport: http(paidRPC, {
+      timeout: 30_000,
+      retryCount: 3,
+    }),
   });
 }
 export const getSignerClientByChainId = (chainId: number): WalletClient => {
@@ -158,9 +165,12 @@ export const getSignerClientByChainId = (chainId: number): WalletClient => {
   if (!chainConfig) {
     throw new Error(`No client has defined for chain ${chainId}`);
   }
-
+  let paidRPC = '';
+  if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
+      paidRPC = process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL
+  }
   return createWalletClient({
     chain: chainConfig,
-    transport: http(),
+    transport: http(paidRPC),
   });
 }

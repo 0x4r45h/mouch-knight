@@ -80,7 +80,7 @@ async function processSingleTransaction(privateKey: HexString, queuedTx: QueuedT
         // Increase the cached nonce without waiting for confirmation.
         relayersNonce.set(account.address, nonce + 1);
         // Optionally, report tx status without awaiting the result.
-        reportTxStatus(hash, pubClient);
+        // reportTxStatus(hash, pubClient);
 
         // Resolve the promise so the POST handler can return the tx hash.
         queuedTx.resolve(hash);
@@ -91,19 +91,22 @@ async function processSingleTransaction(privateKey: HexString, queuedTx: QueuedT
         // Reject the promise so the POST handler can catch the error.
         queuedTx.reject(error);
     } finally {
+        // wait a bit to prevent DDOSing RPCs, each job executes ~5 calls to the rpc
+        await new Promise(resolve => setTimeout(resolve, Number(process.env.NEXT_QUEUE_JOBS_DELAY) ?? 5000));
+
         busyKeys.delete(privateKey);
         console.log("Freed key:", privateKey.slice(-4), "Time taken:", Date.now() - startTime, "ms");
     }
 }
-
-async function reportTxStatus(hash: HexString, pubClient: ReturnType<typeof createPublicClient>) {
-    try {
-        const receipt = await pubClient.waitForTransactionReceipt({ hash });
-        console.log(`Transaction ${receipt.transactionHash} confirmed in block:`, receipt.blockNumber);
-    } catch (error) {
-        console.error(`Error waiting for transaction confirmation for hash ${hash}:`, error);
-    }
-}
+//
+// async function reportTxStatus(hash: HexString, pubClient: ReturnType<typeof createPublicClient>) {
+//     try {
+//         const receipt = await pubClient.waitForTransactionReceipt({ hash });
+//         console.log(`Transaction ${receipt.transactionHash} confirmed in block:`, receipt.blockNumber);
+//     } catch (error) {
+//         console.error(`Error waiting for transaction confirmation for hash ${hash}:`, error);
+//     }
+// }
 
 export async function processQueue(): Promise<void> {
     if (isCheckingQueue) return;
