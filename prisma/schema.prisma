@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -12,15 +12,14 @@ datasource db {
 }
 
 model HighScore {
-  id            Int      @id @default(autoincrement())
-  chainId       Int      @map("chain_id")
-  playerId      Int      @map("player_id")
-  score         Int
-  sessionId     Int      @map("session_id")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
-  player        Player   @relation(fields: [playerId], references: [id])
-
+  id        Int      @id @default(autoincrement())
+  chainId   Int      @map("chain_id")
+  playerId  Int      @map("player_id")
+  score     Int
+  sessionId Int      @map("session_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  player    Player   @relation(fields: [playerId], references: [id])
 
   @@unique([chainId, playerId, sessionId, score])
   @@index([chainId])
@@ -42,12 +41,12 @@ model BlockTracker {
 }
 
 model Player {
-  id        Int          @id @default(autoincrement())
-  address   String       @unique @db.VarChar(42)
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
-  moves     PlayerMove[]
-  highscores     HighScore[]
+  id         Int          @id @default(autoincrement())
+  address    String       @unique @db.VarChar(42)
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @default(now()) @updatedAt @map("updated_at")
+  moves      PlayerMove[]
+  highscores HighScore[]
 
   @@index([address])
   @@map("players")
@@ -60,6 +59,7 @@ model PlayerMove {
   score            Int
   sessionId        Int      @map("session_id")
   verificationHash String   @unique @map("verification_hash")
+  txHash           String?  @map("tx_hash")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
   player           Player   @relation(fields: [playerId], references: [id])

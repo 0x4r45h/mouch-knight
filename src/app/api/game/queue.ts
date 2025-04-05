@@ -98,15 +98,6 @@ async function processSingleTransaction(privateKey: HexString, queuedTx: QueuedT
         console.log("Freed key:", privateKey.slice(-4), "Time taken:", Date.now() - startTime, "ms");
     }
 }
-//
-// async function reportTxStatus(hash: HexString, pubClient: ReturnType<typeof createPublicClient>) {
-//     try {
-//         const receipt = await pubClient.waitForTransactionReceipt({ hash });
-//         console.log(`Transaction ${receipt.transactionHash} confirmed in block:`, receipt.blockNumber);
-//     } catch (error) {
-//         console.error(`Error waiting for transaction confirmation for hash ${hash}:`, error);
-//     }
-// }
 
 export async function processQueue(): Promise<void> {
     if (isCheckingQueue) return;

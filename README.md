@@ -1,14 +1,21 @@
 # Mouch Knight
 
-on production to migrate run :
-
+# ON PRODUCTION USE THIS
 ```bash
 pnpx prisma migrate deploy
 ```
-Run migrations to create the database schema:
+
+# ON DEV only
+Create a migration from changes in Prisma schema, apply it to the database
 ```bash
 pnpx prisma migrate dev --name init
 ```
+to drop everything and migrate from scratch in dev
+
+```bash
+pnpx prisma migrate reset
+```
+
 to reset database in dev use this 
 ```bash
 pnpm prisma db push --force-reset

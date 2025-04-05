@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
                 }
             });
         }
+        // TODO: add a rate-limit per address to prevent RPC rate-limit here
         const sessionId = await fetchPlayerSessionId(from, chainId);
         return NextResponse.json({
             message: 'new session registered',

@@ -9,8 +9,8 @@
     "lint": "next lint",
     "event-worker": "tsx src/scripts/bootstrap.ts --script src/scripts/listenForHighScores.ts",
     "bootstrap": "tsx src/scripts/bootstrap.ts",
-    "prisma:generate": "prisma generate"
-
+    "prisma:generate": "prisma generate",
+    "tx-worker": "tsx src/scripts/bootstrap.ts --script src/scripts/transactionProcessorWorker.ts"
   },
   "dependencies": {
     "@next/env": "^15.2.1",
@@ -19,7 +19,9 @@
     "@reown/appkit-adapter-wagmi": "^1.6.7",
     "@tanstack/react-query": "^5.66.0",
     "@wagmi/core": "^2.16.4",
+    "bullmq": "^5.44.4",
     "dotenv": "^16.4.7",
+    "ioredis": "^5.6.0",
     "next": "15.1.6",
     "prisma": "^6.4.1",
     "react": "19.0.0",
