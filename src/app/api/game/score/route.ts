@@ -1,7 +1,4 @@
 import {NextRequest, NextResponse} from "next/server";
-import {PRIVATE_KEYS} from "@/app/api/game/queue";
-import {getContractConfig, HexString} from "@/config";
-import {PrivateKeyAccount, WalletClient} from "viem";
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import {addTxJob} from "@/services/queue";
@@ -107,12 +104,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
     console.log(`Job ID is ${jobId}`);
 
-    if (PRIVATE_KEYS.length === 0) {
-        return NextResponse.json({ error: "No private keys configured" }, { status: 500 });
-    }
-
     try {
-        return NextResponse.json({ message: 'Score Submitted', data: { txHash: '0x' } });
+        return NextResponse.json({ message: 'Score Submitted', data: { txHash: '0x', moveId: playerMove.id } });
     } catch (e) {
         console.error(e);
         return NextResponse.json({ success: false, message: "Tx Failed", data: { error: e } }, { status: 500 });

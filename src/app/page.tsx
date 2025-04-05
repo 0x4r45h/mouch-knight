@@ -10,6 +10,7 @@ import Leaderboard from "@/components/Leaderboard";
 
 export default function Home() {
     type ScoreTx = {
+        moveId: undefined,
         scoreId: number,
         txHash: undefined | string
     }
@@ -53,6 +54,43 @@ export default function Home() {
             localStorage.setItem('highScore', String(playerHighscore));
         }
     }, [playerHighscore, playerHighScoreError]);
+
+    // get tx hash for each score
+    useEffect(() => {
+        const fetchTxHashes = async () => {
+            // Find moves that don't have tx hashes yet
+            const movesWithoutHash = scoreTx
+                .filter(tx => tx.moveId && !tx.txHash)
+                .map(tx => tx.moveId);
+
+            if (movesWithoutHash.length === 0) return;
+
+            try {
+                const response = await fetch(`/api/game/score/tx-hash?moveIds=${movesWithoutHash.join(',')}`);
+                if (!response.ok) {
+                    console.error('Failed to fetch tx hashes:', response.status);
+                    return;
+                }
+
+                const result = await response.json();
+                const txHashMap = result.data;
+
+                setScoreTx(prevTx => 
+                    prevTx.map(tx =>
+                            (tx.moveId && txHashMap[tx.moveId]) ? {...tx, txHash: txHashMap[tx.moveId]} : tx
+                    )
+                );
+            } catch (error) {
+                console.error('Error fetching tx hashes:', error);
+            }
+        };
+
+        // Set up the interval
+        const interval = setInterval(fetchTxHashes, 1000);
+
+        // Cleanup on unmount or when scoreTx changes
+        return () => clearInterval(interval);
+    }, [scoreTx]);
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -125,6 +163,7 @@ export default function Home() {
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
         try {
             const tx: ScoreTx = {
+                moveId: undefined,
                 scoreId: score,
                 txHash: undefined
             }
@@ -162,7 +201,7 @@ export default function Home() {
             const result = await response.json();
             setScoreTx(prevScoreTx =>
                 prevScoreTx.map(tx =>
-                    tx.scoreId === score ? {...tx, txHash: result.data.txHash} : tx
+                    tx.scoreId === score ? {...tx, moveId: result.data.moveId} : tx
                 )
             );
             console.log('Result is ', result);

@@ -58,7 +58,7 @@ const worker = new Worker<TxJobData>('transaction-processing', async job => {
       args: [player, BigInt(sessionId)],
       nonce,
     });
-
+    // await new Promise(resolve => setTimeout(resolve, 5000));
     // Update player move with transaction hash
     await prisma.playerMove.update({
       where: { id: playerMoveId },
