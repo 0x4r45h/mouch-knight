@@ -4,6 +4,7 @@ import {anvil, defineChain} from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 import {scoreManagerAbi, scoreTokenAbi} from "@/generated";
 import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
+import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 
 // Get projectId from https://cloud.reown.com
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
@@ -65,6 +66,9 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   projectId,
   networks,
+  connectors: [
+    miniAppConnector(),
+  ]
 })
 
 const contractsConfig = {
