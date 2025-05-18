@@ -197,6 +197,7 @@ export default function Home() {
 
             if (!response.ok) {
                 console.error('Network response was not ok', response);
+                return;
             }
             const result = await response.json();
             setScoreTx(prevScoreTx =>
