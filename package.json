@@ -13,6 +13,7 @@
     "tx-worker": "tsx src/scripts/bootstrap.ts --script src/scripts/transactionProcessorWorker.ts"
   },
   "dependencies": {
+    "@farcaster/frame-sdk": "^0.0.43",
     "@next/env": "^15.2.1",
     "@prisma/client": "^6.4.1",
     "@reown/appkit": "^1.6.7",
