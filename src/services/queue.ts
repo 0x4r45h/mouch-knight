@@ -13,8 +13,8 @@ export const txProcessingQueue = new Queue('transaction-processing', {
   defaultJobOptions: {
     attempts: 3,
     backoff: {
-      type: 'exponential',
-      delay: 1000,
+      type: 'fixed',
+      delay: 2000,
     },
   },
 });

@@ -131,8 +131,13 @@ export const getContractConfig = (contractName: string, chainId: number): Single
     deployedBlock: contract.deployedBlock[chainId]
   };
 };
-
+const publicClients: Record<number, ReturnType<typeof createPublicClient>> = {};
 export const getPublicClientByChainId = (chainId: number): ReturnType<typeof createPublicClient> => {
+  // Return cached client if it exists
+  if (publicClients[chainId]) {
+    return publicClients[chainId];
+  }
+
   const chainConfigMap = {
     [monadDevnet.id]: monadDevnet,
     [monadTestnet.id]: monadTestnet,
@@ -149,13 +154,28 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
   if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
     paidRPC = process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL
   }
-  return createPublicClient({
+  
+  // Create new client
+  const client = createPublicClient({
     chain: chainConfig,
     transport: http(paidRPC, {
+      onFetchRequest(request, init) {
+        console.log('request:', request);
+        console.log('init:', init);
+      },
       timeout: 30_000,
       retryCount: 3,
+      batch: {
+        batchSize: 1000,
+        wait: 2000,
+      }
     }),
   });
+  
+  // Cache the client
+  publicClients[chainId] = client;
+  
+  return client;
 }
 export const getSignerClientByChainId = (chainId: number): WalletClient => {
   const chainConfigMap = {
