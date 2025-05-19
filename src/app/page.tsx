@@ -3,10 +3,12 @@ import React, {useCallback, useEffect, useState} from "react";
 import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
-import {useAppKitNetwork} from "@reown/appkit/react";
+import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
 import {Button, Modal, Table} from "flowbite-react";
 import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
+import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
+import {UserContext} from "@farcaster/frame-core/esm/context";
 
 export default function Home() {
     type ScoreTx = {
@@ -29,6 +31,7 @@ export default function Home() {
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
     const {chain} = useAccount()
+    const { walletInfo } = useWalletInfo();
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
@@ -43,7 +46,9 @@ export default function Home() {
         console.log(`update highscore on init`)
         refetchHighScore();
         refetchBalance();
-    }, [chain, refetchBalance, refetchHighScore, gameStarted]);
+        console.log('wallet info is ', walletInfo);
+
+    }, [chain, refetchBalance, refetchHighScore, gameStarted, walletInfo]);
 
 
     //set highscore to localstorage
@@ -94,10 +99,15 @@ export default function Home() {
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        let farcasterUser: UserContext | null = null
+        if (walletInfo?.name == 'farcaster') {
+            const context = await farcasterSdk.context
+            farcasterUser = context.user;
+            console.log('fuser is ', farcasterUser);
+        }
         setGameLoading(true)
         setScoreTx([]);
         setCurrentPage(1)
-
         if (!account.address || !chainId) {
             console.log('Wallet not connected');
             return;
@@ -112,7 +122,8 @@ export default function Home() {
                 },
                 body: JSON.stringify({
                     from: account.address,
-                    chain_id: chainId
+                    chain_id: chainId,
+                    farcaster_user: farcasterUser
                 })
             })
             const result = await response.json();

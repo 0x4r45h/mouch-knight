@@ -41,12 +41,18 @@ model BlockTracker {
 }
 
 model Player {
-  id         Int          @id @default(autoincrement())
-  address    String       @unique @db.VarChar(42)
-  createdAt  DateTime     @default(now()) @map("created_at")
-  updatedAt  DateTime     @default(now()) @updatedAt @map("updated_at")
-  moves      PlayerMove[]
-  highscores HighScore[]
+  id                   Int          @id @default(autoincrement())
+  address              String       @unique @db.VarChar(42)
+  fId                  Int?         @unique
+  fUsername            String?
+  fDisplayName         String?
+  fPfpUrl              String?
+  fLocationDescription String?
+  fLocationPlaceId     String?
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @default(now()) @updatedAt @map("updated_at")
+  moves                PlayerMove[]
+  highscores           HighScore[]
 
   @@index([address])
   @@map("players")

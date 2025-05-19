@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { HexString } from "@/config";
 import { PrismaClient } from '@prisma/client';
 import {fetchPlayerSessionId} from "@/services/newGameService";
+import {UserContext} from "@farcaster/frame-core/esm/context";
 
 const prisma = new PrismaClient();
 
@@ -9,6 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const from: HexString = body.from;
     const chainId: number = body.chain_id;
+    const farcasterUser: UserContext | null = body.farcaster_user;
     // const sessionId: string = body.session_id;
 
     try {
@@ -22,7 +24,13 @@ export async function POST(request: NextRequest) {
         if (!player) {
             await prisma.player.create({
                 data: {
-                    address: from
+                    address: from,
+                    fId: farcasterUser?.fid,
+                    fUsername: farcasterUser?.username,
+                    fDisplayName: farcasterUser?.displayName,
+                    fPfpUrl: farcasterUser?.pfpUrl,
+                    fLocationDescription: farcasterUser?.location?.description,
+                    fLocationPlaceId: farcasterUser?.location?.placeId,
                 }
             });
         }
