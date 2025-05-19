@@ -20,6 +20,12 @@ to reset database in dev use this
 ```bash
 pnpm prisma db push --force-reset
 ```
+
+If you manually changed something like a column name in migration file and models and don't want to write a new migration use this. this will regenrate the prisma client. it is located in `/node_modules/@prisma/client` so you wont see this in git
+```bash
+pnpx prisma generate
+```
+
 ## Usage
 
 1. Go to [Reown Cloud](https://cloud.reown.com) and create a new project.
