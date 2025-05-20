@@ -97,8 +97,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const jobId= await addTxJob({
         chainId,
         player: player,
-        sessionId,
-        playerMoveId: playerMove.id,
+        payload: {
+            type: 'PlayerMoveTx',
+            sessionId,
+            playerMoveId: playerMove.id,
+        },
     });
     console.log(`Job ID is ${jobId}`);
 

@@ -162,7 +162,7 @@ async function getRelayerKeyWithRoundRobin(): Promise<HexString> {
 function createWorker() {
     // Worker to process transaction jobs
     const worker = new Worker<TxJobData>('transaction-processing', async job => {
-        const {chainId, player, sessionId, playerMoveId} = job.data;
+        const { chainId, player } = job.data;
         let relayerAddress: HexString | null = null;
         try {
             // Get a relayer key using the atomic round-robin function
@@ -176,28 +176,44 @@ function createWorker() {
             const nonce = await getNonce(relayerAddress, chainId);
             const contract = getContractConfig('ScoreManager', chainId);
             await new Promise(resolve => setTimeout(resolve, 3000))
-            console.log(`delaying tx by 3000`)
             const fees = await getCurrentFees(chainId);
-            // Execute transaction
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            const txHash = await signerClient.writeContract({
-                address: contract.address,
-                abi: contract.abi,
-                account,
-                functionName: "storeScore",
-                args: [player, BigInt(sessionId)],
-                nonce,
-                maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
-                maxFeePerGas: fees.maxFeePerGas,
-                gas: BigInt(500_000),
-            });
+            let txHash : HexString | null = null;
+            switch (job.data.payload.type) {
+                case 'UpdateHighscoreTx':
+                    txHash = await signerClient.writeContract({
+                        chain: undefined,
+                        address: contract.address,
+                        abi: contract.abi,
+                        account,
+                        functionName: "updateHighScore",
+                        args: [player],
+                        nonce,
+                        maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+                        maxFeePerGas: fees.maxFeePerGas,
+                        gas: BigInt(500_000),
+                    });
+                    break;
+                case 'PlayerMoveTx':
+                    const { sessionId, playerMoveId } = job.data.payload
+                    txHash = await signerClient.writeContract({
+                        chain: undefined,
+                        address: contract.address,
+                        abi: contract.abi,
+                        account,
+                        functionName: "storeScore",
+                        args: [player, BigInt(sessionId)],
+                        nonce,
+                        maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+                        maxFeePerGas: fees.maxFeePerGas,
+                        gas: BigInt(500_000),
+                    });
 
-            await prisma.playerMove.update({
-                where: {id: playerMoveId},
-                data: {txHash},
-            });
-
+                    await prisma.playerMove.update({
+                        where: {id: playerMoveId},
+                        data: {txHash},
+                    });
+                    break;
+            }
             return txHash;
         } catch (e) {
             const error = e as WriteContractErrorType;

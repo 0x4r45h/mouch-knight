@@ -166,8 +166,8 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
       timeout: 30_000,
       retryCount: 3,
       batch: {
-        batchSize: 1000,
-        wait: 2000,
+        batchSize: 2000,
+        wait: 200,
       }
     }),
   });

@@ -22,9 +22,18 @@ export const txProcessingQueue = new Queue('transaction-processing', {
 // Job data type definition
 export interface TxJobData {
   chainId: number;
-  player: string; // HexString
+  player: string;
+  payload: PlayerMoveTx | UpdateHighscoreTx;
+}
+
+export interface PlayerMoveTx {
+  type: 'PlayerMoveTx';
   sessionId: number;
   playerMoveId: number;
+}
+
+export interface UpdateHighscoreTx {
+  type: 'UpdateHighscoreTx';
 }
 
 // Add a job to the queue

@@ -10,7 +10,6 @@ export async function POST(request: NextRequest) {
     const from: HexString = body.from;
     const chainId: number = body.chain_id;
     const farcasterUser: UserContext | null = body.farcaster_user;
-    // const sessionId: string = body.session_id;
 
     try {
         // Get or create player when starting a new game
@@ -33,7 +32,6 @@ export async function POST(request: NextRequest) {
                 }
             });
         }
-        // TODO: add a rate-limit per address to prevent RPC rate-limit here
         const sessionId = await fetchPlayerSessionId(from, chainId);
         return NextResponse.json({
             message: 'new session registered',
