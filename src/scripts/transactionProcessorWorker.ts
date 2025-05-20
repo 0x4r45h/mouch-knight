@@ -75,6 +75,61 @@ async function getNonce(address: HexString, chainId: number): Promise<number> {
     throw new Error(`Could not acquire lock for nonce after ${maxRetries} attempts`);
 }
 
+interface GasFees {
+  maxPriorityFeePerGas: bigint;
+  maxFeePerGas: bigint;
+  lastUpdated: number;
+}
+
+/**
+ * Fetches the current gas fees from the blockchain
+ */
+async function fetchCurrentFees(chainId: number): Promise<GasFees> {
+  const publicClient = getPublicClientByChainId(chainId);
+  const maxPriorityFee = await publicClient.estimateMaxPriorityFeePerGas();
+  const feeData = await publicClient.estimateFeesPerGas();
+  
+  return {
+    maxPriorityFeePerGas: maxPriorityFee,
+    maxFeePerGas: feeData.maxFeePerGas,
+    lastUpdated: Date.now()
+  };
+}
+
+/**
+ * Gets the priority fee from cache or fetches it if not available
+ * @param chainId The blockchain chain ID
+ * @returns The gas fee data
+ */
+async function getCurrentFees(chainId: number): Promise<GasFees> {
+  const cacheKey = `gas_fees:${chainId}`;
+  
+  // Try to get from cache first
+  const cachedData = await redis.get(cacheKey);
+  
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData);
+    // Convert string representations back to bigint
+    return {
+      maxPriorityFeePerGas: BigInt(parsedData.maxPriorityFeePerGas),
+      maxFeePerGas: BigInt(parsedData.maxFeePerGas),
+      lastUpdated: parsedData.lastUpdated
+    };
+  }
+
+    const fees = await fetchCurrentFees(chainId);
+    await redis.set(
+        cacheKey,
+        JSON.stringify({
+            maxPriorityFeePerGas: fees.maxPriorityFeePerGas.toString(),
+            maxFeePerGas: fees.maxFeePerGas.toString(),
+            lastUpdated: fees.lastUpdated
+        }),
+        'EX',
+        120
+    );
+    return fees;
+}
 
 // Function to initialize or update relayer keys in Redis
 async function initializeRelayerKeys() {
@@ -135,6 +190,7 @@ function createWorker() {
             const contract = getContractConfig('ScoreManager', chainId);
             await new Promise(resolve => setTimeout(resolve, 3000))
             console.log(`delaying tx by 3000`)
+            const fees = await getCurrentFees(chainId);
             // Execute transaction
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
@@ -145,6 +201,9 @@ function createWorker() {
                 functionName: "storeScore",
                 args: [player, BigInt(sessionId)],
                 nonce,
+                maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+                maxFeePerGas: fees.maxFeePerGas,
+                gas: BigInt(50_000),
             });
 
             await prisma.playerMove.update({
@@ -172,7 +231,7 @@ function createWorker() {
         }
     }, {
         connection: redisConnection,
-        concurrency: 10,
+        concurrency: 50,
     });
 
     worker.on('completed', job => {
