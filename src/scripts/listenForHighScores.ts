@@ -1,9 +1,8 @@
 import {getContractConfig, getPublicClientByChainId} from "@/config";
-import {PrismaClient} from '@prisma/client';
 import highScoreService from "@/services/highScoreService";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import prisma from "@/db/client";
 
-const prisma = new PrismaClient();
 const STEP = BigInt(100);
 
 async function listenForHighScores(chainId: number) {

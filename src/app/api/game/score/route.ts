@@ -1,9 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import crypto from 'crypto';
-import { PrismaClient } from '@prisma/client';
 import {addTxJob} from "@/services/queue";
-
-const prisma = new PrismaClient();
+import prisma from "@/db/client";
 
 // The same secret key used in the WASM module
 const SECRET_KEY = "f3a9b5c7d1e8f2a4b6c8d0e2f4a6b8c0"; // Replace with your own secret key

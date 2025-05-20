@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { HexString } from "@/config";
-import { PrismaClient } from '@prisma/client';
 import {fetchPlayerSessionId} from "@/services/newGameService";
 import {UserContext} from "@farcaster/frame-core/esm/context";
+import prisma from "@/db/client";
 
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
     const body = await request.json();

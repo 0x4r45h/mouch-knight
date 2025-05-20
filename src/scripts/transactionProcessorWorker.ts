@@ -1,10 +1,10 @@
 import {Worker} from 'bullmq';
 import Redis from 'ioredis';
 import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString} from '@/config';
-import {PrismaClient} from '@prisma/client';
 import {TxJobData} from "@/services/queue";
 import {privateKeyToAccount} from "viem/accounts";
 import { WriteContractErrorType} from "viem";
+import prisma from "@/db/client";
 
 // Redis connection configuration
 const redisConnection = {
@@ -15,9 +15,6 @@ const redisConnection = {
 
 // Initialize Redis client
 const redis = new Redis(redisConnection);
-
-// Initialize Prisma client
-const prisma = new PrismaClient();
 
 // Redis sorted set for round-robin relayer keys
 const RELAYER_KEYS_SET = 'relayer_keys';
@@ -203,7 +200,7 @@ function createWorker() {
                 nonce,
                 maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                 maxFeePerGas: fees.maxFeePerGas,
-                gas: BigInt(50_000),
+                gas: BigInt(500_000),
             });
 
             await prisma.playerMove.update({
