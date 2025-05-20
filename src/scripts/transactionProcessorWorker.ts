@@ -1,20 +1,10 @@
 import {Worker} from 'bullmq';
-import Redis from 'ioredis';
 import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString} from '@/config';
 import {TxJobData} from "@/services/queue";
-import {privateKeyToAccount} from "viem/accounts";
+import { privateKeyToAccount } from "viem/accounts";
 import { WriteContractErrorType} from "viem";
 import prisma from "@/db/client";
-
-// Redis connection configuration
-const redisConnection = {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null,
-};
-
-// Initialize Redis client
-const redis = new Redis(redisConnection);
+import { redis, redisConnection } from "@/db/redis";
 
 // Redis sorted set for round-robin relayer keys
 const RELAYER_KEYS_SET = 'relayer_keys';
@@ -178,7 +168,7 @@ function createWorker() {
             // Get a relayer key using the atomic round-robin function
             const privateKey = await getRelayerKeyWithRoundRobin();
 
-            // Create account from the selected private key
+            // Create an account from the selected private key
             const account = privateKeyToAccount(privateKey);
 
             const signerClient = getSignerClientByChainId(chainId);
