@@ -10,6 +10,7 @@ import Leaderboard from "@/components/Leaderboard";
 import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
 import {UserContext} from "@farcaster/frame-core/esm/context";
 import GameOverModal from "@/components/GameOverModal";
+import TipsModal from "@/components/TipsModal";
 
 export default function Home() {
     type ScoreTx = {
@@ -231,31 +232,10 @@ export default function Home() {
                 closeModalAction={() => setLeaderboardModal(false)} 
                 currentUserAddress={account.address}
             />) : <></>}
-            <Modal dismissible show={tipsModal} onClose={() => setTipsModal(false)}>
-                <Modal.Header>How to play?</Modal.Header>
-                <Modal.Body>
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Game Instructions
-                        </h3>
-                        <ul className="list-disc list-inside text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            <li>Connect a wallet on the Monad Network and start a new game.</li>
-                            <li>On desktop, use the Left/Right Arrow keys or A & D keys to move.</li>
-                            <li>On mobile, touch the two large buttons to move the character.</li>
-                            <li>Your goal is to avoid branches and keep moving, or time will run out.</li>
-                            <li>Every move is a transaction on the Monad blockchain, with fees covered by our relayer account.</li>
-                        </ul>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button size="lg"
-                            color="primary"
-                            className="rounded disabled:opacity-50"
-                            onClick={() => setTipsModal(false)}>Let&#39;s Go!
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
+            <TipsModal 
+                show={tipsModal}
+                onClose={() => setTipsModal(false)}
+            />
             <GameOverModal 
                 show={gameOverModal}
                 onClose={finishGame}

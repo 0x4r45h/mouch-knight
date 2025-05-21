@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Modal } from "flowbite-react";
 import { sdk } from '@farcaster/frame-sdk';
+import { HiX } from 'react-icons/hi';
 
 interface GameOverModalProps {
   show: boolean;
@@ -20,7 +21,7 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
   const handleCastShare = async () => {
     try {
       const result = await sdk.actions.composeCast({ 
-        text: `I just scored ${score} in Mouch Knight! My highest score is ${highScore}. I earned ${mkt} MKT tokens!`,
+        text: `🎮 I just scored ${score} in Mouch Knight! My highest score is ${highScore}. I earned ${mkt} MKT tokens! Can you beat my score? 🏆`,
         embeds: ["https://mouch-knight.emberstake.xyz"]
       });
       console.log('Cast result:', result);
@@ -30,26 +31,50 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
   };
 
   return (
-    <Modal show={show} onClose={onClose}>
-      <Modal.Header>Game Over!</Modal.Header>
-      <Modal.Body>
+    <Modal dismissible show={show} onClose={onClose}>
+      <div className="bg-monad-light-blue text-monad-off-white rounded-t-lg relative">
+        <div className="p-4 text-center text-2xl font-bold">GAME OVER!</div>
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 text-monad-off-white hover:text-white"
+          aria-label="Close"
+        >
+          <HiX className="w-5 h-5" />
+        </button>
+      </div>
+      <div className="bg-monad-light-blue text-monad-off-white p-6">
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Your Score: {score}
+          <h3 className="text-xl font-bold text-center mb-4">
+            {score > Number(highScore) ? "🎉 NEW HIGH SCORE! 🎉" : "Nice Try, Knight!"}
           </h3>
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Your Minted MKT: {mkt}
-          </h3>
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Your Highest Score: {highScore}
-          </h3>
+          
+          <div className="bg-monad-purple bg-opacity-20 rounded-lg p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">Your Score:</span>
+              <span className="text-xl font-bold">{score}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">MKT Earned:</span>
+              <span className="text-xl font-bold text-green-400">{mkt}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="font-semibold">Your Best:</span>
+              <span className="text-xl font-bold">{highScore.toString()}</span>
+            </div>
+          </div>
+          
+          <p className="text-center text-sm">
+            Challenge your friends to beat your score! Share your achievement on Farcaster.
+          </p>
         </div>
-      </Modal.Body>
-      <Modal.Footer className="flex justify-between">
+      </div>
+      <div className="bg-monad-light-blue text-monad-off-white p-4 flex justify-between items-center rounded-b-lg">
         <Button
           size="lg"
           color="primary"
-          className="rounded disabled:opacity-50"
+          className="rounded disabled:opacity-50 bg-monad-berry"
           onClick={handleCastShare}
         >
           Cast to Farcaster
@@ -57,12 +82,12 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
         <Button 
           size="lg"
           color="primary"
-          className="rounded disabled:opacity-50"
+          className="rounded disabled:opacity-50 bg-monad-berry"
           onClick={onClose}
         >
-          Okay!
+          Play Again
         </Button>
-      </Modal.Footer>
+      </div>
     </Modal>
   );
 };

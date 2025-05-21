@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal } from "flowbite-react";
 import { sdk } from '@farcaster/frame-sdk';
+import { HiX } from 'react-icons/hi';
 
 interface LeaderboardProps {
   openModal: boolean;
@@ -98,17 +99,25 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
 
   return (
     <Modal dismissible show={openModal} onClose={closeModalAction} size="md">
-      <div className="bg-monad-light-blue text-monad-off-white rounded-t-lg">
+      <div className="bg-monad-light-blue text-monad-off-white rounded-t-lg relative">
         <div className="p-4 text-center text-2xl font-bold">LEADERBOARD</div>
+        {/* Added X button for mobile */}
+        <button 
+          onClick={closeModalAction}
+          className="absolute top-4 right-4 text-monad-off-white hover:text-white"
+          aria-label="Close"
+        >
+          <HiX className="w-5 h-5" />
+        </button>
       </div>
       
       <div className="bg-monad-light-blue text-monad-off-white p-4">
-        {/* Header row */}
+        {/* Header row - Added more spacing between Score and Attempts */}
         <div className="grid grid-cols-12 mb-2 text-sm font-semibold">
           <div className="col-span-1">#</div>
           <div className="col-span-7">User</div>
-          <div className="col-span-2 text-right">Score</div>
-          <div className="col-span-2 text-right">Attempts</div>
+          <div className="col-span-2 text-right pr-4">Score</div>
+          <div className="col-span-2 text-right pr-4">Attempts</div>
         </div>
         
         {/* Current user row if available */}
@@ -135,15 +144,15 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 </div>
               </div>
             </div>
-            <div className="col-span-2 text-right font-bold">{currentUserScore.score}</div>
-            <div className="col-span-2 text-right">{currentUserScore.sessionId}</div>
+            <div className="col-span-2 text-right font-bold pr-4">{currentUserScore.score}</div>
+            <div className="col-span-2 text-right pr-4">{currentUserScore.sessionId}</div>
           </div>
         )}
         
         {/* Divider */}
         <div className="border-b border-monad-off-white border-opacity-20 mb-3"></div>
         
-        {/* Leaderboard rows */}
+        {/* Leaderboard rows - Added right padding to score and attempts */}
         <div className="space-y-2 max-h-[60vh] overflow-y-auto">
           {scores.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((score, index) => (
             <div 
@@ -171,8 +180,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   </div>
                 </div>
               </div>
-              <div className="col-span-2 text-right font-bold">{score.score}</div>
-              <div className="col-span-2 text-right">{score.sessionId}</div>
+              <div className="col-span-2 text-right font-bold pr-4">{score.score}</div>
+              <div className="col-span-2 text-right pr-4">{score.sessionId}</div>
             </div>
           ))}
         </div>
