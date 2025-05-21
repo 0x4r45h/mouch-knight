@@ -65,7 +65,7 @@ const TipsModal: React.FC<TipsModalProps> = ({ show, onClose }) => {
           className="rounded disabled:opacity-50 bg-monad-berry"
           onClick={onClose}
         >
-          Let's Climb!
+          Let&#39;s Climb!
         </Button>
       </div>
     </Modal>

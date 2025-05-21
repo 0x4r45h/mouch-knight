@@ -68,7 +68,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, score
                 }
             };
         }
-    }, [account.address, chainId, gameOverCallback, scoreUpdateCallback, sessionId]);
+    }, [account.address, chainId, gameOverCallback, highScore, scoreUpdateCallback, sessionId]);
     return (
         <>
             <canvas ref={canvasRef} className="w-full" />
