@@ -8,9 +8,13 @@ import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-conne
 
 // Get projectId from https://cloud.reown.com
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 
 if (!projectId) {
   throw new Error('Project ID is not defined')
+}
+if (!APP_URL) {
+  throw new Error('APP_URL is not defined')
 }
 export type HexString = `0x${string}`
 
