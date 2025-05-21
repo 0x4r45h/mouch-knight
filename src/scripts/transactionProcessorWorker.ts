@@ -200,7 +200,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(50_000),
+                        gas: BigInt(75_000),
                     });
                     break;
                 case 'PlayerMoveTx':
