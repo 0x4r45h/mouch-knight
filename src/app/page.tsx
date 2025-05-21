@@ -92,7 +92,8 @@ export default function Home() {
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
         let farcasterUser: UserContext | null = null
-        if (walletInfo?.name == 'farcaster') {
+        const isMiniApp = await farcasterSdk.isInMiniApp()
+        if (isMiniApp) {
             const context = await farcasterSdk.context
             farcasterUser = context.user;
             console.log('fuser is ', farcasterUser);
