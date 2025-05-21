@@ -9,6 +9,7 @@ import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/cust
 import Leaderboard from "@/components/Leaderboard";
 import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
 import {UserContext} from "@farcaster/frame-core/esm/context";
+import GameOverModal from "@/components/GameOverModal";
 
 export default function Home() {
     type ScoreTx = {
@@ -224,7 +225,12 @@ export default function Home() {
     }, [account.address, chainId]);
     return (
         <div className="flex flex-col items-center justify-start min-h-screen py-8">
-            {chainId ? (<Leaderboard chainId={Number(chainId)} openModal={leaderboardModal} closeModalAction={() => setLeaderboardModal(false)}  />) : <></>}
+            {chainId ? (<Leaderboard 
+                chainId={Number(chainId)} 
+                openModal={leaderboardModal} 
+                closeModalAction={() => setLeaderboardModal(false)} 
+                currentUserAddress={account.address}
+            />) : <></>}
             <Modal dismissible show={tipsModal} onClose={() => setTipsModal(false)}>
                 <Modal.Header>How to play?</Modal.Header>
                 <Modal.Body>
@@ -250,29 +256,13 @@ export default function Home() {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={gameOverModal} onClose={() => finishGame()}>
-                <Modal.Header>Game Over!</Modal.Header>
-                <Modal.Body>
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Your Score: {lastGameScore}
-                        </h3>
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Your Minted MKT: {lastGameMKT}
-                        </h3>
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Your Highest Score: {playerHighscore}
-                        </h3>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button size="lg"
-                            color="primary"
-                            className="rounded disabled:opacity-50"
-                            onClick={() => finishGame()}>Okay!
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <GameOverModal 
+                show={gameOverModal}
+                onClose={finishGame}
+                score={lastGameScore}
+                mkt={lastGameMKT}
+                highScore={playerHighscore || 0}
+            />
             {account.isConnected && (
                 <div className="flex justify-between w-full max-w-[540px]">
                     <span>MKT Balance: {playerBalance ? playerBalance / (BigInt(10) ** BigInt(18)) : 0}</span>

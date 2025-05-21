@@ -52,7 +52,11 @@ export class HighScoreService {
         select: {
           player: {
             select: {
-              address: true
+              address: true,
+              fId: true,
+              fUsername: true,
+              fDisplayName: true,
+              fPfpUrl: true,
             }
           },
           score: true,
@@ -64,6 +68,10 @@ export class HighScoreService {
         player: entry.player.address,
         score: entry.score.toString(),
         sessionId: entry.sessionId.toString(),
+        fId: entry.player.fId,
+        fUsername: entry.player.fUsername,
+        fDisplayName: entry.player.fDisplayName,
+        fPfpUrl: entry.player.fPfpUrl,
       }));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);

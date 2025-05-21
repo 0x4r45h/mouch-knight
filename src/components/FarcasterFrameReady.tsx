@@ -8,6 +8,7 @@ const FarcasterFrameReady = () => {
     const initFarcaster = async () => {
       try {
         await sdk.actions.ready();
+        // await sdk.actions.ready({ disableNativeGestures: true });
         console.log('Farcaster Frame SDK initialized');
       } catch (error) {
         console.error('Failed to initialize Farcaster Frame SDK:', error);
