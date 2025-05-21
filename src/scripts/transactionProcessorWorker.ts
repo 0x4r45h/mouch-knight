@@ -200,7 +200,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(40_000),
+                        gas: BigInt(50_000),
                     });
                     break;
                 case 'PlayerMoveTx':
@@ -215,7 +215,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(75_000),
+                        gas: BigInt(100_000),
                     });
 
                     await prisma.playerMove.update({
