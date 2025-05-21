@@ -237,7 +237,7 @@ export default function Home() {
                 onClose={finishGame}
                 score={lastGameScore}
                 mkt={lastGameMKT}
-                highScore={playerHighscore || 0}
+                highScore={playerHighscore}
             />
             {account.isConnected && (
                 <div className="flex justify-between w-full max-w-[540px]">

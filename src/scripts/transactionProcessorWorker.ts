@@ -1,5 +1,5 @@
 import {Worker} from 'bullmq';
-import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString} from '@/config';
+import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString, monadTestnet} from '@/config';
 import {TxJobData} from "@/services/queue";
 import { privateKeyToAccount } from "viem/accounts";
 import { WriteContractErrorType} from "viem";
@@ -89,7 +89,18 @@ async function fetchCurrentFees(chainId: number): Promise<GasFees> {
  * @returns The gas fee data
  */
 async function getCurrentFees(chainId: number): Promise<GasFees> {
-  const cacheKey = `gas_fees:${chainId}`;
+
+    if (chainId == monadTestnet.id) {
+        // Hardcode fees for Monad testnet
+        return {
+            maxPriorityFeePerGas: BigInt(2_000_000_000),
+            maxFeePerGas: BigInt(52_000_000_000),
+            lastUpdated: Date.now()
+        }
+    }
+
+
+    const cacheKey = `gas_fees:${chainId}`;
   
   // Try to get from cache first
   const cachedData = await redis.get(cacheKey);
@@ -103,7 +114,6 @@ async function getCurrentFees(chainId: number): Promise<GasFees> {
       lastUpdated: parsedData.lastUpdated
     };
   }
-
     const fees = await fetchCurrentFees(chainId);
     await redis.set(
         cacheKey,
@@ -190,7 +200,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(500_000),
+                        gas: BigInt(40_000),
                     });
                     break;
                 case 'PlayerMoveTx':
@@ -205,7 +215,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(500_000),
+                        gas: BigInt(75_000),
                     });
 
                     await prisma.playerMove.update({

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Modal } from "flowbite-react";
 import { sdk } from '@farcaster/frame-sdk';
 import { HiX } from 'react-icons/hi';
+import {APP_URL} from "@/config";
 
 interface GameOverModalProps {
   show: boolean;
@@ -21,8 +22,8 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
   const handleCastShare = async () => {
     try {
       const result = await sdk.actions.composeCast({ 
-        text: `🎮 I just scored ${score} in Mouch Knight! My highest score is ${highScore}. I earned ${mkt} MKT tokens! Can you beat my score? 🏆`,
-        embeds: ["https://mouch-knight.emberstake.xyz"]
+        text: `🎮 I just scored ${score} in #MouchKnight! My highest score is ${highScore}. I earned ${mkt} MKT tokens! Can you beat my score? 🏆`,
+        embeds: [`${APP_URL}`]
       });
       console.log('Cast result:', result);
     } catch (error) {
