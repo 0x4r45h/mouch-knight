@@ -37,7 +37,7 @@ export default function Home() {
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
-        error: playerHighScoreError
+        setHighscore: setPlayerHighscore // Add setter function
     } = useGetPlayerHighscore();
     const {
         data: playerBalance,
@@ -51,16 +51,6 @@ export default function Home() {
         console.log('wallet info is ', walletInfo);
 
     }, [chain, refetchBalance, refetchHighScore, gameStarted, walletInfo]);
-
-
-    //set highscore to localstorage
-    useEffect(() => {
-        console.log(`player high score is ${playerHighscore} , error is ${playerHighScoreError}`)
-        if (playerHighscore != undefined) {
-            console.log('set highscore on localstorage ', playerHighscore);
-            localStorage.setItem('highScore', String(playerHighscore));
-        }
-    }, [playerHighscore, playerHighScoreError]);
 
     // get tx hash for each score
     useEffect(() => {
@@ -142,7 +132,13 @@ export default function Home() {
 
     const gameOverHandler = useCallback((game: GameLogic, score: number, highScore: number, mkt: number) => {
         console.log(`score is ${score} and highscore is ${highScore}`)
+        // if user scored a new highscore, emit highscore event on-chain, also update local highscore state
         if (score == highScore) {
+            // Update highscore state immediately with the new score
+            console.log(`set highscore hook manually to ${score}`)
+            setPlayerHighscore(score);
+            
+            // Still trigger the backend update in the background
             try {
                 fetch('/api/game/score/highscore', {
                     method: 'POST',
@@ -153,9 +149,9 @@ export default function Home() {
                         player: account.address,
                         chain_id: chainId
                     })
-                })
+                })}
 
-            } catch (error) {
+            catch (error) {
                 console.error('Error during updating high score:', error);
             }
         }
@@ -165,7 +161,7 @@ export default function Home() {
         setGameOverModal(true)
         setGameStarted(false);
 
-    }, [account.address, chainId]);
+    }, [account.address, chainId, setPlayerHighscore]);
     const finishGame = () => {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
@@ -259,6 +255,7 @@ export default function Home() {
                             sessionId={gameSession}
                             gameOverCallback={gameOverHandler}
                             scoreUpdateCallback={handleScoreUpdate}
+                            highScore={playerHighscore}
                         />
                     </div>
                 ) : (

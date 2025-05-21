@@ -8,9 +8,10 @@ interface LumberjackGameProps {
     sessionId: number;
     gameOverCallback: (game: GameLogic, score: number, highScore: number, mkt: number) => void;
     scoreUpdateCallback: (score: number, sessionId: number) => void;
+    highScore: number;
 }
 
-const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, scoreUpdateCallback}) => {
+const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, scoreUpdateCallback, highScore}) => {
     const account = useAccount()
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const btnLeftRef = useRef<HTMLButtonElement>(null);
@@ -25,6 +26,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, score
                 canvasRef.current,
                 btnLeftRef.current,
                 btnRightRef.current,
+                highScore,
                 720,
                 980 // + 300px reserved for buttons = 1280
             );

@@ -34,12 +34,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
 
     try {
-        const jobId= await addTxJob({
+        const jobId = await addTxJob({
             chainId,
             player: player,
             payload: {
                 type: 'UpdateHighscoreTx',
             },
+        }, {
+            delay: 5000 // 5 seconds delay
         });
         console.log(`Job ID is ${jobId}`);
         return NextResponse.json({ message: 'Highscore update job submitted', data: { jobId } });

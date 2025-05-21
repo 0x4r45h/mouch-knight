@@ -38,8 +38,9 @@ export interface UpdateHighscoreTx {
 
 // Add a job to the queue
 export const addTxJob = async (
-  jobData: TxJobData
+    jobData: TxJobData,
+    options?: { delay?: number }
 ): Promise<string | undefined> => {
-  const job = await txProcessingQueue.add('process-transaction', jobData);
+  const job = await txProcessingQueue.add('process-transaction', jobData, options);
   return job.id;
 };

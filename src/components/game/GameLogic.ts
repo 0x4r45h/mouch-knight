@@ -38,12 +38,15 @@ export class GameLogic {
         canvas: HTMLCanvasElement,
         btnLeft: HTMLButtonElement,
         btnRight: HTMLButtonElement,
+        highscore: number,
         canvasWidth: number,
         canvasHeight: number
     ) {
         this.canvas = canvas;
         this.btnLeft = btnLeft;
         this.btnRight = btnRight;
+
+        this.highScore = highscore;
 
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
@@ -55,7 +58,6 @@ export class GameLogic {
         this.ctx = context;
 
         this.cutSound = new Audio('/audio/cut.wav');
-        this.highScore = Number(localStorage.getItem('highScore')) || 0;
 
         this.landImage = new Image();
         this.landImage.src = '/images/land.png'; // Load the image once
@@ -267,7 +269,7 @@ export class GameLogic {
     restartGame(): void {
         // Reset the game state.
         this.score = 0;
-        this.highScore = Number(localStorage.getItem('highScore')) || 0;
+        this.highScore = 0;
         this.progress = GameLogic.DEFAULT_PROGRESS;
         this.difficultyFactor = GameLogic.DEFAULT_DIFFICULTY_FACTOR;
 
