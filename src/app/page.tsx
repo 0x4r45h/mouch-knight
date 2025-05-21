@@ -4,7 +4,7 @@ import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
-import {Button, Modal, Table} from "flowbite-react";
+import {Button, Table} from "flowbite-react";
 import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
 import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
