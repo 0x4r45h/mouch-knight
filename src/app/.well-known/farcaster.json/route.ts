@@ -20,7 +20,7 @@ export async function GET() {
                 `${APP_URL}/images/ss2.png`,
                 `${APP_URL}/images/ss3.png`,
             ],
-            tags: ["monad", "farcaster", "miniapp", "minigame", "onchain", "game"],
+            tags: ["monad", "farcaster", "miniapp", "minigame", "game"],
             primaryCategory: "games",
             buttonTitle: "Play Mouch Knight",
             splashImageUrl: `${APP_URL}/images/splash.png`,
