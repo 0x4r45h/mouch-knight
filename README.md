@@ -57,6 +57,8 @@ Build the WASM module:
 cd wasm
 wasm-pack build --target web
 
+## Farcaster Dev
+i use cloudflared on my server to quickly expose it to the internet and run the app on pnpm run dev, so i can push my changes to server using rsync and get instant results on warpcast
 
 ## Get contracts ABIs
 Install WAGMI CLI too
