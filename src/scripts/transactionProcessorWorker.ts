@@ -20,8 +20,8 @@ async function getNonce(address: HexString, chainId: number): Promise<number> {
     const nonceKey = `${chainId}:${address}:nonce`;
     const lockKey = `${nonceKey}:lock`;
     const lockTimeout = 5000; // 5 seconds lock timeout
-    const retryDelay = 10; // 10ms between retries
-    const maxRetries = 500; // Maximum number of retries (5 seconds total)
+    const retryDelay = 20; // 10ms between retries
+    const maxRetries = 250; // Maximum number of retries (5 seconds total)
 
     // If nonce not in Redis, we need to acquire a lock before querying blockchain
     let retries = 0;
@@ -30,12 +30,15 @@ async function getNonce(address: HexString, chainId: number): Promise<number> {
         const acquired = await redis.set(lockKey, '1', 'PX', lockTimeout, 'NX');
 
         if (acquired) {
+            console.log(` Acquired lock: ${acquired}`);
             try {
                 // Check once more if another process set the nonce while we were waiting
                 const redisNonce = await redis.get(nonceKey);
                 if (redisNonce !== null) {
+                    console.log(`Nonce ${nonceKey} found in Redis: ${redisNonce}`);
+
                     const currentNonce = parseInt(redisNonce, 10);
-                    await redis.set(nonceKey, (currentNonce + 1).toString());
+                    await redis.set(nonceKey, (currentNonce + 1).toString(), 'EX', 10);
                     return currentNonce;
                 }
 
@@ -44,15 +47,17 @@ async function getNonce(address: HexString, chainId: number): Promise<number> {
                 const currentNonce = await publicClient.getTransactionCount({address});
 
                 // Store the incremented nonce in Redis
-                await redis.set(nonceKey, (currentNonce + 1).toString());
+                await redis.set(nonceKey, (currentNonce + 1).toString(), 'EX', 10);
+                console.log(`Got Nonce from blockchain: ${nonceKey} -- current nonce is : ${currentNonce}`);
 
                 return currentNonce;
             } finally {
                 // Release the lock
+                console.log(`Releasing lock: ${lockKey}`);
                 await redis.del(lockKey);
             }
         }
-
+        console.log(`Retrying ${retries} times`);
         // Wait before retrying
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         retries++;
@@ -244,7 +249,7 @@ function createWorker() {
         }
     }, {
         connection: redisConnection,
-        concurrency: 50,
+        concurrency: 100,
     });
 
     worker.on('completed', job => {
