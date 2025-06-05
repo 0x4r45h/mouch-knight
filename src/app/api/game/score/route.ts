@@ -1,11 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
-import {PRIVATE_KEYS, processQueue, txQueue} from "@/app/api/game/queue";
-import {getContractConfig, HexString} from "@/config";
-import {PrivateKeyAccount, WalletClient} from "viem";
 import crypto from 'crypto';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import {addTxJob} from "@/services/queue";
+import prisma from "@/db/client";
 
 // The same secret key used in the WASM module
 const SECRET_KEY = "f3a9b5c7d1e8f2a4b6c8d0e2f4a6b8c0"; // Replace with your own secret key
@@ -89,7 +85,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
     }
     // Store the player move
-    await prisma.playerMove.create({
+    const playerMove = await prisma.playerMove.create({
         data: {
             playerId: playerRecord.id,
             chainId,
@@ -98,52 +94,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             verificationHash: verification.hash
         }
     });
-
-    if (PRIVATE_KEYS.length === 0) {
-        return NextResponse.json({ error: "No private keys configured" }, { status: 500 });
-    }
+    const jobId= await addTxJob({
+        chainId,
+        player: player,
+        payload: {
+            type: 'PlayerMoveTx',
+            sessionId,
+            playerMoveId: playerMove.id,
+        },
+    });
+    console.log(`Job ID is ${jobId}`);
 
     try {
-        // Create a promise that resolves when the transaction executes.
-        const txPromise: Promise<HexString> = new Promise((resolve, reject) => {
-            txQueue.push({
-                chainId,
-                execute: async (account, nonce, signerClient, chainId) => {
-                    return await storeScoreOnChain(player as HexString, BigInt(sessionId), account, chainId, nonce, signerClient);
-                },
-                resolve,
-                reject,
-            });
-        });
-
-        // Begin processing the queue.
-        processQueue();
-        // Await the promise so we can return the tx hash.
-        const txHash = await txPromise;
-        return NextResponse.json({ message: 'Score Submitted', data: { txHash } });
+        return NextResponse.json({ message: 'Score Submitted', data: { txHash: '0x', moveId: playerMove.id } });
     } catch (e) {
         console.error(e);
         return NextResponse.json({ success: false, message: "Tx Failed", data: { error: e } }, { status: 500 });
     }
 }
-
-const storeScoreOnChain = async (
-    player: HexString,
-    sessionIndex: bigint,
-    account: PrivateKeyAccount,
-    chainId: number,
-    nonce: number,
-    signerClient: WalletClient
-): Promise<HexString> => {
-    const { abi, address } = getContractConfig('ScoreManager', chainId);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    return await signerClient.writeContract({
-        address,
-        abi,
-        functionName: "storeScore",
-        args: [player, sessionIndex],
-        account,
-        nonce,
-    });
-};

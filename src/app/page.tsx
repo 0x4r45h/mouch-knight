@@ -3,13 +3,18 @@ import React, {useCallback, useEffect, useState} from "react";
 import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
-import {useAppKitNetwork} from "@reown/appkit/react";
-import {Button, Modal, Table} from "flowbite-react";
+import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
+import {Button, Table} from "flowbite-react";
 import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
+import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
+import {UserContext} from "@farcaster/frame-core/esm/context";
+import GameOverModal from "@/components/GameOverModal";
+import TipsModal from "@/components/TipsModal";
 
 export default function Home() {
     type ScoreTx = {
+        moveId: undefined,
         scoreId: number,
         txHash: undefined | string
     }
@@ -28,10 +33,11 @@ export default function Home() {
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
     const {chain} = useAccount()
+    const { walletInfo } = useWalletInfo();
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
-        error: playerHighScoreError
+        setHighscore: setPlayerHighscore // Add setter function
     } = useGetPlayerHighscore();
     const {
         data: playerBalance,
@@ -42,24 +48,59 @@ export default function Home() {
         console.log(`update highscore on init`)
         refetchHighScore();
         refetchBalance();
-    }, [chain, refetchBalance, refetchHighScore, gameStarted]);
+        console.log('wallet info is ', walletInfo);
 
+    }, [chain, refetchBalance, refetchHighScore, gameStarted, walletInfo]);
 
-    //set highscore to localstorage
+    // get tx hash for each score
     useEffect(() => {
-        console.log(`player high score is ${playerHighscore} , error is ${playerHighScoreError}`)
-        if (playerHighscore != undefined) {
-            console.log('set highscore on localstorage ', playerHighscore);
-            localStorage.setItem('highScore', String(playerHighscore));
-        }
-    }, [playerHighscore, playerHighScoreError]);
+        const fetchTxHashes = async () => {
+            // Find moves that don't have tx hashes yet
+            const movesWithoutHash = scoreTx
+                .filter(tx => tx.moveId && !tx.txHash)
+                .map(tx => tx.moveId);
+
+            if (movesWithoutHash.length === 0) return;
+
+            try {
+                const response = await fetch(`/api/game/score/tx-hash?moveIds=${movesWithoutHash.join(',')}`);
+                if (!response.ok) {
+                    console.error('Failed to fetch tx hashes:', response.status);
+                    return;
+                }
+
+                const result = await response.json();
+                const txHashMap = result.data;
+
+                setScoreTx(prevTx => 
+                    prevTx.map(tx =>
+                            (tx.moveId && txHashMap[tx.moveId]) ? {...tx, txHash: txHashMap[tx.moveId]} : tx
+                    )
+                );
+            } catch (error) {
+                console.error('Error fetching tx hashes:', error);
+            }
+        };
+
+        // Set up the interval
+        const interval = setInterval(fetchTxHashes, 1000);
+
+        // Cleanup on unmount or when scoreTx changes
+        return () => clearInterval(interval);
+    }, [scoreTx]);
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        let farcasterUser: UserContext | null = null
+        const isMiniApp = await farcasterSdk.isInMiniApp()
+        if (isMiniApp) {
+            const context = await farcasterSdk.context
+            farcasterUser = context.user;
+            console.log('fuser is ', farcasterUser);
+        }
         setGameLoading(true)
         setScoreTx([]);
         setCurrentPage(1)
-
         if (!account.address || !chainId) {
             console.log('Wallet not connected');
             return;
@@ -74,7 +115,8 @@ export default function Home() {
                 },
                 body: JSON.stringify({
                     from: account.address,
-                    chain_id: chainId
+                    chain_id: chainId,
+                    farcaster_user: farcasterUser
                 })
             })
             const result = await response.json();
@@ -91,7 +133,13 @@ export default function Home() {
 
     const gameOverHandler = useCallback((game: GameLogic, score: number, highScore: number, mkt: number) => {
         console.log(`score is ${score} and highscore is ${highScore}`)
+        // if user scored a new highscore, emit highscore event on-chain, also update local highscore state
         if (score == highScore) {
+            // Update highscore state immediately with the new score
+            console.log(`set highscore hook manually to ${score}`)
+            setPlayerHighscore(score);
+            
+            // Still trigger the backend update in the background
             try {
                 fetch('/api/game/score/highscore', {
                     method: 'POST',
@@ -102,9 +150,9 @@ export default function Home() {
                         player: account.address,
                         chain_id: chainId
                     })
-                })
+                })}
 
-            } catch (error) {
+            catch (error) {
                 console.error('Error during updating high score:', error);
             }
         }
@@ -114,7 +162,7 @@ export default function Home() {
         setGameOverModal(true)
         setGameStarted(false);
 
-    }, [account.address, chainId]);
+    }, [account.address, chainId, setPlayerHighscore]);
     const finishGame = () => {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
@@ -125,6 +173,7 @@ export default function Home() {
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
         try {
             const tx: ScoreTx = {
+                moveId: undefined,
                 scoreId: score,
                 txHash: undefined
             }
@@ -158,11 +207,12 @@ export default function Home() {
 
             if (!response.ok) {
                 console.error('Network response was not ok', response);
+                return;
             }
             const result = await response.json();
             setScoreTx(prevScoreTx =>
                 prevScoreTx.map(tx =>
-                    tx.scoreId === score ? {...tx, txHash: result.data.txHash} : tx
+                    tx.scoreId === score ? {...tx, moveId: result.data.moveId} : tx
                 )
             );
             console.log('Result is ', result);
@@ -173,55 +223,23 @@ export default function Home() {
     }, [account.address, chainId]);
     return (
         <div className="flex flex-col items-center justify-start min-h-screen py-8">
-            {chainId ? (<Leaderboard chainId={Number(chainId)} openModal={leaderboardModal} closeModalAction={() => setLeaderboardModal(false)}  />) : <></>}
-            <Modal dismissible show={tipsModal} onClose={() => setTipsModal(false)}>
-                <Modal.Header>How to play?</Modal.Header>
-                <Modal.Body>
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Game Instructions
-                        </h3>
-                        <ul className="list-disc list-inside text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            <li>Connect a wallet on the Monad Network and start a new game.</li>
-                            <li>On desktop, use the Left/Right Arrow keys or A & D keys to move.</li>
-                            <li>On mobile, touch the two large buttons to move the character.</li>
-                            <li>Your goal is to avoid branches and keep moving, or time will run out.</li>
-                            <li>Every move is a transaction on the Monad blockchain, with fees covered by our relayer account.</li>
-                        </ul>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button size="lg"
-                            color="primary"
-                            className="rounded disabled:opacity-50"
-                            onClick={() => setTipsModal(false)}>Let&#39;s Go!
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={gameOverModal} onClose={() => finishGame()}>
-                <Modal.Header>Game Over!</Modal.Header>
-                <Modal.Body>
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Your Score: {lastGameScore}
-                        </h3>
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Your Minted MKT: {lastGameMKT}
-                        </h3>
-                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                            Your Highest Score: {playerHighscore}
-                        </h3>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button size="lg"
-                            color="primary"
-                            className="rounded disabled:opacity-50"
-                            onClick={() => finishGame()}>Okay!
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            {chainId ? (<Leaderboard 
+                chainId={Number(chainId)} 
+                openModal={leaderboardModal} 
+                closeModalAction={() => setLeaderboardModal(false)} 
+                currentUserAddress={account.address}
+            />) : <></>}
+            <TipsModal 
+                show={tipsModal}
+                onClose={() => setTipsModal(false)}
+            />
+            <GameOverModal 
+                show={gameOverModal}
+                onClose={finishGame}
+                score={lastGameScore}
+                mkt={lastGameMKT}
+                highScore={playerHighscore}
+            />
             {account.isConnected && (
                 <div className="flex justify-between w-full max-w-[540px]">
                     <span>MKT Balance: {playerBalance ? playerBalance / (BigInt(10) ** BigInt(18)) : 0}</span>
@@ -238,6 +256,7 @@ export default function Home() {
                             sessionId={gameSession}
                             gameOverCallback={gameOverHandler}
                             scoreUpdateCallback={handleScoreUpdate}
+                            highScore={playerHighscore}
                         />
                     </div>
                 ) : (

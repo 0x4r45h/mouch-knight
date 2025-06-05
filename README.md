@@ -1,18 +1,31 @@
 # Mouch Knight
 
-on production to migrate run :
-
+# ON PRODUCTION USE THIS
 ```bash
 pnpx prisma migrate deploy
 ```
-Run migrations to create the database schema:
+
+# ON DEV only
+Create a migration from changes in Prisma schema, apply it to the database
 ```bash
 pnpx prisma migrate dev --name init
 ```
+to drop everything and migrate from scratch in dev
+
+```bash
+pnpx prisma migrate reset
+```
+
 to reset database in dev use this 
 ```bash
 pnpm prisma db push --force-reset
 ```
+
+If you manually changed something like a column name in migration file and models and don't want to write a new migration use this. this will regenrate the prisma client. it is located in `/node_modules/@prisma/client` so you wont see this in git
+```bash
+pnpx prisma generate
+```
+
 ## Usage
 
 1. Go to [Reown Cloud](https://cloud.reown.com) and create a new project.
@@ -44,6 +57,8 @@ Build the WASM module:
 cd wasm
 wasm-pack build --target web
 
+## Farcaster Dev
+i use cloudflared on my server to quickly expose it to the internet and run the app on pnpm run dev, so i can push my changes to server using rsync and get instant results on warpcast
 
 ## Get contracts ABIs
 Install WAGMI CLI too

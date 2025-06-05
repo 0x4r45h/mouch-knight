@@ -52,7 +52,11 @@ export class HighScoreService {
         select: {
           player: {
             select: {
-              address: true
+              address: true,
+              fId: true,
+              fUsername: true,
+              fDisplayName: true,
+              fPfpUrl: true,
             }
           },
           score: true,
@@ -64,9 +68,48 @@ export class HighScoreService {
         player: entry.player.address,
         score: entry.score.toString(),
         sessionId: entry.sessionId.toString(),
+        fId: entry.player.fId,
+        fUsername: entry.player.fUsername,
+        fDisplayName: entry.player.fDisplayName,
+        fPfpUrl: entry.player.fPfpUrl,
       }));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get highscore for a specific player on a specific chain
+   */
+  async getPlayerHighscore(playerAddress: string, chainId: number): Promise<string | null> {
+    try {
+      // Find the player first
+      const player = await prisma.player.findUnique({
+        where: { address: playerAddress }
+      });
+
+      if (!player) {
+        return null;
+      }
+
+      // Get the highest score for this player on this chain
+      const highScore = await prisma.highScore.findFirst({
+        where: {
+          chainId,
+          playerId: player.id
+        },
+        orderBy: {
+          score: 'desc'
+        },
+        select: {
+          score: true
+        }
+      });
+
+      return highScore ? highScore.score.toString() : null;
+    } catch (error) {
+      console.error('Error fetching player highscore:', error);
       throw error;
     }
   }

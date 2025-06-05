@@ -5,11 +5,36 @@ import ContextProvider from "@/context";
 import {Header} from "@/components/Header";
 import {CustomFlowbiteTheme, Flowbite} from "flowbite-react";
 import MaintenanceCheck from "@/components/MaintenanceCheck";
+import FarcasterFrameReady from "@/components/FarcasterFrameReady";
+import {APP_URL} from "@/config";
 
-export const metadata: Metadata = {
-  title: "Mouch Knight",
-  description: "On-Chain game to show off Monad Blockchain technology",
+const frame = {
+  version: "next",
+  imageUrl: `${APP_URL}/images/feed.png`,
+  button: {
+    title: "Play Mouch Knight",
+    action: {
+      type: "launch_frame",
+      name: "Mouch Knight - Farcaster Edition",
+      url: APP_URL,
+      splashImageUrl: `${APP_URL}/images/character.png`,
+      splashBackgroundColor: "#836EF9",
+    },
+  },
 };
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Mouch Knight - Farcaster Edition",
+    description: "On-Chain game to show off Monad Blockchain technology",
+    openGraph: {
+      title: "Mouch Knight x Farcaster",
+      description: "An on-chain fun minigame for Farcaster users",
+    },
+    other: {
+      "fc:frame": JSON.stringify(frame),
+    },
+  };
+}
 const customTheme: CustomFlowbiteTheme = {
   button: {
     color: {
@@ -49,6 +74,7 @@ export default async function RootLayout({
           </div>
         </footer>
       </ContextProvider>
+      <FarcasterFrameReady />
       <MaintenanceCheck />
       </body>
     </Flowbite>

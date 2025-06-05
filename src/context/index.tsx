@@ -36,6 +36,7 @@ export const modal = createAppKit({
     '--w3m-border-radius-master': '1px',
   },
   features: {
+    collapseWallets: false,
     analytics: true,
     swaps: false,
     onramp: false,
@@ -43,6 +44,7 @@ export const modal = createAppKit({
     email: false,
     history: false,
     send: false,
+
   }
 })
 

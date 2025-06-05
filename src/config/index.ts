@@ -4,12 +4,18 @@ import {anvil, defineChain} from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 import {scoreManagerAbi, scoreTokenAbi} from "@/generated";
 import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
+import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 
 // Get projectId from https://cloud.reown.com
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
+export const MINI_APP_URL = process.env.NEXT_PUBLIC_MINI_APP_URL
 
 if (!projectId) {
   throw new Error('Project ID is not defined')
+}
+if (!APP_URL) {
+  throw new Error('APP_URL is not defined')
 }
 export type HexString = `0x${string}`
 
@@ -65,6 +71,9 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   projectId,
   networks,
+  connectors: [
+    miniAppConnector(),
+  ]
 })
 
 const contractsConfig = {
@@ -127,8 +136,13 @@ export const getContractConfig = (contractName: string, chainId: number): Single
     deployedBlock: contract.deployedBlock[chainId]
   };
 };
-
+const publicClients: Record<number, ReturnType<typeof createPublicClient>> = {};
 export const getPublicClientByChainId = (chainId: number): ReturnType<typeof createPublicClient> => {
+  // Return cached client if it exists
+  if (publicClients[chainId]) {
+    return publicClients[chainId];
+  }
+
   const chainConfigMap = {
     [monadDevnet.id]: monadDevnet,
     [monadTestnet.id]: monadTestnet,
@@ -145,15 +159,37 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
   if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
     paidRPC = process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL
   }
-  return createPublicClient({
+  
+  // Create new client
+  const client = createPublicClient({
     chain: chainConfig,
     transport: http(paidRPC, {
+      onFetchRequest(request, init) {
+        console.log('request:', request);
+        console.log('init:', init);
+      },
       timeout: 30_000,
       retryCount: 3,
+      batch: {
+        batchSize: 2000,
+        wait: 200,
+      }
     }),
   });
+  
+  // Cache the client
+  publicClients[chainId] = client;
+  
+  return client;
 }
+
+const signerClients: Record<number, WalletClient> = {};
+
 export const getSignerClientByChainId = (chainId: number): WalletClient => {
+
+  if (signerClients[chainId]) {
+    return signerClients[chainId];
+  }
   const chainConfigMap = {
     [monadTestnet.id]: monadTestnet,
     [monadDevnet.id]: monadDevnet,
@@ -169,8 +205,24 @@ export const getSignerClientByChainId = (chainId: number): WalletClient => {
   if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
       paidRPC = process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL
   }
-  return createWalletClient({
+  const client = createWalletClient({
     chain: chainConfig,
-    transport: http(paidRPC),
+    transport: http(paidRPC, {
+      onFetchRequest(request, init) {
+        // console.log('request:', request);
+        console.log('init:', init);
+      },
+      onFetchResponse(response) {
+        console.log('response:', response);
+      },
+      timeout: 30_000,
+      retryCount: 3,
+      batch: {
+        batchSize: 2000,
+        wait: 500,
+      }
+    }),
   });
+  signerClients[chainId] = client;
+  return client;
 }
