@@ -53,6 +53,7 @@ model Player {
   updatedAt            DateTime     @default(now()) @updatedAt @map("updated_at")
   moves                PlayerMove[]
   highscores           HighScore[]
+  cooldown             PlayerCooldown?
 
   @@index([address])
   @@map("players")
@@ -73,4 +74,14 @@ model PlayerMove {
   @@index([chainId])
   @@index([playerId])
   @@map("player_moves")
+}
+
+model PlayerCooldown {
+  id        Int      @id @default(autoincrement())
+  playerId  Int      @map("player_id")
+  lastPlayed DateTime @default(now()) @map("last_played")
+  player    Player   @relation(fields: [playerId], references: [id])
+
+  @@unique([playerId])
+  @@map("player_cooldowns")
 }

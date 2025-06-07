@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { HexString } from "@/config";
-import {fetchPlayerSessionId} from "@/services/newGameService";
-import {UserContext} from "@farcaster/frame-core/esm/context";
+import { fetchPlayerSessionId } from "@/services/newGameService";
+import { UserContext } from "@farcaster/frame-core/esm/context";
 import prisma from "@/db/client";
+import { cooldownMiddleware } from "@/middleware/cooldownMiddleware";
 
-
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
     const body = await request.json();
     const from: HexString = body.from;
     const chainId: number = body.chain_id;
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     try {
         // Upsert player when starting a new game
-        await prisma.player.upsert({
+        const player = await prisma.player.upsert({
             where: {
                 address: from
             },
@@ -33,8 +33,23 @@ export async function POST(request: NextRequest) {
                 fPfpUrl: farcasterUser?.pfpUrl,
                 fLocationDescription: farcasterUser?.location?.description,
                 fLocationPlaceId: farcasterUser?.location?.placeId,
-                }
-            });
+            }
+        });
+
+        // Update or create cooldown record
+        await prisma.playerCooldown.upsert({
+            where: {
+                playerId: player.id
+            },
+            create: {
+                playerId: player.id,
+                lastPlayed: new Date()
+            },
+            update: {
+                lastPlayed: new Date()
+            }
+        });
+
         const sessionId = await fetchPlayerSessionId(from, chainId);
         return NextResponse.json({
             message: 'new session registered',
@@ -48,4 +63,8 @@ export async function POST(request: NextRequest) {
             data: { error: e }
         }, { status: 500 });
     }
+}
+
+export async function POST(request: NextRequest) {
+    return cooldownMiddleware(request, handler);
 }

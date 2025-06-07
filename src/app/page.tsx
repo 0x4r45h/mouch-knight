@@ -5,7 +5,7 @@ import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
 import {Button, Table} from "flowbite-react";
-import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer} from "@/hooks/custom";
+import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer, usePlayerCooldown } from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
 import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
 import {UserContext} from "@farcaster/frame-core/esm/context";
@@ -43,6 +43,18 @@ export default function Home() {
         data: playerBalance,
         refetch: refetchBalance,
     } = useScoreTokenBalanceOfPlayer();
+    const { 
+        inCooldown, 
+        remainingSeconds,
+        checkCooldown 
+    } = usePlayerCooldown();
+    
+    // Format remaining time for display
+    const formatRemainingTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         console.log(`update highscore on init`)
@@ -118,12 +130,20 @@ export default function Home() {
                     chain_id: chainId,
                     farcaster_user: farcasterUser
                 })
-            })
+                  })
+            if (!response.ok) {
+                // Optionally, you can check for specific status codes
+                if (response.status === 429) {
+                    // Handle rate limit error
+                    throw new Error('Too many requests. Please try again later.');
+                }
+                // Handle other errors
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const result = await response.json();
 
             setGameSession(result.data.session_id)
             setGameStarted(true)
-
         } catch (error) {
             console.error('Failed to start game', error);
         } finally {
@@ -161,8 +181,8 @@ export default function Home() {
         setLastGameMKT(mkt);
         setGameOverModal(true)
         setGameStarted(false);
-
-    }, [account.address, chainId, setPlayerHighscore]);
+        checkCooldown();
+    }, [account.address, chainId, setPlayerHighscore, checkCooldown]);
     const finishGame = () => {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
@@ -275,11 +295,13 @@ export default function Home() {
                             <Button
                                 color="primary"
                                 size="xl"
-                                className="bg-monad-berry  rounded-md focus:outline-none focus:ring-2 w-full"
+                                className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full"
                                 onClick={handleNewGame}
-                                disabled={gameLoading}
+                                disabled={gameLoading || inCooldown}
                             >
-                                {gameLoading ? 'Loading...' : 'Start Climbing!'}
+                                {gameLoading ? 'Loading...' : 
+                                 inCooldown ? `Cooldown: ${formatRemainingTime(remainingSeconds)}` : 
+                                 'Start Climbing!'}
                             </Button>
                         ) : (
                             /* @ts-expect-error msg */
