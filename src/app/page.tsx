@@ -40,7 +40,10 @@ export default function Home() {
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
-    const { balance: treasuryBalance, refetch: refetchTreasuryBalance } = useTreasuryBalance(chainId ? Number(chainId) : undefined);
+    const {
+        balance: treasuryBalance,
+        refetch: refetchTreasuryBalance
+    } = useTreasuryBalance(chainId ? Number(chainId) : undefined);
     const {chain} = useAccount()
     const {walletInfo} = useWalletInfo();
     const {
@@ -285,11 +288,11 @@ export default function Home() {
                 mkt={lastGameMKT}
                 highScore={playerHighscore}
             />
-
-            {account.isConnected && !gameStarted && (
+            {!gameStarted && (
                 <div>
                     <div className="w-full max-w-[540px] mb-6">
-                        <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 rounded-xl p-6 shadow-lg border-2 border-yellow-300">
+                        <div
+                            className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 rounded-xl p-6 shadow-lg border-2 border-yellow-300">
                             <div className="text-center">
                                 <div className="flex items-center justify-center mb-2">
                                     <span className="text-3xl mr-2">🏆</span>
@@ -305,35 +308,40 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full max-w-[540px] mb-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* MKT Balance Card */}
-                            <div className="bg-gradient-to-br from-monad-purple to-monad-light-blue rounded-lg p-3 shadow-md">
-                                <div className="flex items-center justify-center mb-2">
-                                    <img src="/images/coin.svg" alt="MKT" className="w-8 h-8 mr-2" />
-                                    <span className="text-monad-off-white font-semibold">MKT</span>
+                    {account.isConnected && (
+                        <div className="w-full max-w-[540px] mb-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* MKT Balance Card */}
+                                <div
+                                    className="bg-gradient-to-br from-monad-purple to-monad-light-blue rounded-lg p-3 shadow-md">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <img src="/images/coin.svg" alt="MKT" className="w-8 h-8 mr-2"/>
+                                        <span className="text-monad-off-white font-semibold">MKT</span>
+                                    </div>
+                                    <div className="text-center text-1xl font-bold text-monad-off-white">
+                                        {playerBalance ? (playerBalance / (BigInt(10) ** BigInt(18))).toString() : '0'}
+                                    </div>
                                 </div>
-                                <div className="text-center text-1xl font-bold text-monad-off-white">
-                                    {playerBalance ? (playerBalance / (BigInt(10) ** BigInt(18))).toString() : '0'}
-                                </div>
-                            </div>
 
-                            {/* Highscore Card */}
-                            <div className="bg-gradient-to-br from-monad-berry to-red-600 rounded-lg p-3 shadow-md">
-                                <div className="flex items-center justify-center mb-2">
-                                    <span className="text-2xl mr-2">🎯</span>
-                                    <span className="text-monad-off-white font-semibold">High Score</span>
-                                </div>
-                                <div className="text-center text-1xl font-bold text-monad-off-white">
-                                    {playerHighscore?.toString() || '0'}
+                                {/* Highscore Card */}
+                                <div className="bg-gradient-to-br from-monad-berry to-red-600 rounded-lg p-3 shadow-md">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-2xl mr-2">🎯</span>
+                                        <span className="text-monad-off-white font-semibold">High Score</span>
+                                    </div>
+                                    <div className="text-center text-1xl font-bold text-monad-off-white">
+                                        {playerHighscore?.toString() || '0'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+
+                    )}
                 </div>
             )}
 
-            <div className={`relative w-full max-w-[540px] mx-auto flex items-center justify-center ${gameStarted ? 'mt-0' : 'mt-5 mb-5'}`}>
+            <div
+                className={`relative w-full max-w-[540px] mx-auto flex items-center justify-center ${gameStarted ? 'mt-0' : 'mt-5 mb-5'}`}>
                 {account.isConnected && gameStarted ? (
                     /* If the game has started, render the Game component */
                     <div className="w-full h-full">
@@ -351,20 +359,31 @@ export default function Home() {
                             <h1 className="text-3xl font-bold text-monad-off-white">
                                 🏰 Mouch Knight&#39;s Treasury Quest
                             </h1>
-                            <div className="bg-gradient-to-r from-monad-purple to-monad-light-blue rounded-lg p-6 shadow-lg">
+                            <div
+                                className="bg-gradient-to-r from-monad-purple to-monad-light-blue rounded-lg p-6 shadow-lg">
                                 <h2 className="text-lg text-monad-off-white mb-4 leading-relaxed">
-                                    Join the ultimate climbing challenge! Our treasury is loaded with <span className="font-bold text-yellow-300">MON tokens</span> waiting to be distributed among our brave knights.
+                                    Join the ultimate climbing challenge! Our treasury is loaded with <span
+                                    className="font-bold text-yellow-300">MON tokens</span> waiting to be distributed
+                                    among our brave knights.
                                 </h2>
                                 <div className="bg-monad-berry bg-opacity-20 rounded-lg p-4 mb-4">
-                                    <h3 className="text-md text-monad-off-white font-semibold mb-2">🎁 How Rewards Work:</h3>
+                                    <h3 className="text-md text-monad-off-white font-semibold mb-2">🎁 How Rewards
+                                        Work:</h3>
                                     <ul className="text-sm text-monad-off-white space-y-1 text-left">
-                                        <li>• <span className="font-semibold">Top Players:</span> Leaderboard champions get the biggest share</li>
-                                        <li>• <span className="font-semibold">Lucky Winners:</span> Random players also win MON prizes</li>
-                                        <li>• <span className="font-semibold">MKT Tokens:</span> Earn more as you climb higher each session</li>
+                                        <li>• <span className="font-semibold">Top Players:</span> Leaderboard champions
+                                            get the biggest share
+                                        </li>
+                                        <li>• <span className="font-semibold">Lucky Winners:</span> Random players also
+                                            win MON prizes
+                                        </li>
+                                        <li>• <span className="font-semibold">MKT Tokens:</span> Earn more as you climb
+                                            higher each session
+                                        </li>
                                     </ul>
                                 </div>
                                 <p className="text-md text-monad-off-white">
-                                    Race to the top, stack your MKT tokens, and claim your share of the treasury! The higher you climb, the better your multiplier! 🚀
+                                    Race to the top, stack your MKT tokens, and claim your share of the treasury! The
+                                    higher you climb, the better your multiplier! 🚀
                                 </p>
                             </div>
                         </div>
