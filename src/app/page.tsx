@@ -5,14 +5,14 @@ import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
 import {Button, Table} from "flowbite-react";
-import { useGetPlayerHighscore, useScoreTokenBalanceOfPlayer, usePlayerCooldown } from "@/hooks/custom";
+import {useGetPlayerHighscore, useScoreTokenBalanceOfPlayer, usePlayerCooldown} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
-import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
+import {sdk as farcasterSdk} from '@farcaster/frame-sdk';
 import {UserContext} from "@farcaster/frame-core/esm/context";
 import GameOverModal from "@/components/GameOverModal";
 import TipsModal from "@/components/TipsModal";
 import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
-import { gameConfig } from '@/config/gameConfig';
+import {gameConfig} from '@/config/gameConfig';
 
 export default function Home() {
     type ScoreTx = {
@@ -20,8 +20,8 @@ export default function Home() {
         scoreId: number,
         txHash: undefined | string
     }
-    const [leaderboardModal, setLeaderboardModal ] = useState(false)
-    const [tipsModal, setTipsModal ] = useState(false)
+    const [leaderboardModal, setLeaderboardModal] = useState(false)
+    const [tipsModal, setTipsModal] = useState(false)
     const [gameStarted, setGameStarted] = useState(false);
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
@@ -36,7 +36,7 @@ export default function Home() {
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
     const {chain} = useAccount()
-    const { walletInfo } = useWalletInfo();
+    const {walletInfo} = useWalletInfo();
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
@@ -46,12 +46,12 @@ export default function Home() {
         data: playerBalance,
         refetch: refetchBalance,
     } = useScoreTokenBalanceOfPlayer();
-    const { 
-        inCooldown, 
+    const {
+        inCooldown,
         remainingSeconds,
-        checkCooldown 
+        checkCooldown
     } = usePlayerCooldown();
-    
+
     // Format remaining time for display
     const formatRemainingTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -63,7 +63,7 @@ export default function Home() {
     const handleShowPurchaseModal = () => {
         setShowPurchaseModal(true);
     };
-    
+
     // Handle closing purchase modal
     const handleClosePurchaseModal = () => {
         setShowPurchaseModal(false);
@@ -99,9 +99,9 @@ export default function Home() {
                 const result = await response.json();
                 const txHashMap = result.data;
 
-                setScoreTx(prevTx => 
+                setScoreTx(prevTx =>
                     prevTx.map(tx =>
-                            (tx.moveId && txHashMap[tx.moveId]) ? {...tx, txHash: txHashMap[tx.moveId]} : tx
+                        (tx.moveId && txHashMap[tx.moveId]) ? {...tx, txHash: txHashMap[tx.moveId]} : tx
                     )
                 );
             } catch (error) {
@@ -145,7 +145,7 @@ export default function Home() {
                     chain_id: chainId,
                     farcaster_user: farcasterUser
                 })
-                  })
+            })
             if (!response.ok) {
                 // Optionally, you can check for specific status codes
                 if (response.status === 429) {
@@ -173,7 +173,7 @@ export default function Home() {
             // Update highscore state immediately with the new score
             console.log(`set highscore hook manually to ${score}`)
             setPlayerHighscore(score);
-            
+
             // Still trigger the backend update in the background
             try {
                 fetch('/api/game/score/highscore', {
@@ -185,9 +185,8 @@ export default function Home() {
                         player: account.address,
                         chain_id: chainId
                     })
-                })}
-
-            catch (error) {
+                })
+            } catch (error) {
                 console.error('Error during updating high score:', error);
             }
         }
@@ -215,8 +214,8 @@ export default function Home() {
             setScoreTx((prevScoreTx) => [...prevScoreTx, tx]);
 
             // Generate verification hash using WASM
-            const { generateTimedVerificationHash } = await import('@/lib/wasm-loader');
-            const { hash, timestamp } = await generateTimedVerificationHash(
+            const {generateTimedVerificationHash} = await import('@/lib/wasm-loader');
+            const {hash, timestamp} = await generateTimedVerificationHash(
                 account.address as string,
                 score,
                 Number(chainId),
@@ -258,17 +257,17 @@ export default function Home() {
     }, [account.address, chainId]);
     return (
         <div className="flex flex-col items-center justify-start min-h-screen py-8">
-            {chainId ? (<Leaderboard 
-                chainId={Number(chainId)} 
-                openModal={leaderboardModal} 
-                closeModalAction={() => setLeaderboardModal(false)} 
+            {chainId ? (<Leaderboard
+                chainId={Number(chainId)}
+                openModal={leaderboardModal}
+                closeModalAction={() => setLeaderboardModal(false)}
                 currentUserAddress={account.address}
             />) : <></>}
-            <TipsModal 
+            <TipsModal
                 show={tipsModal}
                 onClose={() => setTipsModal(false)}
             />
-            <GameOverModal 
+            <GameOverModal
                 show={gameOverModal}
                 onClose={finishGame}
                 score={lastGameScore}
@@ -301,26 +300,44 @@ export default function Home() {
                             Can You Break the Monad with Mouch Knight?
                         </h1>
                         <h2 className="text-lg w-full">
-                            Calling all Nads! The Monad network claims it’s unbreakable—but can Mouch Knight prove it wrong? Dash up the tower, dodge pesky obstacles, and climb faster than a caffeinated squire. (Seriously, is it even *possible* to break this thing?)
+                            Calling all Nads! The Monad network claims it’s unbreakable—but can Mouch Knight prove it
+                            wrong? Dash up the tower, dodge pesky obstacles, and climb faster than a caffeinated squire.
+                            (Seriously, is it even *possible* to break this thing?)
                         </h2>
                         <h3 className="text-md w-full">
-                            Race to the top of the leaderboard and stack MKT tokens! The higher you climb in a session, the juicier the multiplier—more MKT for every epic ascent!
+                            Race to the top of the leaderboard and stack MKT tokens! The higher you climb in a session,
+                            the juicier the multiplier—more MKT for every epic ascent!
                         </h3>
                         {account.isConnected ? (
-                            <Button
-                                color="primary"
-                                size="xl"
-                                className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full"
-                                onClick={inCooldown ? handleShowPurchaseModal : handleNewGame}
-                                disabled={gameLoading}
-                            >
-                                {gameLoading ? 'Loading...' : 
-                                 inCooldown ? `Cooldown: ${formatRemainingTime(remainingSeconds)} - Buy Now` : 
-                                 'Start Climbing!'}
-                            </Button>
+                            inCooldown ? (
+                                <div className="space-y-3">
+                                    <p className="text-center text-monad-off-white">
+                                        Next climb available in {formatRemainingTime(remainingSeconds)}
+                                    </p>
+                                    <Button
+                                        color="primary"
+                                        size="xl"
+                                        className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full"
+                                        onClick={handleShowPurchaseModal}
+                                        disabled={gameLoading}
+                                    >
+                                        Skip Wait
+                                    </Button>
+                                </div>
+                            ) : (
+                                <Button
+                                    color="primary"
+                                    size="xl"
+                                    className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full"
+                                    onClick={handleNewGame}
+                                    disabled={gameLoading}
+                                >
+                                    {gameLoading ? 'Loading...' : 'Start Climbing!'}
+                                </Button>
+                            )
                         ) : (
                             /* @ts-expect-error msg */
-                            <appkit-connect-button className="" />
+                            <appkit-connect-button className=""/>
                         )}
                     </div>
                 )}
@@ -329,13 +346,14 @@ export default function Home() {
             {scoreTx.length !== 0 && (
                 <div className="w-full overflow-x-auto">
                     <Table striped className="text-monad-black font-bold ">
-                        <Table.Head >
+                        <Table.Head>
                             <Table.HeadCell className="bg-purple-500">Score</Table.HeadCell>
                             <Table.HeadCell className="bg-purple-500">Tx Link</Table.HeadCell>
                         </Table.Head>
                         <Table.Body className="divide-y ">
                             {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
-                                <Table.Row key={key} className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
+                                <Table.Row key={key}
+                                           className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
                                     <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                         {scoreTx.scoreId}
                                     </Table.Cell>
@@ -343,7 +361,8 @@ export default function Home() {
                                         scoreTx.txHash ? (
                                             <a className="underline" target="_blank"
                                                href={`${chain?.blockExplorers?.default.url ?? "http://testnet.monadexplorer.com/"}tx/${scoreTx.txHash}`}>
-                                                <span className="block sm:hidden">{`${scoreTx.txHash.slice(0, 4)}...${scoreTx.txHash.slice(-4)}`}</span>
+                                                <span
+                                                    className="block sm:hidden">{`${scoreTx.txHash.slice(0, 4)}...${scoreTx.txHash.slice(-4)}`}</span>
                                                 <span className="hidden sm:block">{scoreTx.txHash}</span>
                                             </a>
                                         ) : (<span>Pending...</span>)

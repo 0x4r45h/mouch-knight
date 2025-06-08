@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Button, Modal, Label, Radio} from "flowbite-react";
+import {Button, Modal} from "flowbite-react";
 import {
     useAccount,
     useBalance,
@@ -20,6 +20,7 @@ import {
     useWriteScoreTokenApprove
 } from '@/generated';
 import {useWriteItemPurchaseManagerDepositTokens} from '@/generated';
+import { HiX } from 'react-icons/hi';
 
 interface PurchaseSessionsModalProps {
     show: boolean;
@@ -225,97 +226,111 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
     };
 
     return (
-        <Modal show={show} onClose={onClose} size="md">
-            <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
-                <div className="flex items-center justify-between w-full">
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-                        Purchase Game Sessions
-                    </h3>
-                    {/*<Button color="gray" onClick={onClose} className="!p-2">*/}
-                    {/*  <HiX className="h-5 w-5" />*/}
-                    {/*</Button>*/}
-                </div>
-            </Modal.Header>
-            <Modal.Body>
+        <Modal dismissible show={show} onClose={onClose}>
+            <div className="bg-monad-light-blue text-monad-off-white rounded-t-lg relative">
+                <div className="p-4 text-center text-2xl font-bold">Purchase Game Sessions</div>
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-monad-off-white hover:text-white"
+                    aria-label="Close"
+                >
+                    <HiX className="w-5 h-5" />
+                </button>
+            </div>
+            <div className="bg-monad-light-blue text-monad-off-white p-6">
                 <div className="space-y-6">
                     <div>
-                        <p className="text-base text-gray-500 dark:text-gray-400">
-                            You&#39;re in cooldown for {formatRemainingTime(remainingSeconds)}. Purchase additional game
-                            sessions to play now!
+                        <p className="text-center text-sm">
+                            You&#39;re in cooldown for {formatRemainingTime(remainingSeconds)}. Purchase additional game sessions to play now!
                         </p>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label value="Payment Method"/>
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-center">Choose Payment Method</h3>
 
-                        <div className="flex items-center gap-2">
-                            <Radio
-                                id="mkt"
-                                name="payment"
-                                value="mkt"
-                                checked={paymentMethod === 'mkt'}
-                                onChange={() => handlePaymentMethodChange('mkt')}
-                                disabled={!mktEnabled}
-                            />
-                            <Label htmlFor="mkt">
-                                MKT Token ({formatTokenAmount(gameConfig.sessionCost.mkt.perSession)} per session)
-                            </Label>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Radio
-                                id="native"
-                                name="payment"
-                                value="native"
-                                checked={paymentMethod === 'native'}
-                                onChange={() => handlePaymentMethodChange('native')}
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={() => handlePaymentMethodChange('native')}
                                 disabled={!nativeEnabled}
-                            />
-                            <Label htmlFor="native">
-                                {nativeBalance?.symbol || 'MON'} ({formatTokenAmount(gameConfig.sessionCost.native.perSession)} per
-                                session)
-                            </Label>
+                                className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${
+                                    paymentMethod === 'native'
+                                        ? 'border-monad-berry bg-monad-berry bg-opacity-20'
+                                        : 'border-monad-purple border-opacity-30 hover:border-opacity-50'
+                                } ${!nativeEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                                <img src="/images/monad-logo.png" alt="MON" className="w-12 h-12 mb-2" />
+                                <span className="font-semibold">Pay with MON</span>
+                                <span className="text-sm text-monad-off-white opacity-80">
+                                    {formatTokenAmount(gameConfig.sessionCost.native.perSession)} per session
+                                </span>
+                            </button>
+
+                            <button
+                                onClick={() => handlePaymentMethodChange('mkt')}
+                                disabled={!mktEnabled}
+                                className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${
+                                    paymentMethod === 'mkt'
+                                        ? 'border-monad-berry bg-monad-berry bg-opacity-20'
+                                        : 'border-monad-purple border-opacity-30 hover:border-opacity-50'
+                                } ${!mktEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                                <img src="/images/coin.svg" alt="MKT" className="w-12 h-12 mb-2" />
+                                <span className="font-semibold">Pay with MKT</span>
+                                <span className="text-sm text-monad-off-white opacity-80">
+                                    {formatTokenAmount(gameConfig.sessionCost.mkt.perSession)} per session
+                                </span>
+                            </button>
                         </div>
                     </div>
 
-                    <div className="font-medium">
-                        Total
-                        Cost: {formatTokenAmount(totalCost.toString())} {paymentMethod === 'mkt' ? 'MKT' : (nativeBalance?.symbol || 'MON')}
+                    <div className="bg-monad-purple bg-opacity-20 rounded-lg p-4">
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold">Total Cost:</span>
+                            <span className="text-xl font-bold">
+                                {formatTokenAmount(totalCost.toString())} {paymentMethod === 'mkt' ? 'MKT' : (nativeBalance?.symbol || 'MON')}
+                            </span>
+                        </div>
                     </div>
 
                     {error && (
-                        <div className="text-red-500 text-sm">
+                        <div className="text-red-400 text-sm text-center bg-red-900 bg-opacity-20 p-3 rounded-lg">
                             {error}
                         </div>
                     )}
                 </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <div className="w-full flex justify-end gap-2">
-                    {needsApproval && paymentMethod === 'mkt' ? (
-                        <Button
-                            color="primary"
-                            onClick={handleApprove}
-                            disabled={isApproving}
-                            isProcessing={isApproving}
-                        >
-                            {isApproving ? 'Approving...' : 'Approve MKT'}
-                        </Button>
-                    ) : (
-                        <Button
-                            color="primary"
-                            onClick={handlePurchase}
-                            disabled={isPurchasing}
-                            isProcessing={isPurchasing}
-                        >
-                            {isPurchasing ? 'Processing...' : 'Purchase'}
-                        </Button>
-                    )}
-                    <Button color="gray" onClick={onClose}>
-                        Cancel
+            </div>
+            <div className="bg-monad-light-blue text-monad-off-white p-4 flex justify-between items-center rounded-b-lg">
+                <Button
+                    size="lg"
+                    color="primary"
+                    className="rounded disabled:opacity-50 bg-monad-berry"
+                    onClick={onClose}
+                >
+                    Cancel
+                </Button>
+                {needsApproval && paymentMethod === 'mkt' ? (
+                    <Button
+                        size="lg"
+                        color="primary"
+                        className="rounded disabled:opacity-50 bg-monad-berry"
+                        onClick={handleApprove}
+                        disabled={isApproving}
+                    >
+                        {isApproving ? 'Approving...' : 'Approve MKT'}
                     </Button>
-                </div>
-            </Modal.Footer>
+                ) : (
+                    <Button
+                        size="lg"
+                        color="primary"
+                        className="rounded disabled:opacity-50 bg-monad-berry"
+                        onClick={handlePurchase}
+                        disabled={isPurchasing}
+                    >
+                        {isPurchasing ? 'Processing...' : 'Purchase'}
+                    </Button>
+                )}
+
+            </div>
         </Modal>
     );
 };
