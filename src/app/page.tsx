@@ -12,7 +12,6 @@ import {UserContext} from "@farcaster/frame-core/esm/context";
 import GameOverModal from "@/components/GameOverModal";
 import TipsModal from "@/components/TipsModal";
 import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
-import {gameConfig} from '@/config/gameConfig';
 
 export default function Home() {
     type ScoreTx = {
@@ -31,6 +30,7 @@ export default function Home() {
     const [lastGameMKT, setLastGameMKT] = useState(0);
     const [gameOverModal, setGameOverModal] = useState(false);
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+    const [treasuryAmount] = useState(50000); // Mock treasury amount - replace with actual data
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
@@ -57,6 +57,11 @@ export default function Home() {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Format number with commas
+    const formatNumber = (num: number) => {
+        return num.toLocaleString();
     };
 
     // Handle showing purchase modal
@@ -255,8 +260,9 @@ export default function Home() {
             console.error('Error during submit score:', error);
         }
     }, [account.address, chainId]);
+
     return (
-        <div className="flex flex-col items-center justify-start min-h-screen py-8">
+        <div className={`flex flex-col items-center justify-start min-h-screen ${gameStarted ? '' : 'py-6'}`}>
             {chainId ? (<Leaderboard
                 chainId={Number(chainId)}
                 openModal={leaderboardModal}
@@ -274,17 +280,57 @@ export default function Home() {
                 mkt={lastGameMKT}
                 highScore={playerHighscore}
             />
-            {account.isConnected && (
-                <div className="flex justify-between w-full max-w-[540px]">
-                    <span>MKT Balance: {playerBalance ? playerBalance / (BigInt(10) ** BigInt(18)) : 0}</span>
-                    <span>Highscore: {playerHighscore}</span>
+
+            {account.isConnected && !gameStarted && (
+                <div>
+                    <div className="w-full max-w-[540px] mb-6">
+                        <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 rounded-xl p-6 shadow-lg border-2 border-yellow-300">
+                            <div className="text-center">
+                                <div className="flex items-center justify-center mb-2">
+                                    <span className="text-3xl mr-2">🏆</span>
+                                    <h2 className="text-2xl font-bold text-yellow-900">MON Treasury</h2>
+                                    <span className="text-3xl ml-2">🏆</span>
+                                </div>
+                                <div className="text-4xl font-extrabold text-yellow-900 mb-2">
+                                    {formatNumber(treasuryAmount)} MON
+                                </div>
+                                <p className="text-yellow-800 text-sm font-medium">
+                                    Distributed to top players & lucky winners!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="w-full max-w-[540px] mb-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* MKT Balance Card */}
+                            <div className="bg-gradient-to-br from-monad-purple to-monad-light-blue rounded-lg p-3 shadow-md">
+                                <div className="flex items-center justify-center mb-2">
+                                    <img src="/images/coin.svg" alt="MKT" className="w-8 h-8 mr-2" />
+                                    <span className="text-monad-off-white font-semibold">MKT</span>
+                                </div>
+                                <div className="text-center text-1xl font-bold text-monad-off-white">
+                                    {playerBalance ? (playerBalance / (BigInt(10) ** BigInt(18))).toString() : '0'}
+                                </div>
+                            </div>
+
+                            {/* Highscore Card */}
+                            <div className="bg-gradient-to-br from-monad-berry to-red-600 rounded-lg p-3 shadow-md">
+                                <div className="flex items-center justify-center mb-2">
+                                    <span className="text-2xl mr-2">🎯</span>
+                                    <span className="text-monad-off-white font-semibold">High Score</span>
+                                </div>
+                                <div className="text-center text-1xl font-bold text-monad-off-white">
+                                    {playerHighscore?.toString() || '0'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
-            <div
-                className=" relative w-full max-w-[540px] mx-auto flex items-center justify-center mt-5 mb-5 "
-            >
+
+            <div className={`relative w-full max-w-[540px] mx-auto flex items-center justify-center ${gameStarted ? 'mt-0' : 'mt-5 mb-5'}`}>
                 {account.isConnected && gameStarted ? (
-                    /* If the game has started, render the LumberjackGame component */
+                    /* If the game has started, render the Game component */
                     <div className="w-full h-full">
                         <Game
                             sessionId={gameSession}
@@ -295,25 +341,40 @@ export default function Home() {
                     </div>
                 ) : (
                     /* Otherwise, show a placeholder with a "Start New Game" button */
-                    <div className="flex items-center justify-center w-full flex-col space-y-4 ">
-                        <h1 className="text-2xl font-bold w-full">
-                            Can You Break the Monad with Mouch Knight?
-                        </h1>
-                        <h2 className="text-lg w-full">
-                            Calling all Nads! The Monad network claims it’s unbreakable—but can Mouch Knight prove it
-                            wrong? Dash up the tower, dodge pesky obstacles, and climb faster than a caffeinated squire.
-                            (Seriously, is it even *possible* to break this thing?)
-                        </h2>
-                        <h3 className="text-md w-full">
-                            Race to the top of the leaderboard and stack MKT tokens! The higher you climb in a session,
-                            the juicier the multiplier—more MKT for every epic ascent!
-                        </h3>
+                    <div className="flex items-center justify-center w-full flex-col space-y-6 px-4">
+                        <div className="text-center space-y-4">
+                            <h1 className="text-3xl font-bold text-monad-off-white">
+                                🏰 Mouch Knight&#39;s Treasury Quest
+                            </h1>
+                            <div className="bg-gradient-to-r from-monad-purple to-monad-light-blue rounded-lg p-6 shadow-lg">
+                                <h2 className="text-lg text-monad-off-white mb-4 leading-relaxed">
+                                    Join the ultimate climbing challenge! Our treasury is loaded with <span className="font-bold text-yellow-300">MON tokens</span> waiting to be distributed among our brave knights.
+                                </h2>
+                                <div className="bg-monad-berry bg-opacity-20 rounded-lg p-4 mb-4">
+                                    <h3 className="text-md text-monad-off-white font-semibold mb-2">🎁 How Rewards Work:</h3>
+                                    <ul className="text-sm text-monad-off-white space-y-1 text-left">
+                                        <li>• <span className="font-semibold">Top Players:</span> Leaderboard champions get the biggest share</li>
+                                        <li>• <span className="font-semibold">Lucky Winners:</span> Random players also win MON prizes</li>
+                                        <li>• <span className="font-semibold">MKT Tokens:</span> Earn more as you climb higher each session</li>
+                                    </ul>
+                                </div>
+                                <p className="text-md text-monad-off-white">
+                                    Race to the top, stack your MKT tokens, and claim your share of the treasury! The higher you climb, the better your multiplier! 🚀
+                                </p>
+                            </div>
+                        </div>
+
                         {account.isConnected ? (
                             inCooldown ? (
-                                <div className="space-y-3">
-                                    <p className="text-center text-monad-off-white">
-                                        Next climb available in {formatRemainingTime(remainingSeconds)}
-                                    </p>
+                                <div className="space-y-3 w-full">
+                                    <div className="bg-monad-light-blue bg-opacity-20 rounded-lg p-4 text-center">
+                                        <p className="text-monad-off-white mb-2">
+                                            ⏰ Next climb available in
+                                        </p>
+                                        <div className="text-2xl font-bold text-monad-berry">
+                                            {formatRemainingTime(remainingSeconds)}
+                                        </div>
+                                    </div>
                                     <Button
                                         color="primary"
                                         size="xl"
@@ -321,36 +382,39 @@ export default function Home() {
                                         onClick={handleShowPurchaseModal}
                                         disabled={gameLoading}
                                     >
-                                        Skip Wait
+                                        ⚡ Skip Wait & Play Now
                                     </Button>
                                 </div>
                             ) : (
                                 <Button
                                     color="primary"
                                     size="xl"
-                                    className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full"
+                                    className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full text-lg py-4"
                                     onClick={handleNewGame}
                                     disabled={gameLoading}
                                 >
-                                    {gameLoading ? 'Loading...' : 'Start Climbing!'}
+                                    {gameLoading ? '⚔️ Preparing...' : '🏰 Start Climbing!'}
                                 </Button>
                             )
                         ) : (
-                            /* @ts-expect-error msg */
-                            <appkit-connect-button className=""/>
+                            <div className="w-full">
+                                {/* @ts-expect-error msg */}
+                                <appkit-connect-button className="w-full"/>
+                            </div>
                         )}
                     </div>
                 )}
             </div>
-            {/*  Tx Table*/}
-            {scoreTx.length !== 0 && (
-                <div className="w-full overflow-x-auto">
-                    <Table striped className="text-monad-black font-bold ">
+
+            {/*  Tx Table - Only show when not in game */}
+            {!gameStarted && scoreTx.length !== 0 && (
+                <div className="w-full overflow-x-auto mt-6">
+                    <Table striped className="text-monad-black font-bold">
                         <Table.Head>
                             <Table.HeadCell className="bg-purple-500">Score</Table.HeadCell>
                             <Table.HeadCell className="bg-purple-500">Tx Link</Table.HeadCell>
                         </Table.Head>
-                        <Table.Body className="divide-y ">
+                        <Table.Body className="divide-y">
                             {scoreTx.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((scoreTx, key) => (
                                 <Table.Row key={key}
                                            className="hover:bg-purple-400 odd:bg-purple-200 even:bg-purple-300 odd:dark:bg-gray-800 even:dark:bg-gray-700">
@@ -382,9 +446,9 @@ export default function Home() {
                         >
                             Previous
                         </Button>
-                        <span>
-    Page {currentPage} of {Math.ceil(scoreTx.length / rowsPerPage)}
-  </span>
+                        <span className="flex items-center text-monad-off-white">
+                            Page {currentPage} of {Math.ceil(scoreTx.length / rowsPerPage)}
+                        </span>
                         <Button
                             size="lg"
                             color="primary"
@@ -397,25 +461,27 @@ export default function Home() {
                     </div>
                 </div>
             )}
-            {/* Section for other buttons (leaderboard, how to play, etc.) */}
-            <div
-                className=" flex flex-col gap-4 mt-6 w-full max-w-[800px] px-4 sm:px-6 sm:flex-row sm:justify-center"
-            >
-                <Button
-                    color="primary"
-                    className=" bg-monad-berry  rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500"
-                    onClick={() => setLeaderboardModal(true)}
-                >
-                    Leaderboard
-                </Button>
-                <Button
-                    color="primary"
-                    className=" bg-monad-berry rounded-md px-4 py-2  focus:outline-none focus:ring-2 focus:ring-stone-500"
-                    onClick={() => setTipsModal(true)}
-                >
-                    How to Play
-                </Button>
-            </div>
+
+            {/* Action Buttons - Only show when not in game */}
+            {!gameStarted && (
+                <div className="flex flex-col gap-4 mt-6 w-full max-w-[540px] px-4 sm:flex-row sm:justify-center">
+                    <Button
+                        color="primary"
+                        className="bg-monad-berry rounded-md px-6 py-3 focus:outline-none focus:ring-2 focus:ring-stone-500 text-lg"
+                        onClick={() => setLeaderboardModal(true)}
+                    >
+                        🏆 Leaderboard
+                    </Button>
+                    <Button
+                        color="primary"
+                        className="bg-monad-berry rounded-md px-6 py-3 focus:outline-none focus:ring-2 focus:ring-stone-500 text-lg"
+                        onClick={() => setTipsModal(true)}
+                    >
+                        📖 How to Play
+                    </Button>
+                </div>
+            )}
+
             <PurchaseSessionsModal
                 show={showPurchaseModal}
                 onClose={handleClosePurchaseModal}
