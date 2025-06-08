@@ -91,7 +91,7 @@ model SessionPurchase {
   id            Int      @id @default(autoincrement())
   playerId      Int      @map("player_id")
   chainId       Int      @map("chain_id")
-  txHash        String   @map("tx_hash")
+  txHash        String   @unique @map("tx_hash")
   paymentMethod String   @map("payment_method")
   quantity      Int
   totalCost     String   @map("total_cost")

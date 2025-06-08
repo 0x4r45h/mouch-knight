@@ -4,7 +4,6 @@ import { HiX } from 'react-icons/hi';
 import {
   useAccount,
   useBalance,
-  type BaseError,
   usePublicClient,
   useSendTransaction,
   useWaitForTransaction,
@@ -12,7 +11,10 @@ import {
 } from 'wagmi';
 
 import {
+  parseEther,
   decodeErrorResult,
+  BaseError,
+  ContractFunctionRevertedError,
 } from 'viem';
 
 import { useAppKitNetwork } from "@reown/appkit/react";
@@ -47,7 +49,8 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
 
   const { address } = useAccount();
   const { chainId } = useAppKitNetwork();
-  
+  const {  sendTransactionAsync: sendNativeToken} = useSendTransaction();
+
   // Format remaining time for display
   const formatRemainingTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -156,40 +159,20 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
     
     setIsPurchasing(true);
     setError(null);
-
-
-    try {
-      await publicClient.simulateContract({
-        address: purchaseManagerConfig.address,
-        abi: purchaseManagerConfig.abi,
-        functionName: 'depositTokens',
-        args: [totalCost],
-        account: address,
-      });
-    } catch (simulationError) {
-      console.log('simulationError is  : ', simulationError);
-      const revertData = simulationError?.cause?.data || simulationError?.data;
-      if (revertData) {
-        const decoded = decodeErrorResult({
-          abi: ierc20ErrorsAbi,
-          data: revertData,
-        });
-        console.error('🧠 Revert reason (simulated):', decoded);
-        throw new Error(`Contract reverted: ${decoded.errorName}`);
-      }
-      throw simulationError; // Unknown error
-    }
-    finally {
-      setIsPurchasing(false);
-    }
-
-
-
-
     try {
       let receipt;
       
       if (paymentMethod === 'mkt') {
+        const combinedAbi = [...purchaseManagerConfig.abi, ...scoreTokenConfig.abi] as const;
+
+        // Simulate
+        await publicClient.simulateContract({
+          address: purchaseManagerConfig.address,
+          abi: combinedAbi,
+          functionName: 'depositTokens',
+          args: [totalCost],
+          account: address,
+        });
 
         // ERC20 token purchase
         const hash = await depositTokens({
@@ -199,23 +182,21 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
 
         receipt = await publicClient.waitForTransactionReceipt({ hash })
         if (!receipt || receipt.status !== 'success') {
-          console.log('receipt is : ', receipt);
           throw new Error('Failed to deposit tokens');
         }
       } else {
         // Native token purchase
-        const tx = await sendTransaction({
+        const hash = await sendNativeToken({
           to: purchaseManagerConfig.address,
           value: totalCost,
         });
-        
+
         // Wait for transaction to be mined
-        receipt = await waitForTransaction({
-          hash: tx.hash,
-        });
+        receipt = await publicClient.waitForTransactionReceipt({ hash })
+        if (!receipt || receipt.status !== 'success') {
+          throw new Error('Failed to deposit Native token');
+        }
       }
-      setTxHash(receipt.transactionHash as HexString);
-      
       // Send transaction info to backend
       await fetch('/api/game/purchase', {
         method: 'POST',
@@ -235,10 +216,27 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
       // Close modal after successful purchase
       onClose();
     } catch (err) {
-      console.error('Purchase error:', err);
-      console.log(err);
-      console.log('depositMKTError is  : ', depositMKTError);
-      setError('Failed to purchase game sessions. Please try again.');
+      if (err instanceof BaseError) {
+        const revertError = err.walk(err => err instanceof ContractFunctionRevertedError)
+        if (revertError instanceof ContractFunctionRevertedError) {
+          const { raw } = revertError;
+          const decodedError = decodeErrorResult({
+            abi: scoreTokenConfig.abi,
+            data: raw,
+          });
+          if (decodedError.errorName === 'ERC20InsufficientBalance') {
+            setError('Insufficient MKT balance.');
+          } else if (decodedError.errorName === 'ERC20InsufficientAllowance') {
+            setError('Insufficient MKT Allowance.');
+            refetchAllowance();
+          } else {
+            throw revertError
+          }
+        }
+      } else {
+        console.error('Purchase error:', err);
+        setError('Failed to purchase game sessions. Please try again.');
+      }
     } finally {
       setIsPurchasing(false);
     }
@@ -251,9 +249,9 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">
             Purchase Game Sessions
           </h3>
-          <Button color="gray" onClick={onClose} className="!p-2">
-            <HiX className="h-5 w-5" />
-          </Button>
+          {/*<Button color="gray" onClick={onClose} className="!p-2">*/}
+          {/*  <HiX className="h-5 w-5" />*/}
+          {/*</Button>*/}
         </div>
       </Modal.Header>
       <Modal.Body>
@@ -264,18 +262,18 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
             </p>
           </div>
           
-          <div>
-            <Label htmlFor="quantity" value="Number of Sessions" />
-            <TextInput
-              id="quantity"
-              type="number"
-              // min={1}
-              // max={10}
-              value={quantity}
-              onChange={handleQuantityChange}
-              className="mt-1"
-            />
-          </div>
+          {/*<div>*/}
+          {/*  <Label htmlFor="quantity" value="Number of Sessions" />*/}
+          {/*  <TextInput*/}
+          {/*    id="quantity"*/}
+          {/*    type="number"*/}
+          {/*    // min={1}*/}
+          {/*    // max={10}*/}
+          {/*    value={quantity}*/}
+          {/*    onChange={handleQuantityChange}*/}
+          {/*    className="mt-1"*/}
+          {/*  />*/}
+          {/*</div>*/}
           
           <div className="space-y-2">
             <Label value="Payment Method" />
