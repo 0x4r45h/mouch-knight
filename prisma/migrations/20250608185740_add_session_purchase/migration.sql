@@ -6,7 +6,7 @@ CREATE TABLE "session_purchases" (
     "tx_hash" TEXT NOT NULL,
     "payment_method" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
-    "total_cost" TEXT NOT NULL,
+    "total_cost" BIGINT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "session_purchases_pkey" PRIMARY KEY ("id")

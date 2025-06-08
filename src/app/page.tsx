@@ -5,13 +5,19 @@ import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
 import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
 import {Button, Table} from "flowbite-react";
-import {useGetPlayerHighscore, useScoreTokenBalanceOfPlayer, usePlayerCooldown} from "@/hooks/custom";
+import {
+    useGetPlayerHighscore,
+    useScoreTokenBalanceOfPlayer,
+    usePlayerCooldown,
+    useTreasuryBalance
+} from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
 import {sdk as farcasterSdk} from '@farcaster/frame-sdk';
 import {UserContext} from "@farcaster/frame-core/esm/context";
 import GameOverModal from "@/components/GameOverModal";
 import TipsModal from "@/components/TipsModal";
 import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
+import {formatUnits} from "viem";
 
 export default function Home() {
     type ScoreTx = {
@@ -30,11 +36,11 @@ export default function Home() {
     const [lastGameMKT, setLastGameMKT] = useState(0);
     const [gameOverModal, setGameOverModal] = useState(false);
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-    const [treasuryAmount] = useState(50000); // Mock treasury amount - replace with actual data
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
     const {chainId} = useAppKitNetwork()
+    const { balance: treasuryBalance, refetch: refetchTreasuryBalance } = useTreasuryBalance(chainId ? Number(chainId) : undefined);
     const {chain} = useAccount()
     const {walletInfo} = useWalletInfo();
     const {
@@ -59,11 +65,6 @@ export default function Home() {
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
     };
 
-    // Format number with commas
-    const formatNumber = (num: number) => {
-        return num.toLocaleString();
-    };
-
     // Handle showing purchase modal
     const handleShowPurchaseModal = () => {
         setShowPurchaseModal(true);
@@ -75,6 +76,10 @@ export default function Home() {
         // Refresh cooldown status after modal closes
         checkCooldown();
     };
+    useEffect(() => {
+        const interval = setInterval(refetchTreasuryBalance, 10000);
+        return () => clearInterval(interval);
+    }, [refetchTreasuryBalance])
 
     useEffect(() => {
         console.log(`update highscore on init`)
@@ -292,7 +297,7 @@ export default function Home() {
                                     <span className="text-3xl ml-2">🏆</span>
                                 </div>
                                 <div className="text-4xl font-extrabold text-yellow-900 mb-2">
-                                    {formatNumber(treasuryAmount)} MON
+                                    {treasuryBalance ? formatUnits(treasuryBalance.totalBalance, 18) : 0} MON
                                 </div>
                                 <p className="text-yellow-800 text-sm font-medium">
                                     Distributed to top players & lucky winners!

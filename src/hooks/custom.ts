@@ -183,3 +183,51 @@ export function usePlayerCooldown() {
         error
     };
 }
+
+export function useTreasuryBalance(chainId?: number) {
+    const [balance, setBalance] = useState<{
+        initialBalance: bigint;
+        totalNativePurchases: bigint;
+        totalBalance: bigint;
+    } | null>(null);
+    const [error, setError] = useState<Error | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const fetchTreasuryBalance = useCallback(async () => {
+        if (!chainId) return;
+        
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await fetch(`/api/game/treasury?chain_id=${chainId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch treasury balance');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                setBalance(result.data);
+            } else {
+                throw new Error(result.message || 'Unknown error');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error(String(err)));
+        } finally {
+            setLoading(false);
+        }
+    }, [chainId]);
+
+    useEffect(() => {
+        fetchTreasuryBalance();
+    }, [fetchTreasuryBalance]);
+
+    return {
+        balance,
+        error,
+        loading,
+        refetch: fetchTreasuryBalance
+    };
+}
