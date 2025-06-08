@@ -11,6 +11,8 @@ import { sdk as farcasterSdk } from '@farcaster/frame-sdk';
 import {UserContext} from "@farcaster/frame-core/esm/context";
 import GameOverModal from "@/components/GameOverModal";
 import TipsModal from "@/components/TipsModal";
+import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
+import { gameConfig } from '@/config/gameConfig';
 
 export default function Home() {
     type ScoreTx = {
@@ -28,6 +30,7 @@ export default function Home() {
     const [lastGameScore, setLastGameScore] = useState(0);
     const [lastGameMKT, setLastGameMKT] = useState(0);
     const [gameOverModal, setGameOverModal] = useState(false);
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const account = useAccount()
@@ -54,6 +57,18 @@ export default function Home() {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Handle showing purchase modal
+    const handleShowPurchaseModal = () => {
+        setShowPurchaseModal(true);
+    };
+    
+    // Handle closing purchase modal
+    const handleClosePurchaseModal = () => {
+        setShowPurchaseModal(false);
+        // Refresh cooldown status after modal closes
+        checkCooldown();
     };
 
     useEffect(() => {
@@ -296,11 +311,11 @@ export default function Home() {
                                 color="primary"
                                 size="xl"
                                 className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full"
-                                onClick={handleNewGame}
-                                disabled={gameLoading || inCooldown}
+                                onClick={inCooldown ? handleShowPurchaseModal : handleNewGame}
+                                disabled={gameLoading}
                             >
                                 {gameLoading ? 'Loading...' : 
-                                 inCooldown ? `Cooldown: ${formatRemainingTime(remainingSeconds)}` : 
+                                 inCooldown ? `Cooldown: ${formatRemainingTime(remainingSeconds)} - Buy Now` : 
                                  'Start Climbing!'}
                             </Button>
                         ) : (
@@ -382,6 +397,11 @@ export default function Home() {
                     How to Play
                 </Button>
             </div>
+            <PurchaseSessionsModal
+                show={showPurchaseModal}
+                onClose={handleClosePurchaseModal}
+                remainingSeconds={remainingSeconds}
+            />
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from "@/db/client";
+import { gameConfig } from '@/config/gameConfig';
 
 export async function cooldownMiddleware(
   request: NextRequest,
@@ -12,8 +13,8 @@ export async function cooldownMiddleware(
       const playerAddress = body.from;
       
       // Get cooldown duration from env (default to 1 hour if not set)
-      const cooldownSeconds = parseInt(process.env.NEXT_PUBLIC_GAME_COOLDOWN_SECONDS || '60', 10);
-      
+      const cooldownSeconds = gameConfig.cooldown.durationSeconds;
+
       // Find player and their cooldown
       const player = await prisma.player.findUnique({
         where: { address: playerAddress },

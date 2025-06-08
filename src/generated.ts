@@ -685,6 +685,155 @@ export const iMulticall3Abi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ItemPurchaseManager
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const itemPurchaseManagerAbi = [
+  {
+    type: 'constructor',
+    inputs: [{ name: '_scoreToken', internalType: 'address', type: 'address' }],
+    stateMutability: 'nonpayable',
+  },
+  { type: 'receive', stateMutability: 'payable' },
+  {
+    type: 'function',
+    inputs: [{ name: 'amount', internalType: 'uint256', type: 'uint256' }],
+    name: 'depositTokens',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'scoreToken',
+    outputs: [
+      { name: '', internalType: 'contract ScoreToken', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'to', internalType: 'address payable', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'withdrawNativeToken',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'withdrawTokens',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'player',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'timestamp',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'NativeTokenDeposited',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'player',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'timestamp',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'TokensReceived',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Ownable
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1645,6 +1794,167 @@ export const useSimulateIMulticall3TryBlockAndAggregate =
   /*#__PURE__*/ createUseSimulateContract({
     abi: iMulticall3Abi,
     functionName: 'tryBlockAndAggregate',
+  })
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__
+ */
+export const useReadItemPurchaseManager = /*#__PURE__*/ createUseReadContract({
+  abi: itemPurchaseManagerAbi,
+})
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"owner"`
+ */
+export const useReadItemPurchaseManagerOwner =
+  /*#__PURE__*/ createUseReadContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'owner',
+  })
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"scoreToken"`
+ */
+export const useReadItemPurchaseManagerScoreToken =
+  /*#__PURE__*/ createUseReadContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'scoreToken',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__
+ */
+export const useWriteItemPurchaseManager = /*#__PURE__*/ createUseWriteContract(
+  { abi: itemPurchaseManagerAbi },
+)
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"depositTokens"`
+ */
+export const useWriteItemPurchaseManagerDepositTokens =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'depositTokens',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"renounceOwnership"`
+ */
+export const useWriteItemPurchaseManagerRenounceOwnership =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'renounceOwnership',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"transferOwnership"`
+ */
+export const useWriteItemPurchaseManagerTransferOwnership =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'transferOwnership',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"withdrawNativeToken"`
+ */
+export const useWriteItemPurchaseManagerWithdrawNativeToken =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'withdrawNativeToken',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"withdrawTokens"`
+ */
+export const useWriteItemPurchaseManagerWithdrawTokens =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'withdrawTokens',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__
+ */
+export const useSimulateItemPurchaseManager =
+  /*#__PURE__*/ createUseSimulateContract({ abi: itemPurchaseManagerAbi })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"depositTokens"`
+ */
+export const useSimulateItemPurchaseManagerDepositTokens =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'depositTokens',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"renounceOwnership"`
+ */
+export const useSimulateItemPurchaseManagerRenounceOwnership =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'renounceOwnership',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"transferOwnership"`
+ */
+export const useSimulateItemPurchaseManagerTransferOwnership =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'transferOwnership',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"withdrawNativeToken"`
+ */
+export const useSimulateItemPurchaseManagerWithdrawNativeToken =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'withdrawNativeToken',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `functionName` set to `"withdrawTokens"`
+ */
+export const useSimulateItemPurchaseManagerWithdrawTokens =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: itemPurchaseManagerAbi,
+    functionName: 'withdrawTokens',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link itemPurchaseManagerAbi}__
+ */
+export const useWatchItemPurchaseManagerEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({ abi: itemPurchaseManagerAbi })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `eventName` set to `"NativeTokenDeposited"`
+ */
+export const useWatchItemPurchaseManagerNativeTokenDepositedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: itemPurchaseManagerAbi,
+    eventName: 'NativeTokenDeposited',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `eventName` set to `"OwnershipTransferred"`
+ */
+export const useWatchItemPurchaseManagerOwnershipTransferredEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: itemPurchaseManagerAbi,
+    eventName: 'OwnershipTransferred',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link itemPurchaseManagerAbi}__ and `eventName` set to `"TokensReceived"`
+ */
+export const useWatchItemPurchaseManagerTokensReceivedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: itemPurchaseManagerAbi,
+    eventName: 'TokensReceived',
   })
 
 /**

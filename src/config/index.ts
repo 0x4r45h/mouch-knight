@@ -2,7 +2,7 @@ import { cookieStorage, createStorage } from 'wagmi'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import {anvil, defineChain} from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
-import {scoreManagerAbi, scoreTokenAbi} from "@/generated";
+import {scoreManagerAbi, scoreTokenAbi, itemPurchaseManagerAbi} from "@/generated";
 import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
 import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 
@@ -19,25 +19,6 @@ if (!APP_URL) {
 }
 export type HexString = `0x${string}`
 
-export const monadDevnet = defineChain({
-  id: Number(process.env.NEXT_PUBLIC_MONAD_DEVNET_CHAIN_ID),
-  caipNetworkId: 'eip155:123456700',
-  chainNamespace: 'eip155',
-  name: 'Monad Devnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Monad',
-    symbol: 'DMON',
-  },
-  rpcUrls: {
-    default: {
-      http: [process.env.NEXT_PUBLIC_MONAD_DEVNET_RPC_URL || ""],
-    },
-  },
-  blockExplorers: {
-    default: { name: 'Monad Devnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_DEVNET_BLOCKSCOUT_URL || "" },
-  },
-})
 export const monadTestnet = defineChain({
   id: Number(process.env.NEXT_PUBLIC_MONAD_TESTNET_CHAIN_ID),
   caipNetworkId: 'eip155:123456800',
@@ -81,12 +62,10 @@ const contractsConfig = {
     abi: scoreManagerAbi,
     addresses: {
       [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_MANAGER as HexString,
-      [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_MANAGER as HexString,
       [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__SCORE_MANAGER as HexString,
     },
     deployedBlock: {
       [anvil.id]: BigInt(1),
-      [monadDevnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_DEVNET__SCORE_MANAGER || 1),
       [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__SCORE_MANAGER || 1),
     }
   },
@@ -94,13 +73,22 @@ const contractsConfig = {
     abi: scoreTokenAbi,
     addresses: {
       [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__SCORE_TOKEN as HexString,
-      [monadDevnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_DEVNET__SCORE_TOKEN as HexString,
       [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__SCORE_TOKEN as HexString,
     },
     deployedBlock: {
       [anvil.id]: BigInt(0),
-      [monadDevnet.id]:  BigInt(0),
       [monadTestnet.id]:  BigInt(0),
+    }
+  },
+  ItemPurchaseManager: {
+    abi: itemPurchaseManagerAbi,
+    addresses: {
+      [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__ITEM_PURCHASE_MANAGER as HexString,
+      [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__ITEM_PURCHASE_MANAGER as HexString,
+    },
+    deployedBlock: {
+      [anvil.id]: BigInt(1),
+      [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__ITEM_PURCHASE_MANAGER || 1),
     }
   },
 } as const;
@@ -144,7 +132,6 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
   }
 
   const chainConfigMap = {
-    [monadDevnet.id]: monadDevnet,
     [monadTestnet.id]: monadTestnet,
     [anvil.id]: anvil,
   };
@@ -192,7 +179,6 @@ export const getSignerClientByChainId = (chainId: number): WalletClient => {
   }
   const chainConfigMap = {
     [monadTestnet.id]: monadTestnet,
-    [monadDevnet.id]: monadDevnet,
     [anvil.id]: anvil,
   };
 
