@@ -17,6 +17,7 @@ import {UserContext} from "@farcaster/frame-core/esm/context";
 import GameOverModal from "@/components/GameOverModal";
 import TipsModal from "@/components/TipsModal";
 import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
+import TreasuryInfoModal from '@/components/TreasuryInfoModal';
 import {formatUnits} from "viem";
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
     }
     const [leaderboardModal, setLeaderboardModal] = useState(false)
     const [tipsModal, setTipsModal] = useState(false)
+    const [treasuryInfoModal, setTreasuryInfoModal] = useState(false)
     const [gameStarted, setGameStarted] = useState(false);
     const [gameSession, setGameSession] = useState(0);
     const [gameLoading, setGameLoading] = useState(false);
@@ -281,6 +283,10 @@ export default function Home() {
                 show={tipsModal}
                 onClose={() => setTipsModal(false)}
             />
+            <TreasuryInfoModal
+                show={treasuryInfoModal}
+                onClose={() => setTreasuryInfoModal(false)}
+            />
             <GameOverModal
                 show={gameOverModal}
                 onClose={finishGame}
@@ -292,19 +298,28 @@ export default function Home() {
                 <div>
                     <div className="w-full max-w-[540px] mb-6">
                         <div
-                            className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 rounded-xl p-6 shadow-lg border-2 border-yellow-300">
-                            <div className="text-center">
-                                <div className="flex items-center justify-center mb-2">
-                                    <span className="text-3xl mr-2">🏆</span>
-                                    <h2 className="text-2xl font-bold text-yellow-900">MON Treasury</h2>
-                                    <span className="text-3xl ml-2">🏆</span>
+                            className="relative p-1 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600">
+                            <div
+                                className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 animate-pulse"></div>
+                            <div
+                                className="relative bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 rounded-xl p-6 shadow-2xl cursor-pointer transition-all duration-500 hover:shadow-yellow-500/50 hover:scale-105 hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 group"
+                                onClick={() => setTreasuryInfoModal(true)}
+                            >
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center mb-2">
+                                        <span className="text-3xl mr-2 group-hover:animate-bounce">🏆</span>
+                                        <h2 className="text-2xl font-bold text-yellow-900 group-hover:text-yellow-800 transition-colors duration-300">MON
+                                            Treasury</h2>
+                                        <span className="text-3xl ml-2 group-hover:animate-bounce">🏆</span>
+                                    </div>
+                                    <div
+                                        className="text-4xl font-extrabold text-yellow-900 mb-2 group-hover:text-yellow-800 transition-colors duration-300">
+                                        {treasuryBalance ? formatUnits(treasuryBalance.totalBalance, 18) : 0} MON
+                                    </div>
+                                    <p className="text-yellow-800 text-sm font-medium group-hover:text-yellow-700 transition-colors duration-300">
+                                        Learn more about rewards!
+                                    </p>
                                 </div>
-                                <div className="text-4xl font-extrabold text-yellow-900 mb-2">
-                                    {treasuryBalance ? formatUnits(treasuryBalance.totalBalance, 18) : 0} MON
-                                </div>
-                                <p className="text-yellow-800 text-sm font-medium">
-                                    Distributed to top players & lucky winners!
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -327,7 +342,7 @@ export default function Home() {
                                 <div className="bg-gradient-to-br from-monad-berry to-red-600 rounded-lg p-3 shadow-md">
                                     <div className="flex items-center justify-center mb-2">
                                         <span className="text-2xl mr-2">🎯</span>
-                                        <span className="text-monad-off-white font-semibold">High Score</span>
+                                        <span className="text-monad-off-white font-semibold">Best</span>
                                     </div>
                                     <div className="text-center text-1xl font-bold text-monad-off-white">
                                         {playerHighscore?.toString() || '0'}
@@ -339,7 +354,6 @@ export default function Home() {
                     )}
                 </div>
             )}
-
             <div
                 className={`relative w-full max-w-[540px] mx-auto flex items-center justify-center ${gameStarted ? 'mt-0' : 'mt-5 mb-5'}`}>
                 {account.isConnected && gameStarted ? (
@@ -353,41 +367,8 @@ export default function Home() {
                         />
                     </div>
                 ) : (
-                    /* Otherwise, show a placeholder with a "Start New Game" button */
+                    /* Otherwise, show game controls */
                     <div className="flex items-center justify-center w-full flex-col space-y-6 px-4">
-                        <div className="text-center space-y-4">
-                            <h1 className="text-3xl font-bold text-monad-off-white">
-                                🏰 Mouch Knight&#39;s Treasury Quest
-                            </h1>
-                            <div
-                                className="bg-gradient-to-r from-monad-purple to-monad-light-blue rounded-lg p-6 shadow-lg">
-                                <h2 className="text-lg text-monad-off-white mb-4 leading-relaxed">
-                                    Join the ultimate climbing challenge! Our treasury is loaded with <span
-                                    className="font-bold text-yellow-300">MON tokens</span> waiting to be distributed
-                                    among our brave knights.
-                                </h2>
-                                <div className="bg-monad-berry bg-opacity-20 rounded-lg p-4 mb-4">
-                                    <h3 className="text-md text-monad-off-white font-semibold mb-2">🎁 How Rewards
-                                        Work:</h3>
-                                    <ul className="text-sm text-monad-off-white space-y-1 text-left">
-                                        <li>• <span className="font-semibold">Top Players:</span> Leaderboard champions
-                                            get the biggest share
-                                        </li>
-                                        <li>• <span className="font-semibold">Lucky Winners:</span> Random players also
-                                            win MON prizes
-                                        </li>
-                                        <li>• <span className="font-semibold">MKT Tokens:</span> Earn more as you climb
-                                            higher each session
-                                        </li>
-                                    </ul>
-                                </div>
-                                <p className="text-md text-monad-off-white">
-                                    Race to the top, stack your MKT tokens, and claim your share of the treasury! The
-                                    higher you climb, the better your multiplier! 🚀
-                                </p>
-                            </div>
-                        </div>
-
                         {account.isConnected ? (
                             inCooldown ? (
                                 <div className="space-y-3 w-full">
@@ -413,7 +394,7 @@ export default function Home() {
                                 <Button
                                     color="primary"
                                     size="xl"
-                                    className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full text-lg py-4"
+                                    className="bg-monad-berry rounded-md focus:outline-none focus:ring-2 w-full text-xl py-6"
                                     onClick={handleNewGame}
                                     disabled={gameLoading}
                                 >
@@ -421,9 +402,9 @@ export default function Home() {
                                 </Button>
                             )
                         ) : (
-                            <div className="w-full">
+                            <div className="w-full flex justify-center">
                                 {/* @ts-expect-error msg */}
-                                <appkit-connect-button className="w-full"/>
+                                <appkit-connect-button size="md" className="transform scale-150"/>
                             </div>
                         )}
                     </div>
@@ -511,6 +492,9 @@ export default function Home() {
                 onClose={handleClosePurchaseModal}
                 remainingSeconds={remainingSeconds}
             />
+
         </div>
+
     );
+
 }
