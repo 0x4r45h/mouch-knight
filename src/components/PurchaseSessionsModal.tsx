@@ -215,6 +215,8 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
                     } else {
                         throw revertError
                     }
+                } else {
+                    throw err
                 }
             } else {
                 console.error('Purchase error:', err);
