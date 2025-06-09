@@ -48,10 +48,14 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
     const {sendTransactionAsync: sendNativeToken} = useSendTransaction();
 
     // Format remaining time for display
-    const formatRemainingTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    const formatRemainingTime = (totalSeconds: number): string => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        return `${hours.toString().padStart(2, '0')}:${minutes
+            .toString()
+            .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
     // Get contract configs

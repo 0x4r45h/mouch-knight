@@ -63,12 +63,26 @@ export default function Home() {
         checkCooldown
     } = usePlayerCooldown();
 
+    const formatToFixedDecimals = (value: bigint, decimals: number, fixed: number): string => {
+        const formatted = formatUnits(value, decimals); // e.g., "123.456789"
+        const [intPart, decimalPart = ""] = formatted.split(".");
+
+        // Trim or pad the decimal part to `fixed` digits
+        const trimmedDecimals = decimalPart.slice(0, fixed).padEnd(fixed, "0");
+
+        return `${intPart}.${trimmedDecimals}`;
+    }
     // Format remaining time for display
-    const formatRemainingTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    const formatRemainingTime = (totalSeconds: number): string => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        return `${hours.toString().padStart(2, '0')}:${minutes
+            .toString()
+            .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
+
 
     // Handle showing purchase modal
     const handleShowPurchaseModal = () => {
@@ -314,7 +328,7 @@ export default function Home() {
                                     </div>
                                     <div
                                         className="text-4xl font-extrabold text-yellow-900 mb-2 group-hover:text-yellow-800 transition-colors duration-300">
-                                        {treasuryBalance ? formatUnits(treasuryBalance.totalBalance, 18) : 0} MON
+                                        {treasuryBalance ? formatToFixedDecimals(treasuryBalance.totalBalance, 18, 2) : 0.00 } MON
                                     </div>
                                     <p className="text-yellow-800 text-sm font-medium group-hover:text-yellow-700 transition-colors duration-300">
                                         Learn more about rewards!
