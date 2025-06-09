@@ -56,6 +56,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             }
         }
         let validTx = false;
+        let amount = BigInt(0);
+        let paymentMethod = '';
         for (const e of decodedEvents) {
             if (e.eventName === 'NativeTokenDeposited') {
                 const event = e as unknown as TokenDepositedEvent;
@@ -63,6 +65,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 if (event.args.player.toLowerCase() === body.player.toLowerCase() &&
                     event.args.amount >= BigInt(gameConfig.sessionCost.native.perSession) * BigInt(body.quantity)) {
                     validTx = true;
+                    amount = event.args.amount;
+                    paymentMethod = 'native';
                     break;
                 }
             }
@@ -71,6 +75,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 if (event.args.player.toLowerCase() === body.player.toLowerCase() &&
                     event.args.amount >= BigInt(gameConfig.sessionCost.mkt.perSession) * BigInt(body.quantity)) {
                     validTx = true;
+                    amount = event.args.amount;
+                    paymentMethod = 'mkt';
                     break;
                 }
             }
@@ -95,9 +101,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 playerId: player.id,
                 chainId: body.chain_id,
                 txHash: body.tx_hash,
-                paymentMethod: body.payment_method,
+                paymentMethod: paymentMethod,
                 quantity: body.quantity,
-                totalCost: body.total_cost
+                totalCost: amount
             }
         });
 
