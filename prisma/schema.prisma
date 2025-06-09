@@ -94,7 +94,7 @@ model SessionPurchase {
   txHash        String   @unique @map("tx_hash")
   paymentMethod String   @map("payment_method")
   quantity      Int
-  totalCost     BigInt   @map("total_cost")
+  totalCost     Decimal  @map("total_cost") @db.Decimal(78, 0)
   createdAt     DateTime @default(now()) @map("created_at")
   player        Player   @relation(fields: [playerId], references: [id])
 

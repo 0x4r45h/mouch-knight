@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from "@/db/client";
+import { Decimal } from '@prisma/client/runtime/library';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -11,12 +12,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Get initial balance from environment variable (default to 0 if not set)
-    const initialBalance = process.env.NEXT_PUBLIC_TREASURY_INITIAL_BALANCE || "0";
+    const initialBalance = new Decimal(process.env.NEXT_PUBLIC_TREASURY_INITIAL_BALANCE || "0");
 
     // Sum all native token purchases
     const nativePurchases = await prisma.sessionPurchase.aggregate({
       _sum: {
-
         totalCost: true
       },
       where: {
@@ -25,17 +25,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     });
 
-    // Calculate total treasury balance
-    const totalNativePurchases = nativePurchases._sum.totalCost || "0";
-    const totalBalance = BigInt(initialBalance) + BigInt(totalNativePurchases);
+    // Calculate total treasury balance using Decimal arithmetic
+    const totalNativePurchases = nativePurchases._sum.totalCost || new Decimal(0);
+    const totalBalance = initialBalance.add(totalNativePurchases);
 
     return NextResponse.json({
       success: true,
       message: 'Treasury balance fetched',
       data: {
-        initialBalance: initialBalance.toString(),
-        totalNativePurchases: totalNativePurchases.toString(),
-        totalBalance: totalBalance.toString()
+        initialBalance: initialBalance.toFixed(),
+        totalNativePurchases: totalNativePurchases.toFixed(),
+        totalBalance: totalBalance.toFixed()
       }
     });
   } catch (error) {
