@@ -103,7 +103,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 txHash: body.tx_hash,
                 paymentMethod: paymentMethod,
                 quantity: body.quantity,
-                totalCost: amount
+                totalCost: amount.toString()
             }
         });
 
