@@ -97,3 +97,137 @@ export function useGetPlayerHighscore() {
         setHighscore: setHighscoreWithTimestamp // Expose the setter with timestamp
     };
 }
+
+export function usePlayerCooldown() {
+    const {chain, address} = useAccount();
+    const [cooldownData, setCooldownData] = useState<{
+        inCooldown: boolean;
+        remainingSeconds: number;
+        cooldownEnds: string | null;
+    }>({
+        inCooldown: false,
+        remainingSeconds: 0,
+        cooldownEnds: null
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+    
+    const checkCooldown = useCallback(async () => {
+        if (!address || !chain?.id) return;
+        
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/game/cooldown?chain_id=${chain.id}&player=${address}`);
+            const data = await response.json();
+            
+            if (data.data.cooldown) {
+                setCooldownData({
+                    inCooldown: true,
+                    remainingSeconds: data.data.remainingSeconds,
+                    cooldownEnds: data.data.cooldownEnds
+                });
+            } else {
+                setCooldownData({
+                    inCooldown: false,
+                    remainingSeconds: 0,
+                    cooldownEnds: null
+                });
+            }
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error('Unknown error'));
+            console.error('Error checking cooldown:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [address, chain]);
+    
+    useEffect(() => {
+        checkCooldown();
+        
+        // Set up interval to update remaining time
+        let interval: NodeJS.Timeout | null = null;
+        if (cooldownData.inCooldown && cooldownData.cooldownEnds) {
+            interval = setInterval(() => {
+                const now = new Date();
+                const ends = new Date(cooldownData.cooldownEnds!);
+                const remaining = Math.max(0, Math.ceil((ends.getTime() - now.getTime()) / 1000));
+                
+                if (remaining <= 0) {
+                    setCooldownData({
+                        inCooldown: false,
+                        remainingSeconds: 0,
+                        cooldownEnds: null
+                    });
+                    if (interval) clearInterval(interval);
+                } else {
+                    setCooldownData(prev => ({
+                        ...prev,
+                        remainingSeconds: remaining
+                    }));
+                }
+            }, 1000);
+        }
+        
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [checkCooldown, cooldownData.cooldownEnds, cooldownData.inCooldown]);
+    
+    return {
+        inCooldown: cooldownData.inCooldown,
+        remainingSeconds: cooldownData.remainingSeconds,
+        cooldownEnds: cooldownData.cooldownEnds,
+        checkCooldown,
+        isLoading: loading,
+        error
+    };
+}
+
+export function useTreasuryBalance(chainId?: number) {
+    const [balance, setBalance] = useState<{
+        initialBalance: bigint;
+        totalNativePurchases: bigint;
+        totalBalance: bigint;
+    } | null>(null);
+    const [error, setError] = useState<Error | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const fetchTreasuryBalance = useCallback(async () => {
+        if (!chainId) return;
+        
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await fetch(`/api/game/treasury?chain_id=${chainId}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch treasury balance');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                setBalance(result.data);
+            } else {
+                throw new Error(result.message || 'Unknown error');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error(String(err)));
+        } finally {
+            setLoading(false);
+        }
+    }, [chainId]);
+
+    useEffect(() => {
+        fetchTreasuryBalance();
+    }, [fetchTreasuryBalance]);
+
+    return {
+        balance,
+        error,
+        loading,
+        refetch: fetchTreasuryBalance
+    };
+}

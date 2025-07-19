@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="logosandtypes_com" data-name="logosandtypes com" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #e19300;
+      }
+
+      .cls-2 {
+        fill: #9f4526;
+      }
+
+      .cls-3 {
+        fill: none;
+      }
+
+      .cls-4 {
+        fill: #fee93b;
+      }
+
+      .cls-5 {
+        fill: #441635;
+      }
+    </style>
+  </defs>
+  <path id="Layer_3" data-name="Layer 3" class="cls-3" d="M0,0H150V150H0V0Z"/>
+  <polygon class="cls-5" points="127.63 42.51 127.63 32.93 118.06 32.93 118.06 23.36 108.5 23.36 108.5 13.8 41.5 13.8 41.5 23.36 31.94 23.36 31.94 32.93 22.37 32.93 22.37 42.51 12.8 42.51 12.8 109.49 22.37 109.49 22.37 119.06 31.94 119.06 31.94 128.64 41.5 128.64 41.5 138.2 108.5 138.2 108.5 128.64 118.06 128.64 118.06 119.06 127.63 119.06 127.63 109.49 137.21 109.49 137.21 42.51 127.63 42.51"/>
+  <rect class="cls-2" x="31.94" y="109.49" width="9.57" height="9.57"/>
+  <rect class="cls-2" x="108.5" y="42.51" width="9.57" height="66.98"/>
+  <rect class="cls-4" x="108.5" y="32.93" width="9.57" height="9.58"/>
+  <rect class="cls-2" x="31.94" y="32.93" width="9.57" height="9.58"/>
+  <rect class="cls-2" x="41.5" y="23.36" width="9.57" height="9.57"/>
+  <rect class="cls-2" x="98.93" y="32.93" width="9.57" height="9.58"/>
+  <rect class="cls-4" x="51.07" y="23.36" width="57.43" height="9.57"/>
+  <rect class="cls-4" x="41.5" y="32.93" width="9.57" height="9.58"/>
+  <rect class="cls-2" x="22.37" y="42.51" width="9.57" height="66.98"/>
+  <rect class="cls-4" x="118.06" y="42.51" width="9.57" height="66.98"/>
+  <rect class="cls-4" x="31.94" y="42.51" width="9.57" height="66.98"/>
+  <rect class="cls-2" x="98.93" y="109.49" width="9.57" height="9.57"/>
+  <polygon class="cls-2" points="98.93 52.08 98.93 99.92 89.35 99.92 89.35 80.79 79.78 80.79 79.78 90.36 70.22 90.36 70.22 80.78 60.65 80.78 60.65 99.92 51.07 99.92 51.07 52.08 70.22 52.08 70.22 61.64 79.78 61.64 79.78 52.08 98.93 52.08"/>
+  <rect class="cls-4" x="108.5" y="109.49" width="9.57" height="9.57"/>
+  <rect class="cls-4" x="51.07" y="119.06" width="57.43" height="9.58"/>
+  <path class="cls-1" d="M98.93,42.51v-9.58H51.07v9.58h-9.57V109.49h9.57v9.57h47.86v-9.57h9.57V42.51h-9.57Zm0,57.41h-9.58v-19.13h-9.57v9.57h-9.57v-9.58h-9.57v19.15h-9.58V52.08h19.15v9.57h9.57v-9.57h19.15v47.85Z"/>
+  <rect class="cls-4" x="41.5" y="109.49" width="9.57" height="9.57"/>
+  <rect class="cls-2" x="41.5" y="119.06" width="9.57" height="9.58"/>
+</svg>

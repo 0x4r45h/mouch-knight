@@ -41,18 +41,20 @@ model BlockTracker {
 }
 
 model Player {
-  id                   Int          @id @default(autoincrement())
-  address              String       @unique @db.VarChar(42)
-  fId                  Int?         @unique
+  id                   Int               @id @default(autoincrement())
+  address              String            @unique @db.VarChar(42)
+  fId                  Int?              @unique
   fUsername            String?
   fDisplayName         String?
   fPfpUrl              String?
   fLocationDescription String?
   fLocationPlaceId     String?
-  createdAt            DateTime     @default(now()) @map("created_at")
-  updatedAt            DateTime     @default(now()) @updatedAt @map("updated_at")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @default(now()) @updatedAt @map("updated_at")
   moves                PlayerMove[]
   highscores           HighScore[]
+  cooldown             PlayerCooldown?
+  purchases            SessionPurchase[]
 
   @@index([address])
   @@map("players")
@@ -73,4 +75,28 @@ model PlayerMove {
   @@index([chainId])
   @@index([playerId])
   @@map("player_moves")
+}
+
+model PlayerCooldown {
+  id         Int      @id @default(autoincrement())
+  playerId   Int      @map("player_id")
+  lastPlayed DateTime @default(now()) @map("last_played")
+  player     Player   @relation(fields: [playerId], references: [id])
+
+  @@unique([playerId])
+  @@map("player_cooldowns")
+}
+
+model SessionPurchase {
+  id            Int      @id @default(autoincrement())
+  playerId      Int      @map("player_id")
+  chainId       Int      @map("chain_id")
+  txHash        String   @unique @map("tx_hash")
+  paymentMethod String   @map("payment_method")
+  quantity      Int
+  totalCost     Decimal  @map("total_cost") @db.Decimal(78, 0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  player        Player   @relation(fields: [playerId], references: [id])
+
+  @@map("session_purchases")
 }
