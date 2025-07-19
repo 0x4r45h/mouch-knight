@@ -1,0 +1,35 @@
+'use client'
+
+import React, { type ReactNode } from 'react'
+import { PrivyProvider } from '@privy-io/react-auth'
+import { WagmiProvider } from '@privy-io/wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { privyAppId, privyWagmiConfig } from '@/config/privy'
+import { monadTestnet } from '@/config'
+
+const queryClient = new QueryClient()
+
+interface PrivyWalletProviderProps {
+  children: ReactNode
+}
+
+export default function PrivyWalletProvider({ children }: PrivyWalletProviderProps) {
+  return (
+    <PrivyProvider
+      appId={privyAppId!}
+      config={{
+        defaultChain: monadTestnet,
+        supportedChains: process.env.NODE_ENV !== 'production' ? [monadTestnet] : [monadTestnet],
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={privyWagmiConfig}>
+          {children}
+        </WagmiProvider>
+      </QueryClientProvider>
+    </PrivyProvider>
+  )
+}

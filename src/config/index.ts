@@ -1,19 +1,12 @@
-import { cookieStorage, createStorage } from 'wagmi'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import {anvil, defineChain} from '@reown/appkit/networks'
-import type { AppKitNetwork } from '@reown/appkit/networks'
 import {scoreManagerAbi, scoreTokenAbi, itemPurchaseManagerAbi} from "@/generated";
-import {Abi, createPublicClient, createWalletClient, http, WalletClient} from "viem";
-import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
+import {Abi, createPublicClient, createWalletClient, http, WalletClient, defineChain} from "viem";
+import { anvil } from 'viem/chains'
 
-// Get projectId from https://cloud.reown.com
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 export const MINI_APP_URL = process.env.NEXT_PUBLIC_MINI_APP_URL
+export const WALLET_PROVIDER = process.env.NEXT_PUBLIC_WALLET_PROVIDER
 
-if (!projectId) {
-  throw new Error('Project ID is not defined')
-}
+
 if (!APP_URL) {
   throw new Error('APP_URL is not defined')
 }
@@ -38,24 +31,8 @@ export const monadTestnet = defineChain({
     default: { name: 'Monad Testnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_TESTNET_BLOCKSCOUT_URL || "" },
   },
 })
-export const networks = [monadTestnet] as [AppKitNetwork, ...AppKitNetwork[]]
 
-if (process.env.NODE_ENV !== 'production') {
-  networks.push(anvil)
-}
 
-//Set up the Wagmi Adapter (Config)
-export const wagmiAdapter = new WagmiAdapter({
-  storage: createStorage({
-    storage: cookieStorage
-  }),
-  ssr: true,
-  projectId,
-  networks,
-  connectors: [
-    miniAppConnector(),
-  ]
-})
 
 const contractsConfig = {
   ScoreManager: {

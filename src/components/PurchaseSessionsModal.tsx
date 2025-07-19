@@ -12,7 +12,6 @@ import {
     ContractFunctionRevertedError,
 } from 'viem';
 
-import {useAppKitNetwork} from "@reown/appkit/react";
 import {formatTokenAmount, gameConfig} from '@/config/gameConfig';
 import {getContractConfig} from '@/config';
 import {
@@ -41,9 +40,7 @@ const PurchaseSessionsModal: React.FC<PurchaseSessionsModalProps> = ({
     const [isPurchasing, setIsPurchasing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const {address} = useAccount();
-    const {chainId: appKitChainId} = useAppKitNetwork();
-    const chainId = typeof appKitChainId === 'string' ? parseInt(appKitChainId) : appKitChainId;
+    const {address, chainId} = useAccount();
 
     const {sendTransactionAsync: sendNativeToken} = useSendTransaction();
 

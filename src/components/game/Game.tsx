@@ -2,7 +2,6 @@
 import React, {useEffect, useRef} from 'react';
 import {GameLogic, GameEventDetail} from '@/components/game/GameLogic';
 import {useAccount} from "wagmi";
-import { useAppKitNetwork } from "@reown/appkit/react";
 
 interface LumberjackGameProps {
     sessionId: number;
@@ -12,11 +11,10 @@ interface LumberjackGameProps {
 }
 
 const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, scoreUpdateCallback, highScore}) => {
-    const account = useAccount()
+    const {address, chainId} = useAccount()
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const btnLeftRef = useRef<HTMLButtonElement>(null);
     const btnRightRef = useRef<HTMLButtonElement>(null);
-    const { chainId } = useAppKitNetwork()
 
     useEffect(() => {
         console.log('GameFrame Effect!');
@@ -68,7 +66,7 @@ const Game: React.FC<LumberjackGameProps> = ({sessionId, gameOverCallback, score
                 }
             };
         }
-    }, [account.address, chainId, gameOverCallback, highScore, scoreUpdateCallback, sessionId]);
+    }, [address, chainId, gameOverCallback, highScore, scoreUpdateCallback, sessionId]);
     return (
         <>
             <canvas ref={canvasRef} className="w-full" />

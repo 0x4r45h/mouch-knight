@@ -3,7 +3,6 @@ import React, {useCallback, useEffect, useState} from "react";
 import Game from "@/components/game/Game";
 import {useAccount} from "wagmi";
 import {GameLogic} from "@/components/game/GameLogic";
-import {useAppKitNetwork, useWalletInfo} from "@reown/appkit/react";
 import {Button, Table} from "flowbite-react";
 import {
     useGetPlayerHighscore,
@@ -40,14 +39,12 @@ export default function Home() {
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
-    const account = useAccount()
-    const {chainId} = useAppKitNetwork()
+    const {address, chainId, isConnected} = useAccount()
     const {
         balance: treasuryBalance,
         refetch: refetchTreasuryBalance
     } = useTreasuryBalance(chainId ? Number(chainId) : undefined);
     const {chain} = useAccount()
-    const {walletInfo} = useWalletInfo();
     const {
         data: playerHighscore,
         refetch: refetchHighScore,
@@ -104,9 +101,8 @@ export default function Home() {
         console.log(`update highscore on init`)
         refetchHighScore();
         refetchBalance();
-        console.log('wallet info is ', walletInfo);
 
-    }, [chain, refetchBalance, refetchHighScore, gameStarted, walletInfo]);
+    }, [chain, refetchBalance, refetchHighScore, gameStarted]);
 
     // get tx hash for each score
     useEffect(() => {
@@ -157,20 +153,20 @@ export default function Home() {
         setGameLoading(true)
         setScoreTx([]);
         setCurrentPage(1)
-        if (!account.address || !chainId) {
+        if (!address || !chainId) {
             console.log('Wallet not connected');
             return;
         }
         try {
 
-            // const result = await startNewGameSession(account.address, Number(chainId));
+            // const result = await startNewGameSession(address, Number(chainId));
             const response = await fetch('/api/game', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    from: account.address,
+                    from: address,
                     chain_id: chainId,
                     farcaster_user: farcasterUser
                 })
@@ -211,7 +207,7 @@ export default function Home() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        player: account.address,
+                        player: address,
                         chain_id: chainId
                     })
                 })
@@ -225,7 +221,7 @@ export default function Home() {
         setGameOverModal(true)
         setGameStarted(false);
         checkCooldown();
-    }, [account.address, chainId, setPlayerHighscore, checkCooldown]);
+    }, [address, chainId, setPlayerHighscore, checkCooldown]);
     const finishGame = () => {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
@@ -245,7 +241,7 @@ export default function Home() {
             // Generate verification hash using WASM
             const {generateTimedVerificationHash} = await import('@/lib/wasm-loader');
             const {hash, timestamp} = await generateTimedVerificationHash(
-                account.address as string,
+                address as string,
                 score,
                 Number(chainId),
                 sessionId
@@ -257,7 +253,7 @@ export default function Home() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    player: account.address,
+                    player: address,
                     session_id: sessionId,
                     chain_id: chainId,
                     score,
@@ -283,7 +279,7 @@ export default function Home() {
         } catch (error) {
             console.error('Error during submit score:', error);
         }
-    }, [account.address, chainId]);
+    }, [address, chainId]);
 
     return (
         <div className={`flex flex-col items-center justify-start min-h-screen ${gameStarted ? '' : 'py-6'}`}>
@@ -291,7 +287,7 @@ export default function Home() {
                 chainId={Number(chainId)}
                 openModal={leaderboardModal}
                 closeModalAction={() => setLeaderboardModal(false)}
-                currentUserAddress={account.address}
+                currentUserAddress={address}
             />) : <></>}
             <TipsModal
                 show={tipsModal}
@@ -337,7 +333,7 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                    {account.isConnected && (
+                    {isConnected && (
                         <div className="w-full max-w-[540px] mb-6">
                             <div className="grid grid-cols-2 gap-4">
                                 {/* MKT Balance Card */}
@@ -370,7 +366,7 @@ export default function Home() {
             )}
             <div
                 className={`relative w-full max-w-[540px] mx-auto flex items-center justify-center ${gameStarted ? 'mt-0' : 'mt-5 mb-5'}`}>
-                {account.isConnected && gameStarted ? (
+                {isConnected && gameStarted ? (
                     /* If the game has started, render the Game component */
                     <div className="w-full h-full">
                         <Game
@@ -383,7 +379,7 @@ export default function Home() {
                 ) : (
                     /* Otherwise, show game controls */
                     <div className="flex items-center justify-center w-full flex-col space-y-6 px-4">
-                        {account.isConnected ? (
+                        {isConnected ? (
                             inCooldown ? (
                                 <div className="space-y-3 w-full">
                                     <div className="bg-monad-light-blue bg-opacity-20 rounded-lg p-4 text-center">
