@@ -18,13 +18,15 @@ import TipsModal from "@/components/TipsModal";
 import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
 import TreasuryInfoModal from '@/components/TreasuryInfoModal';
 import {formatUnits} from "viem";
-
+import {ConnectButton} from "@/components/ConnectButton";
+import {useWallets} from "@privy-io/react-auth";
 export default function Home() {
     type ScoreTx = {
         moveId: undefined,
         scoreId: number,
         txHash: undefined | string
     }
+    const {wallets} = useWallets();
     const [leaderboardModal, setLeaderboardModal] = useState(false)
     const [tipsModal, setTipsModal] = useState(false)
     const [treasuryInfoModal, setTreasuryInfoModal] = useState(false)
@@ -98,11 +100,11 @@ export default function Home() {
     }, [refetchTreasuryBalance])
 
     useEffect(() => {
-        console.log(`update highscore on init`)
+        console.log(`wallets are `, wallets)
         refetchHighScore();
         refetchBalance();
 
-    }, [chain, refetchBalance, refetchHighScore, gameStarted]);
+    }, [chain, refetchBalance, refetchHighScore, gameStarted, wallets]);
 
     // get tx hash for each score
     useEffect(() => {
@@ -413,8 +415,7 @@ export default function Home() {
                             )
                         ) : (
                             <div className="w-full flex justify-center">
-                                {/* @ts-expect-error msg */}
-                                <appkit-connect-button size="md" className="transform scale-150"/>
+                                <ConnectButton size="md" className="transform scale-150" />
                             </div>
                         )}
                     </div>

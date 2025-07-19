@@ -67,11 +67,13 @@ export type SingleContractConfig = {
 export const getContractConfig = (contractName: string, chainId: number): SingleContractConfig => {
   const contract = (contractsConfig as ContractsConfig)[contractName];
   if (!contract) {
-    throw new Error(`Contract ${contractName} not found in config`);
+    console.error(`Contract ${contractName} not found in config`);
+    // throw new Error(`Contract ${contractName} not found in config`);
   }
   const address = contract.addresses[chainId];
   if (!address) {
-    throw new Error(`Contract ${contractName} not deployed on chain ${chainId}`);
+    console.error(`Contract ${contractName} not deployed on chain ${chainId}`);
+    // throw new Error(`Contract ${contractName} not deployed on chain ${chainId}`);
   }
   return {
     address,

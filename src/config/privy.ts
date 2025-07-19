@@ -1,5 +1,7 @@
-import { createConfig, http } from 'wagmi'
+import { http } from 'wagmi'
 import { anvil, monadTestnet } from 'viem/chains'
+import {createConfig} from '@privy-io/wagmi';
+import type {PrivyClientConfig} from '@privy-io/react-auth';
 
 export const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
 
@@ -11,7 +13,7 @@ export function defaultNetwork() {
   return monadTestnet
 }
 export function supportedChains() {
-  return process.env.NODE_ENV !== 'production' ? [monadTestnet] : [monadTestnet]
+  return process.env.NODE_ENV !== 'production' ? [monadTestnet, anvil] : [monadTestnet]
 }
 
 export const privyWagmiConfig = createConfig({
@@ -21,3 +23,20 @@ export const privyWagmiConfig = createConfig({
     [anvil.id]: http('http://127.0.0.1:8545'),
   },
 })
+
+
+// Replace this with your Privy config
+export const privyConfig: PrivyClientConfig = {
+  defaultChain: defaultNetwork(),
+  supportedChains: supportedChains(),
+  embeddedWallets: {
+    createOnLogin: 'users-without-wallets',
+    requireUserPasswordOnCreate: false,
+    showWalletUIs: true
+  },
+  loginMethods: ['wallet', 'email', 'sms'],
+  appearance: {
+    showWalletLoginFirst: true,
+    walletChainType: 'ethereum-only'
+  }
+};
