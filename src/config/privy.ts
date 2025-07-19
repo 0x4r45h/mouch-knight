@@ -1,11 +1,17 @@
 import { createConfig, http } from 'wagmi'
-import { monadTestnet } from './index'
-import { anvil } from 'viem/chains'
+import { anvil, monadTestnet } from 'viem/chains'
 
 export const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
 
 if (!privyAppId) {
   throw new Error('Privy App ID is not defined')
+}
+
+export function defaultNetwork() {
+  return monadTestnet
+}
+export function supportedChains() {
+  return process.env.NODE_ENV !== 'production' ? [monadTestnet] : [monadTestnet]
 }
 
 export const privyWagmiConfig = createConfig({

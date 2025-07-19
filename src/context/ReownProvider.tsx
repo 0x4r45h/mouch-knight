@@ -1,11 +1,14 @@
 'use client'
 
-import { monadTestnet} from '@/config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createAppKit } from '@reown/appkit/react'
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
-import {wagmiAdapter, networks , getReownAppId} from "@/config/reown";
+import {getReownAppId, defaultNetwork, supportedChains} from "@/config/reown";
+import {cookieStorage, createStorage} from 'wagmi'
+import {WagmiAdapter} from "@reown/appkit-adapter-wagmi";
+import {farcasterFrame as miniAppConnector} from "@farcaster/frame-wagmi-connector";
+
 
 const queryClient = new QueryClient()
 
@@ -16,11 +19,24 @@ const metadata = {
   icons: ['https://emberstake.xyz/logo.png']
 }
 
+//Set up the Wagmi Adapter (Config)
+const wagmiAdapter = new WagmiAdapter({
+  storage: createStorage({
+    storage: cookieStorage
+  }),
+  ssr: true,
+  projectId: getReownAppId(),
+  networks: supportedChains(),
+  connectors: [
+    miniAppConnector(),
+  ]
+})
+
 export const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId: getReownAppId(),
-  networks,
-  defaultNetwork: monadTestnet,
+  networks: supportedChains(),
+  defaultNetwork: defaultNetwork(),
   metadata,
   themeMode: 'light',
   themeVariables: {

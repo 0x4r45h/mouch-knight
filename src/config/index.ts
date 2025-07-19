@@ -1,6 +1,6 @@
 import {scoreManagerAbi, scoreTokenAbi, itemPurchaseManagerAbi} from "@/generated";
-import {Abi, createPublicClient, createWalletClient, http, WalletClient, defineChain} from "viem";
-import { anvil } from 'viem/chains'
+import {Abi, createPublicClient, createWalletClient, http, WalletClient } from "viem";
+import { anvil, monadTestnet } from 'viem/chains'
 
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 export const MINI_APP_URL = process.env.NEXT_PUBLIC_MINI_APP_URL
@@ -11,28 +11,6 @@ if (!APP_URL) {
   throw new Error('APP_URL is not defined')
 }
 export type HexString = `0x${string}`
-
-export const monadTestnet = defineChain({
-  id: Number(process.env.NEXT_PUBLIC_MONAD_TESTNET_CHAIN_ID),
-  caipNetworkId: 'eip155:123456800',
-  chainNamespace: 'eip155',
-  name: 'Monad Testnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Monad',
-    symbol: 'MON',
-  },
-  rpcUrls: {
-    default: {
-      http: [process.env.NEXT_PUBLIC_MONAD_TESTNET_RPC_URL || ""],
-    },
-  },
-  blockExplorers: {
-    default: { name: 'Monad Testnet Blockscout', url: process.env.NEXT_PUBLIC_MONAD_TESTNET_BLOCKSCOUT_URL || "" },
-  },
-})
-
-
 
 const contractsConfig = {
   ScoreManager: {
@@ -101,6 +79,18 @@ export const getContractConfig = (contractName: string, chainId: number): Single
     deployedBlock: contract.deployedBlock[chainId]
   };
 };
+
+function getConfigForChain(chainId: number) {
+  switch (chainId) {
+    case monadTestnet.id:
+      return monadTestnet;
+    case anvil.id:
+      return anvil;
+    default:
+      throw new Error(`No client has defined for chain ${chainId}`);
+  }
+}
+
 const publicClients: Record<number, ReturnType<typeof createPublicClient>> = {};
 export const getPublicClientByChainId = (chainId: number): ReturnType<typeof createPublicClient> => {
   // Return cached client if it exists
@@ -108,16 +98,7 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
     return publicClients[chainId];
   }
 
-  const chainConfigMap = {
-    [monadTestnet.id]: monadTestnet,
-    [anvil.id]: anvil,
-  };
-
-  const chainConfig = chainConfigMap[chainId];
-
-  if (!chainConfig) {
-    throw new Error(`No client has defined for chain ${chainId}`);
-  }
+  const chainConfig = getConfigForChain(chainId);
 
   let paidRPC = '';
   if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
@@ -154,16 +135,9 @@ export const getSignerClientByChainId = (chainId: number): WalletClient => {
   if (signerClients[chainId]) {
     return signerClients[chainId];
   }
-  const chainConfigMap = {
-    [monadTestnet.id]: monadTestnet,
-    [anvil.id]: anvil,
-  };
 
-  const chainConfig = chainConfigMap[chainId];
+  const chainConfig = getConfigForChain(chainId);
 
-  if (!chainConfig) {
-    throw new Error(`No client has defined for chain ${chainId}`);
-  }
   let paidRPC = '';
   if (chainId == monadTestnet.id && process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL) {
       paidRPC = process.env.NEXT_MONAD_TESTNET_BACKEND_RPC_URL
