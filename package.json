@@ -21,6 +21,8 @@
     "@privy-io/wagmi": "^1.0.5",
     "@reown/appkit": "^1.6.7",
     "@reown/appkit-adapter-wagmi": "^1.6.7",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.98.2",
     "@tanstack/react-query": "^5.66.0",
     "@wagmi/core": "^2.16.4",
     "bullmq": "^5.44.4",
