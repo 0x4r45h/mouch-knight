@@ -834,6 +834,49 @@ export const itemPurchaseManagerAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Leaderboard
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const leaderboardAbi = [
+  {
+    type: 'function',
+    inputs: [
+      { name: 'player', internalType: 'address', type: 'address' },
+      { name: 'scoreAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'transactionAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'updatePlayerData',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'player',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'scoreAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'transactionAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'PlayerDataUpdated',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Ownable
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1955,6 +1998,53 @@ export const useWatchItemPurchaseManagerTokensReceivedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
     abi: itemPurchaseManagerAbi,
     eventName: 'TokensReceived',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link leaderboardAbi}__
+ */
+export const useWriteLeaderboard = /*#__PURE__*/ createUseWriteContract({
+  abi: leaderboardAbi,
+})
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link leaderboardAbi}__ and `functionName` set to `"updatePlayerData"`
+ */
+export const useWriteLeaderboardUpdatePlayerData =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: leaderboardAbi,
+    functionName: 'updatePlayerData',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link leaderboardAbi}__
+ */
+export const useSimulateLeaderboard = /*#__PURE__*/ createUseSimulateContract({
+  abi: leaderboardAbi,
+})
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link leaderboardAbi}__ and `functionName` set to `"updatePlayerData"`
+ */
+export const useSimulateLeaderboardUpdatePlayerData =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: leaderboardAbi,
+    functionName: 'updatePlayerData',
+  })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link leaderboardAbi}__
+ */
+export const useWatchLeaderboardEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({ abi: leaderboardAbi })
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link leaderboardAbi}__ and `eventName` set to `"PlayerDataUpdated"`
+ */
+export const useWatchLeaderboardPlayerDataUpdatedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: leaderboardAbi,
+    eventName: 'PlayerDataUpdated',
   })
 
 /**
