@@ -4,6 +4,7 @@ import {createConfig} from '@privy-io/wagmi';
 import type {PrivyClientConfig} from '@privy-io/react-auth';
 
 export const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
+export const privyClientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID || ''
 
 if (!privyAppId) {
   throw new Error('Privy App ID is not defined')
@@ -34,7 +35,9 @@ export const privyConfig: PrivyClientConfig = {
     requireUserPasswordOnCreate: false,
     showWalletUIs: true
   },
-  loginMethods: ['wallet', 'email', 'sms'],
+  loginMethodsAndOrder: {
+    primary: process.env.NODE_ENV !== 'production' ? ['rabby_wallet', 'email', 'privy:cmd8euall0037le0my79qpz42'] : ['privy:cmd8euall0037le0my79qpz42'],
+  },
   appearance: {
     showWalletLoginFirst: true,
     walletChainType: 'ethereum-only'

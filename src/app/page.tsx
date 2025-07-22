@@ -19,7 +19,7 @@ import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
 import TreasuryInfoModal from '@/components/TreasuryInfoModal';
 import {formatUnits} from "viem";
 import {ConnectButton} from "@/components/ConnectButton";
-import {useWallets} from "@privy-io/react-auth";
+import {usePrivy, useWallets} from "@privy-io/react-auth";
 export default function Home() {
     type ScoreTx = {
         moveId: undefined,
@@ -27,6 +27,7 @@ export default function Home() {
         txHash: undefined | string
     }
     const {wallets} = useWallets();
+    const { user: privyUser } = usePrivy();
     const [leaderboardModal, setLeaderboardModal] = useState(false)
     const [tipsModal, setTipsModal] = useState(false)
     const [treasuryInfoModal, setTreasuryInfoModal] = useState(false)
@@ -101,6 +102,7 @@ export default function Home() {
 
     useEffect(() => {
         console.log(`wallets are `, wallets)
+        console.log(`privy user is `, privyUser)
         refetchHighScore();
         refetchBalance();
 
@@ -224,6 +226,7 @@ export default function Home() {
         setGameStarted(false);
         checkCooldown();
     }, [address, chainId, setPlayerHighscore, checkCooldown]);
+
     const finishGame = () => {
         lastGameRef?.restartGame();
         setLastGameRef(undefined);
@@ -231,6 +234,7 @@ export default function Home() {
         setLastGameMKT(0);
         setGameOverModal(false)
     }
+
     const handleScoreUpdate = useCallback(async (score: number, sessionId: number) => {
         try {
             const tx: ScoreTx = {

@@ -1,10 +1,11 @@
 import {Worker} from 'bullmq';
-import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString, monadTestnet} from '@/config';
-import {TxJobData} from "@/services/queue";
+import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString} from '@/config';
+import {addTxJob, SendUserScoreJobData, TxJobData} from "@/services/queue";
 import { privateKeyToAccount } from "viem/accounts";
 import { WriteContractErrorType} from "viem";
 import prisma from "@/db/client";
 import { redis, redisConnection } from "@/db/redis";
+import { monadTestnet } from "viem/chains";
 
 // Redis sorted set for round-robin relayer keys
 const RELAYER_KEYS_SET = 'relayer_keys';
@@ -157,6 +158,8 @@ async function initializeRelayerKeys() {
     }
 }
 
+const scorePublisherKey = (process.env.SCORE_PUBLISHER_PRIVATE_KEY || '0x') as HexString;
+
 // Function to get a relayer key using atomic round-robin selection
 async function getRelayerKeyWithRoundRobin(): Promise<HexString> {
     // Get the key with the lowest score directly
@@ -207,6 +210,16 @@ function createWorker() {
                         maxFeePerGas: fees.maxFeePerGas,
                         gas: BigInt(75_000),
                     });
+                    const jobId = await addTxJob({
+                        type: "SendUserScoreJobData",
+                        chainId,
+                        playerAddress: "0x",
+                        scoreAmount: 0,
+                        transactionAmount: 0
+                    }, {
+                        delay: 0
+                    });
+                    console.log(`SendUserScoreTx Job ID is ${jobId}`);
                     break;
                 case 'PlayerMoveTx':
                     const { sessionId, playerMoveId } = job.data.payload
@@ -263,19 +276,93 @@ function createWorker() {
     return worker;
 }
 
+
+function createSendUserScoreWorker() {
+    // Worker to process send user score jobs
+    const worker = new Worker<SendUserScoreJobData>('send-user-score', async job => {
+        const { chainId, playerAddress, scoreAmount, transactionAmount } = job.data;
+        let signerAddress: HexString | null = null;
+
+        try {
+            console.log(`Processing send user score for player: ${playerAddress}, score: ${scoreAmount}, amount: ${transactionAmount}`);
+
+            // TODO: Implement your score sending logic here
+            const account = privateKeyToAccount(scorePublisherKey);
+            const signerClient = getSignerClientByChainId(chainId);
+            signerAddress = account.address;
+            const nonce = await getNonce(signerAddress, chainId);
+            const fees = await getCurrentFees(chainId);
+            // TODO : define the contract
+            const contract = getContractConfig('CentralLeaderboard', chainId);
+            // i think this is to prevent rpc rate limit and leverage tx batching
+            await new Promise(resolve => setTimeout(resolve, 3000))
+            let txHash : HexString | null = null;
+            // TODO : add correct info the contract
+            txHash = await signerClient.writeContract({
+                chain: undefined,
+                address: contract.address,
+                abi: contract.abi,
+                account,
+                functionName: "updatePlayerData",
+                args: [playerAddress, BigInt(scoreAmount), BigInt(transactionAmount)],
+                nonce,
+                maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+                maxFeePerGas: fees.maxFeePerGas,
+                gas: BigInt(75_000),
+            });
+            // TODO : add a db record for this
+
+            console.log(`Successfully sent score for player: ${playerAddress}`);
+            return txHash;
+
+        } catch (e) {
+            const error = e as WriteContractErrorType;
+            if (
+                error.name === 'ContractFunctionExecutionError' &&
+                error.cause?.name === 'TransactionExecutionError' &&
+                error.cause?.message.includes('nonce too low')
+            ) {
+                console.log('Nonce too low!');
+                if (signerAddress) {
+                    console.log('Deleting bad nonce');
+                    await deleteBadNonce(signerAddress, chainId);
+                }
+            } else {
+                console.error('Send user score failed:', error);
+            }
+            throw error;
+        }
+    }, {
+        connection: redisConnection,
+        concurrency: 1, // Process one job at a time
+    });
+
+    worker.on('completed', job => {
+        console.log(`Send score job ${job.id} completed: ${job.returnvalue}`);
+    });
+
+    worker.on('failed', (job, error) => {
+        console.error(`Send score job ${job?.id} failed:`, error);
+    });
+
+    return worker;
+}
+
 export default async function main() {
     try {
         await initializeRelayerKeys();
-        const worker = createWorker();
+        const txWorker = createWorker();
+        const scoreWorker = createSendUserScoreWorker();
 
         // Handle process termination
         process.on('SIGTERM', async () => {
-            await worker.close();
+            await txWorker.close();
+            await scoreWorker.close();
             await redis.quit();
             await prisma.$disconnect();
         });
     } catch (error) {
-        console.error('Failed to start worker:', error);
+        console.error('Failed to start workers:', error);
         process.exit(1);
     }
 }

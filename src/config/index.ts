@@ -1,4 +1,4 @@
-import {scoreManagerAbi, scoreTokenAbi, itemPurchaseManagerAbi} from "@/generated";
+import {scoreManagerAbi, scoreTokenAbi, itemPurchaseManagerAbi, leaderboardAbi} from "@/generated";
 import {Abi, createPublicClient, createWalletClient, http, WalletClient } from "viem";
 import { anvil, monadTestnet } from 'viem/chains'
 
@@ -44,6 +44,17 @@ const contractsConfig = {
     deployedBlock: {
       [anvil.id]: BigInt(1),
       [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__ITEM_PURCHASE_MANAGER || 1),
+    }
+  },
+  CentralLeaderboard: {
+    abi: leaderboardAbi,
+    addresses: {
+      [anvil.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__ANVIL__CENTRAL_LEADERBOARD as HexString,
+      [monadTestnet.id]: process.env.NEXT_PUBLIC_CONTRACT_ADDR__MONAD_TESTNET__CENTRAL_LEADERBOARD as HexString,
+    },
+    deployedBlock: {
+      [anvil.id]: BigInt(1),
+      [monadTestnet.id]:  BigInt(process.env.NEXT_PUBLIC_CONTRACT_DEPLOYED_BLOCK__MONAD_TESTNET__CENTRAL_LEADERBOARD || 1),
     }
   },
 } as const;

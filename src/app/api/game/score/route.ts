@@ -102,6 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             sessionId,
             playerMoveId: playerMove.id,
         },
+        type: "TxJobData"
     });
     console.log(`Job ID is ${jobId}`);
 

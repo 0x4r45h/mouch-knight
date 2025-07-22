@@ -37,7 +37,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     if (openModal) {
       const fetchHighscores = async () => {
         try {
-          const response = await fetch(`/api/game/score/highscore?chain_id=${chainId}`, {
+          const response = await fetch(`/api/game/score/highscore/leaderboard?chain_id=${chainId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
