@@ -19,15 +19,12 @@ import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
 import TreasuryInfoModal from '@/components/TreasuryInfoModal';
 import {formatUnits} from "viem";
 import {ConnectButton} from "@/components/ConnectButton";
-import {usePrivy, useWallets} from "@privy-io/react-auth";
 export default function Home() {
     type ScoreTx = {
         moveId: undefined,
         scoreId: number,
         txHash: undefined | string
     }
-    const {wallets} = useWallets();
-    const { user: privyUser } = usePrivy();
     const [leaderboardModal, setLeaderboardModal] = useState(false)
     const [tipsModal, setTipsModal] = useState(false)
     const [treasuryInfoModal, setTreasuryInfoModal] = useState(false)
@@ -101,12 +98,10 @@ export default function Home() {
     }, [refetchTreasuryBalance])
 
     useEffect(() => {
-        console.log(`wallets are `, wallets)
-        console.log(`privy user is `, privyUser)
         refetchHighScore();
         refetchBalance();
 
-    }, [chain, refetchBalance, refetchHighScore, gameStarted, wallets]);
+    }, [chain, refetchBalance, refetchHighScore, gameStarted]);
 
     // get tx hash for each score
     useEffect(() => {

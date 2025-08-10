@@ -3,8 +3,9 @@
 import {WALLET_PROVIDER} from '@/config'
 import {useLogin, useLogout, usePrivy, useWallets} from '@privy-io/react-auth'
 import {UserPill} from '@privy-io/react-auth/ui';
-import {supportedChains} from '@/config/privy';
+import {supportedChains as privySupportedChains} from '@/config/privy';
 import {useState} from 'react';
+import {ConnectButton as RainbowConnectButton} from '@rainbow-me/rainbowkit';
 
 interface ConnectButtonProps {
     size?: 'sm' | 'md' | 'lg'
@@ -17,9 +18,12 @@ export const ConnectButton: React.FC<ConnectButtonProps> = ({
                                                             }) => {
     if (WALLET_PROVIDER === 'privy') {
         return <PrivyConnectButton size={size} />
+    } else if (WALLET_PROVIDER === 'rainbow') {
+        return <RainbowConnectButton />
+    } else {
+        return <ReownConnectButton size={size} className={className}/>
     }
 
-    return <ReownConnectButton size={size} className={className}/>
 }
 
 function PrivyConnectButton({size}: {size?: 'sm' | 'md' | 'lg'}) {
@@ -30,7 +34,7 @@ function PrivyConnectButton({size}: {size?: 'sm' | 'md' | 'lg'}) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [isSwitching, setIsSwitching] = useState(false)
 
-    const chains = supportedChains()
+    const chains = privySupportedChains()
 
     const handleSwitchNetwork = async (chainId: number) => {
         const wallet = wallets[0]

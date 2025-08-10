@@ -7,6 +7,7 @@ import {CustomFlowbiteTheme, Flowbite} from "flowbite-react";
 import MaintenanceCheck from "@/components/MaintenanceCheck";
 import FarcasterFrameReady from "@/components/FarcasterFrameReady";
 import {APP_URL} from "@/config";
+import "@rainbow-me/rainbowkit/styles.css";
 
 const frame = {
   version: "next",

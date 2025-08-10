@@ -5,6 +5,8 @@ import type {PrivyClientConfig} from '@privy-io/react-auth';
 
 export const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
 export const privyClientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID || ''
+export const privyProviderId = process.env.NEXT_PUBLIC_PRIVY_PROVIDER_ID || ''
+
 
 if (!privyAppId) {
   throw new Error('Privy App ID is not defined')
