@@ -17,7 +17,7 @@ export default function RainbowWalletProvider({children}: WalletProviderProps) {
     return (
         <WagmiProvider config={rainbowWagmiConfig}>
             <QueryClientProvider client={queryClient}>
-                <RainbowKitProvider>
+                <RainbowKitProvider modalSize="compact">
                     {children}
                 </RainbowKitProvider>
             </QueryClientProvider>
