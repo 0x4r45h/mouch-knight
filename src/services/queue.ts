@@ -35,6 +35,8 @@ export const sendScoreQueue = new Queue('send-user-score', {
 export interface SendUserScoreJobData {
   type: 'SendUserScoreJobData';
   chainId: number;
+  sessionId: number;
+  playerId: number
   playerAddress: HexString;
   scoreAmount: number;
   transactionAmount: number;
@@ -45,24 +47,25 @@ export interface TxJobData {
   type: 'TxJobData';
   chainId: number;
   player: string;
+  sessionId: number;
   payload: PlayerMoveTx | UpdateHighscoreTx;
 }
 
 export interface PlayerMoveTx {
   type: 'PlayerMoveTx';
-  sessionId: number;
   playerMoveId: number;
 }
 
 export interface UpdateHighscoreTx {
   type: 'UpdateHighscoreTx';
+  playerId: number
 }
 
 // Add a job to the queue
 export const addTxJob = async (
     jobData: TxJobData | SendUserScoreJobData,
     options?: { delay?: number }
-): Promise<string | undefined> => {
+): Promise<string> => {
   let job;
   switch (jobData.type) {
     case 'SendUserScoreJobData':
@@ -74,5 +77,5 @@ export const addTxJob = async (
     default:
       throw new Error('Invalid job data type');
   }
-  return job.id;
+  return job.id ? job.id : '';
 };

@@ -1,11 +1,11 @@
 import {Worker} from 'bullmq';
 import {getContractConfig, getPublicClientByChainId, getSignerClientByChainId, HexString} from '@/config';
-import {addTxJob, SendUserScoreJobData, TxJobData} from "@/services/queue";
-import { privateKeyToAccount } from "viem/accounts";
-import { WriteContractErrorType} from "viem";
+import { SendUserScoreJobData, TxJobData} from "@/services/queue";
+import {privateKeyToAccount} from "viem/accounts";
+import {WriteContractErrorType} from "viem";
 import prisma from "@/db/client";
-import { redis, redisConnection } from "@/db/redis";
-import { monadTestnet } from "viem/chains";
+import {redis, redisConnection} from "@/db/redis";
+import {monadTestnet} from "viem/chains";
 
 // Redis sorted set for round-robin relayer keys
 const RELAYER_KEYS_SET = 'relayer_keys';
@@ -69,24 +69,24 @@ async function getNonce(address: HexString, chainId: number): Promise<number> {
 }
 
 interface GasFees {
-  maxPriorityFeePerGas: bigint;
-  maxFeePerGas: bigint;
-  lastUpdated: number;
+    maxPriorityFeePerGas: bigint;
+    maxFeePerGas: bigint;
+    lastUpdated: number;
 }
 
 /**
  * Fetches the current gas fees from the blockchain
  */
 async function fetchCurrentFees(chainId: number): Promise<GasFees> {
-  const publicClient = getPublicClientByChainId(chainId);
-  const maxPriorityFee = await publicClient.estimateMaxPriorityFeePerGas();
-  const feeData = await publicClient.estimateFeesPerGas();
-  
-  return {
-    maxPriorityFeePerGas: maxPriorityFee,
-    maxFeePerGas: feeData.maxFeePerGas,
-    lastUpdated: Date.now()
-  };
+    const publicClient = getPublicClientByChainId(chainId);
+    const maxPriorityFee = await publicClient.estimateMaxPriorityFeePerGas();
+    const feeData = await publicClient.estimateFeesPerGas();
+
+    return {
+        maxPriorityFeePerGas: maxPriorityFee,
+        maxFeePerGas: feeData.maxFeePerGas,
+        lastUpdated: Date.now()
+    };
 }
 
 /**
@@ -107,19 +107,19 @@ async function getCurrentFees(chainId: number): Promise<GasFees> {
 
 
     const cacheKey = `gas_fees:${chainId}`;
-  
-  // Try to get from cache first
-  const cachedData = await redis.get(cacheKey);
-  
-  if (cachedData) {
-    const parsedData = JSON.parse(cachedData);
-    // Convert string representations back to bigint
-    return {
-      maxPriorityFeePerGas: BigInt(parsedData.maxPriorityFeePerGas),
-      maxFeePerGas: BigInt(parsedData.maxFeePerGas),
-      lastUpdated: parsedData.lastUpdated
-    };
-  }
+
+    // Try to get from cache first
+    const cachedData = await redis.get(cacheKey);
+
+    if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        // Convert string representations back to bigint
+        return {
+            maxPriorityFeePerGas: BigInt(parsedData.maxPriorityFeePerGas),
+            maxFeePerGas: BigInt(parsedData.maxFeePerGas),
+            lastUpdated: parsedData.lastUpdated
+        };
+    }
     const fees = await fetchCurrentFees(chainId);
     await redis.set(
         cacheKey,
@@ -180,7 +180,7 @@ async function getRelayerKeyWithRoundRobin(): Promise<HexString> {
 function createWorker() {
     // Worker to process transaction jobs
     const worker = new Worker<TxJobData>('transaction-processing', async job => {
-        const { chainId, player } = job.data;
+        const {chainId, player, sessionId} = job.data;
         let relayerAddress: HexString | null = null;
         try {
             // Get a relayer key using the atomic round-robin function
@@ -195,9 +195,11 @@ function createWorker() {
             const contract = getContractConfig('ScoreManager', chainId);
             await new Promise(resolve => setTimeout(resolve, 3000))
             const fees = await getCurrentFees(chainId);
-            let txHash : HexString | null = null;
+            let txHash: HexString | null = null;
             switch (job.data.payload.type) {
                 case 'UpdateHighscoreTx':
+                    const {playerId} = job.data.payload
+
                     txHash = await signerClient.writeContract({
                         chain: undefined,
                         address: contract.address,
@@ -210,19 +212,18 @@ function createWorker() {
                         maxFeePerGas: fees.maxFeePerGas,
                         gas: BigInt(75_000),
                     });
-                    const jobId = await addTxJob({
-                        type: "SendUserScoreJobData",
-                        chainId,
-                        playerAddress: "0x",
-                        scoreAmount: 0,
-                        transactionAmount: 0
-                    }, {
-                        delay: 0
+
+                    await prisma.gameOverRecord.update({
+                        where: {
+                            playerId_chainId_sessionId: {
+                                playerId: playerId, chainId: chainId, sessionId: sessionId
+                            }
+                        },
+                        data: {updateHighscoreTxHash: txHash},
                     });
-                    console.log(`SendUserScoreTx Job ID is ${jobId}`);
                     break;
                 case 'PlayerMoveTx':
-                    const { sessionId, playerMoveId } = job.data.payload
+                    const {playerMoveId} = job.data.payload
                     txHash = await signerClient.writeContract({
                         chain: undefined,
                         address: contract.address,
@@ -280,24 +281,21 @@ function createWorker() {
 function createSendUserScoreWorker() {
     // Worker to process send user score jobs
     const worker = new Worker<SendUserScoreJobData>('send-user-score', async job => {
-        const { chainId, playerAddress, scoreAmount, transactionAmount } = job.data;
+        const {chainId, playerAddress, scoreAmount, transactionAmount, playerId, sessionId} = job.data;
         let signerAddress: HexString | null = null;
 
         try {
             console.log(`Processing send user score for player: ${playerAddress}, score: ${scoreAmount}, amount: ${transactionAmount}`);
 
-            // TODO: Implement your score sending logic here
             const account = privateKeyToAccount(scorePublisherKey);
             const signerClient = getSignerClientByChainId(chainId);
             signerAddress = account.address;
             const nonce = await getNonce(signerAddress, chainId);
             const fees = await getCurrentFees(chainId);
-            // TODO : define the contract
             const contract = getContractConfig('CentralLeaderboard', chainId);
             // i think this is to prevent rpc rate limit and leverage tx batching
             await new Promise(resolve => setTimeout(resolve, 3000))
-            let txHash : HexString | null = null;
-            // TODO : add correct info the contract
+            let txHash: HexString | null = null;
             txHash = await signerClient.writeContract({
                 chain: undefined,
                 address: contract.address,
@@ -310,8 +308,15 @@ function createSendUserScoreWorker() {
                 maxFeePerGas: fees.maxFeePerGas,
                 gas: BigInt(75_000),
             });
-            // TODO : add a db record for this
 
+            await prisma.gameOverRecord.update({
+                where: {
+                    playerId_chainId_sessionId: {
+                        playerId: playerId, chainId: chainId, sessionId: sessionId
+                    }
+                },
+                data: {sendUserScoreTxHash: txHash},
+            });
             console.log(`Successfully sent score for player: ${playerAddress}`);
             return txHash;
 

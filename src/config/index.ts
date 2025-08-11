@@ -123,8 +123,8 @@ export const getPublicClientByChainId = (chainId: number): ReturnType<typeof cre
     chain: chainConfig,
     transport: http(paidRPC, {
       onFetchRequest(request, init) {
-        console.log('request:', request);
-        console.log('init:', init);
+        // console.log('request:', request);
+        // console.log('init:', init);
       },
       timeout: 30_000,
       retryCount: 3,
@@ -160,10 +160,10 @@ export const getSignerClientByChainId = (chainId: number): WalletClient => {
     transport: http(paidRPC, {
       onFetchRequest(request, init) {
         // console.log('request:', request);
-        console.log('init:', init);
+        // console.log('init:', init);
       },
       onFetchResponse(response) {
-        console.log('response:', response);
+        // console.log('response:', response);
       },
       timeout: 30_000,
       retryCount: 3,

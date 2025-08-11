@@ -55,6 +55,7 @@ model Player {
   highscores           HighScore[]
   cooldown             PlayerCooldown?
   purchases            SessionPurchase[]
+  GameOverRecord       GameOverRecord[]
 
   @@index([address])
   @@map("players")
@@ -99,4 +100,19 @@ model SessionPurchase {
   player        Player   @relation(fields: [playerId], references: [id])
 
   @@map("session_purchases")
+}
+
+model GameOverRecord {
+  id                    Int      @id @default(autoincrement())
+  playerId              Int
+  chainId               Int
+  sessionId             Int
+  updateHighscoreTxHash String?
+  sendUserScoreTxHash   String?
+  createdAt             DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@unique([playerId, chainId, sessionId])
+  @@map("game_over_records")
 }

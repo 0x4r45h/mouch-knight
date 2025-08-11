@@ -97,9 +97,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const jobId= await addTxJob({
         chainId,
         player: player,
+        sessionId,
         payload: {
             type: 'PlayerMoveTx',
-            sessionId,
             playerMoveId: playerMove.id,
         },
         type: "TxJobData"

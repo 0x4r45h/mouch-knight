@@ -197,22 +197,6 @@ export default function Home() {
             // Update highscore state immediately with the new score
             console.log(`set highscore hook manually to ${score}`)
             setPlayerHighscore(score);
-
-            // Still trigger the backend update in the background
-            try {
-                fetch('/api/game/score/highscore', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        player: address,
-                        chain_id: chainId
-                    })
-                })
-            } catch (error) {
-                console.error('Error during updating high score:', error);
-            }
         }
         setLastGameRef(game);
         setLastGameScore(score);
@@ -220,7 +204,22 @@ export default function Home() {
         setGameOverModal(true)
         setGameStarted(false);
         checkCooldown();
-    }, [address, chainId, setPlayerHighscore, checkCooldown]);
+        try {
+            fetch('/api/game/gameover', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    player: address,
+                    chain_id: chainId,
+                    session_id: gameSession
+                })
+            })
+        } catch (error) {
+            console.error('Error during game over processing:', error);
+        }
+    }, [checkCooldown, setPlayerHighscore, address, chainId, gameSession]);
 
     const finishGame = () => {
         lastGameRef?.restartGame();
