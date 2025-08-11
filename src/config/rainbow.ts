@@ -29,7 +29,7 @@ const connectors = connectorsForWallets(
                 toPrivyWallet({
                     id: privyProviderId,
                     name: 'Monad ID',
-                    iconUrl: 'https://i.ibb.co/NdyfX1qx/Monad-Logo-Black-Logo-Mark.png'
+                    iconUrl: 'https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/66c3711574e166ac115bba8a_Logo%20Mark.svg'
                 }),
             ],
         },

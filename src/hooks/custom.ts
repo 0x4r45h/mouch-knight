@@ -231,3 +231,119 @@ export function useTreasuryBalance(chainId?: number) {
         refetch: fetchTreasuryBalance
     };
 }
+
+export function useMonadUsername() {
+    const { address } = useAccount();
+    const [username, setUsername] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+    
+    const fetchUsername = useCallback(async () => {
+        if (!address) {
+            setUsername(null);
+            return;
+        }
+        
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await fetch(`/api/player?address=${address}`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    setUsername(null);
+                    return;
+                }
+                throw new Error('Failed to fetch username');
+            }
+            
+            const data = await response.json();
+            setUsername(data.data.player.mUsername || null);
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error('Unknown error'));
+            console.error('Error fetching monad username:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [address]);
+    
+    const refetchUsername = useCallback(async () => {
+        if (!address) return { success: false, message: 'No address' };
+        
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await fetch('/api/player/upsert-username', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ address })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                setUsername(data.data.player.mUsername || null);
+                return { success: true, usernameFound: data.data.usernameFound };
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error('Unknown error'));
+            console.error('Error refetching monad username:', err);
+            return { success: false, message: err instanceof Error ? err.message : 'Unknown error' };
+        } finally {
+            setLoading(false);
+        }
+    }, [address]);
+    
+    useEffect(() => {
+        fetchUsername();
+    }, [fetchUsername]);
+    
+    return {
+        username,
+        loading,
+        error,
+        refetch: refetchUsername
+    };
+}
+
+export function usePlayerCreation() {
+    const { address, isConnected } = useAccount();
+    const [playerCreated, setPlayerCreated] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const createPlayer = useCallback(async (walletAddress: string) => {
+        if (loading || playerCreated) return;
+        
+        setLoading(true);
+        try {
+            const response = await fetch('/api/player/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ address: walletAddress })
+            });
+            
+            if (response.ok) {
+                setPlayerCreated(true);
+            }
+        } catch (error) {
+            console.error('Error creating player:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [loading, playerCreated]);
+
+    useEffect(() => {
+        if (isConnected && address && !playerCreated) {
+            createPlayer(address);
+        }
+    }, [isConnected, address, playerCreated, createPlayer]);
+
+    return { playerCreated, loading };
+}

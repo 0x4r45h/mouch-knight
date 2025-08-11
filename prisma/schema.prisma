@@ -49,6 +49,7 @@ model Player {
   fPfpUrl              String?
   fLocationDescription String?
   fLocationPlaceId     String?
+  mUsername            String?
   createdAt            DateTime          @default(now()) @map("created_at")
   updatedAt            DateTime          @default(now()) @updatedAt @map("updated_at")
   moves                PlayerMove[]

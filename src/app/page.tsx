@@ -8,7 +8,9 @@ import {
     useGetPlayerHighscore,
     useScoreTokenBalanceOfPlayer,
     usePlayerCooldown,
-    useTreasuryBalance
+    useTreasuryBalance,
+    useMonadUsername,
+    usePlayerCreation
 } from "@/hooks/custom";
 import Leaderboard from "@/components/Leaderboard";
 import {sdk as farcasterSdk} from '@farcaster/frame-sdk';
@@ -40,6 +42,10 @@ export default function Home() {
     const rowsPerPage = 5;
     const [scoreTx, setScoreTx] = useState<ScoreTx[]>([]);
     const {address, chainId, isConnected} = useAccount()
+    
+    // this will create player on wallet connection
+    usePlayerCreation();
+    
     const {
         balance: treasuryBalance,
         refetch: refetchTreasuryBalance
@@ -59,6 +65,14 @@ export default function Home() {
         remainingSeconds,
         checkCooldown
     } = usePlayerCooldown();
+    const {
+        username: monadUsername,
+        loading: usernameLoading,
+        refetch: refetchUsername
+    } = useMonadUsername();
+    
+    const isRainbowProvider = process.env.NEXT_PUBLIC_WALLET_PROVIDER === 'rainbow';
+    const requiresUsername = isRainbowProvider && !monadUsername;
 
     const formatToFixedDecimals = (value: bigint, decimals: number, fixed: number): string => {
         const formatted = formatUnits(value, decimals); // e.g., "123.456789"
@@ -142,6 +156,13 @@ export default function Home() {
 
     const handleNewGame = async (e: React.FormEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        
+        // Check for Rainbow provider username requirement
+        if (isRainbowProvider && !monadUsername) {
+            console.log('Monad username required for Rainbow provider');
+            return;
+        }
+        
         let farcasterUser: UserContext | null = null
         const isMiniApp = await farcasterSdk.isInMiniApp()
         if (isMiniApp) {
@@ -189,6 +210,14 @@ export default function Home() {
             setGameLoading(false)
         }
     }
+
+    const handleRetryUsername = async () => {
+        const result = await refetchUsername();
+        if (result.success && result.usernameFound) {
+            // Username found and updated
+            console.log('Username successfully retrieved');
+        }
+    };
 
     const gameOverHandler = useCallback((game: GameLogic, score: number, highScore: number, mkt: number) => {
         console.log(`score is ${score} and highscore is ${highScore}`)
@@ -380,7 +409,36 @@ export default function Home() {
                     /* Otherwise, show game controls */
                     <div className="flex items-center justify-center w-full flex-col space-y-6 px-4">
                         {isConnected ? (
-                            inCooldown ? (
+                            requiresUsername ? (
+                                <div className="space-y-4 w-full text-center">
+                                    <div className="bg-monad-light-blue bg-opacity-20 rounded-lg p-6">
+                                        <div className="text-2xl mb-3">🎮</div>
+                                        <h3 className="text-xl font-bold text-monad-off-white mb-3">
+                                            Monad Username Required
+                                        </h3>
+                                        <p className="text-monad-off-white mb-4">
+                                            You need to register your Monad username to play this game.
+                                        </p>
+                                        <a 
+                                            href="https://monad.xyz/register" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="inline-block bg-monad-berry text-white px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors mb-4"
+                                        >
+                                            Register Username
+                                        </a>
+                                    </div>
+                                    <Button
+                                        color="primary"
+                                        size="lg"
+                                        className="bg-monad-purple rounded-md focus:outline-none focus:ring-2 w-full"
+                                        onClick={handleRetryUsername}
+                                        disabled={usernameLoading}
+                                    >
+                                        {usernameLoading ? '🔄 Checking...' : '🔄 Check Again'}
+                                    </Button>
+                                </div>
+                            ) : inCooldown ? (
                                 <div className="space-y-3 w-full">
                                     <div className="bg-monad-light-blue bg-opacity-20 rounded-lg p-4 text-center">
                                         <p className="text-monad-off-white mb-2">

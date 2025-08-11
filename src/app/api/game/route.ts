@@ -12,6 +12,21 @@ async function handler(request: NextRequest) {
     const farcasterUser: UserContext | null = body.farcaster_user;
 
     try {
+        // Check Rainbow provider requirement
+        if (process.env.NEXT_PUBLIC_WALLET_PROVIDER === 'rainbow') {
+            const existingPlayer = await prisma.player.findUnique({
+                where: { address: from },
+                select: { mUsername: true }
+            });
+            
+            if (!existingPlayer?.mUsername) {
+                return NextResponse.json({
+                    success: false,
+                    message: "Monad username required for Rainbow provider"
+                }, { status: 403 });
+            }
+        }
+
         // Upsert player when starting a new game
         const player = await prisma.player.upsert({
             where: {
