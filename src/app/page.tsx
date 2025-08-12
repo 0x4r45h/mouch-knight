@@ -21,6 +21,7 @@ import PurchaseSessionsModal from '@/components/PurchaseSessionsModal';
 import TreasuryInfoModal from '@/components/TreasuryInfoModal';
 import {formatUnits} from "viem";
 import {ConnectButton} from "@/components/ConnectButton";
+import {MONAD_USERNAME_REGISTER_URL} from "@/config";
 export default function Home() {
     type ScoreTx = {
         moveId: undefined,
@@ -420,7 +421,7 @@ export default function Home() {
                                             You need to register your Monad username to play this game.
                                         </p>
                                         <a 
-                                            href="https://monad.xyz/register" 
+                                            href={MONAD_USERNAME_REGISTER_URL}
                                             target="_blank" 
                                             rel="noopener noreferrer"
                                             className="inline-block bg-monad-berry text-white px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors mb-4"

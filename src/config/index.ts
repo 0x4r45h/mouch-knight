@@ -5,6 +5,8 @@ import { anvil, monadTestnet } from 'viem/chains'
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 export const MINI_APP_URL = process.env.NEXT_PUBLIC_MINI_APP_URL
 export const WALLET_PROVIDER = process.env.NEXT_PUBLIC_WALLET_PROVIDER
+export const MONAD_USERNAME_API = process.env.MONAD_USERNAME_API_URL;
+export const MONAD_USERNAME_REGISTER_URL = process.env.NEXT_PUBLIC_MONAD_USERNAME_REGISTER_URL;
 
 
 if (!APP_URL) {

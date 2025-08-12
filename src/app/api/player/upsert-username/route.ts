@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from "@/db/client";
-
-// Third party service endpoint - replace with actual endpoint
-const THIRD_PARTY_USERNAME_API = process.env.MONAD_USERNAME_API_URL || 'https://api.example.com/username';
+import {MONAD_USERNAME_API} from "@/config";
 
 async function fetchMonadUsername(address: string): Promise<string | null> {
-    // TODO : for now just return a random username
-    return `foo${Math.random().toString(36).substring(7)}`;
     try {
-        const response = await fetch(`${THIRD_PARTY_USERNAME_API}/${address}`, {
+        console.log(`URL IS : '${MONAD_USERNAME_API}/check-wallet?wallet=${address}'`)
+        const response = await fetch(`${MONAD_USERNAME_API}/check-wallet?wallet=${address}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -27,7 +24,11 @@ async function fetchMonadUsername(address: string): Promise<string | null> {
         }
         
         const data = await response.json();
-        return data.username || null;
+        console.log("data is ", data)
+        if (!data.hasUsername) {
+            return null;
+        }
+        return data.user?.username || null;
     } catch (error) {
         console.error('Error fetching monad username:', error);
         return null;
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         
         // Fetch username from third party service
         const mUsername = await fetchMonadUsername(address);
-        
+
         // Upsert player with the fetched username
         const player = await prisma.player.upsert({
             where: { address },
