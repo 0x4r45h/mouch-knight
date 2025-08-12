@@ -1,4 +1,5 @@
 import prisma from '@/db/client';
+import { Prisma } from '@prisma/client';
 
 export interface HighScore {
   chainId: number;
@@ -38,12 +39,28 @@ export class HighScoreService {
   /**
    * Get leaderboard for a specific chain
    */
-  async getLeaderboard(chainId: number, limit = 100): Promise<{ player: string; score: string }[]> {
+  async getLeaderboard(chainId: number, limit = 100, mode: 'farcaster' | 'monad-id' | 'full' = 'full'): Promise<{ player: string; score: string }[]> {
     try {
+      // const whereClause: any = { chainId };
+      const whereClause: Prisma.HighScoreWhereInput = { chainId };
+
+      // Add filtering based on mode
+      if (mode === 'farcaster') {
+        whereClause.player = {
+          fUsername: {
+            not: null
+          }
+        };
+      } else if (mode === 'monad-id') {
+        whereClause.player = {
+          mUsername: {
+            not: null
+          }
+        };
+      }
+
       const leaderboard = await prisma.highScore.findMany({
-        where: {
-          chainId
-        },
+        where: whereClause,
         orderBy: {
           score: 'desc'
         },
@@ -57,6 +74,7 @@ export class HighScoreService {
               fUsername: true,
               fDisplayName: true,
               fPfpUrl: true,
+              mUsername: true,
             }
           },
           score: true,
@@ -72,6 +90,7 @@ export class HighScoreService {
         fUsername: entry.player.fUsername,
         fDisplayName: entry.player.fDisplayName,
         fPfpUrl: entry.player.fPfpUrl,
+        mUsername: entry.player.mUsername,
       }));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);

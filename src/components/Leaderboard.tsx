@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Modal } from "flowbite-react";
 import { sdk } from '@farcaster/frame-sdk';
 import { HiX } from 'react-icons/hi';
+import { getLeaderboardMode } from '@/config';
 
 interface LeaderboardProps {
   openModal: boolean;
@@ -18,6 +19,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   chainId,
   currentUserAddress
 }) => {
+  const [mode] = useState<'farcaster' | 'monad-id' | 'full'>(getLeaderboardMode());
+
   type Score = {
     address: string,
     score: string,
@@ -26,6 +29,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     fUsername?: string,
     fDisplayName?: string,
     fPfpUrl?: string,
+    mUsername?: string,
   }
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,7 +41,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     if (openModal) {
       const fetchHighscores = async () => {
         try {
-          const response = await fetch(`/api/game/score/highscore/leaderboard?chain_id=${chainId}`, {
+          const response = await fetch(`/api/game/score/highscore/leaderboard?chain_id=${chainId}&mode=${mode}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -59,6 +63,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             fUsername?: string,
             fDisplayName?: string,
             fPfpUrl?: string
+            mUsername?: string
           }) => {
             const score: Score = {
               address: value.player,
@@ -68,6 +73,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
               fUsername: value.fUsername,
               fDisplayName: value.fDisplayName,
               fPfpUrl: value.fPfpUrl,
+              mUsername: value.mUsername,
             }
             return score;
           });
@@ -89,10 +95,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
       
       fetchHighscores();
     }
-  }, [chainId, openModal, currentUserAddress]);
+  }, [chainId, openModal, currentUserAddress, mode]);
 
   const showProfile = (fid?: number) => {
-    if (fid) {
+    if (mode === 'farcaster' && fid) {
       sdk.actions.viewProfile({ fid });
     }
   };
@@ -130,7 +136,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
               <div className="mr-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={currentUserScore.fPfpUrl || '/images/character.png'} 
+                  src={mode === 'farcaster' ? (currentUserScore.fPfpUrl || '/images/character.png') : '/images/character.png'} 
                   width={32} 
                   height={32} 
                   className="rounded-full" 
@@ -138,9 +144,19 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 />
               </div>
               <div>
-                <div className="font-semibold">{currentUserScore.fDisplayName || currentUserScore.address.slice(0, 6)}</div>
+                <div className="font-semibold">
+                  {mode === 'farcaster' 
+                    ? (currentUserScore.fDisplayName || currentUserScore.address.slice(0, 6))
+                    : mode === 'monad-id'
+                    ? (currentUserScore.mUsername || currentUserScore.address.slice(0, 6))
+                    : (currentUserScore.fDisplayName || currentUserScore.mUsername || currentUserScore.address.slice(0, 6))
+                  }
+                </div>
                 <div className="text-xs text-monad-off-white text-opacity-80">
-                  {currentUserScore.fUsername ? `@${currentUserScore.fUsername}` : `${currentUserScore.address.slice(0, 4)}...${currentUserScore.address.slice(-4)}`}
+                  {mode === 'farcaster' && currentUserScore.fUsername 
+                    ? `@${currentUserScore.fUsername}`
+                    : `${currentUserScore.address.slice(0, 4)}...${currentUserScore.address.slice(-4)}`
+                  }
                 </div>
               </div>
             </div>
@@ -166,7 +182,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 <div className="mr-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={score.fPfpUrl || '/images/character.png'} 
+                    src={mode === 'farcaster' ? (score.fPfpUrl || '/images/character.png') : '/images/character.png'} 
                     width={32} 
                     height={32} 
                     className="rounded-full" 
@@ -174,9 +190,19 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   />
                 </div>
                 <div>
-                  <div className="font-semibold">{score.fDisplayName || score.address.slice(0, 6)}</div>
+                  <div className="font-semibold">
+                    {mode === 'farcaster' 
+                      ? (score.fDisplayName || score.address.slice(0, 6))
+                      : mode === 'monad-id'
+                      ? (score.mUsername || score.address.slice(0, 6))
+                      : (score.fDisplayName || score.mUsername || score.address.slice(0, 6))
+                    }
+                  </div>
                   <div className="text-xs text-monad-off-white text-opacity-80">
-                    {score.fUsername ? `@${score.fUsername}` : `${score.address.slice(0, 4)}...${score.address.slice(-4)}`}
+                    {mode === 'farcaster' && score.fUsername 
+                      ? `@${score.fUsername}`
+                      : `${score.address.slice(0, 4)}...${score.address.slice(-4)}`
+                    }
                   </div>
                 </div>
               </div>

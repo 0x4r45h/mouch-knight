@@ -364,6 +364,19 @@ export default function Home() {
                         </div>
                     </div>
                     {isConnected && (
+                        <div className="w-full max-w-[540px] mb-4">
+                            <div className="bg-gradient-to-br from-monad-light-blue to-monad-purple rounded-lg p-4 text-center">
+                                <div className="flex items-center justify-center mb-2">
+                                    <span className="text-2xl mr-2">👑</span>
+                                    <span className="text-monad-off-white font-semibold">Welcome</span>
+                                </div>
+                                <div className="text-xl font-bold text-monad-off-white">
+                                    {monadUsername || 'Knight'}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {isConnected && (
                         <div className="w-full max-w-[540px] mb-6">
                             <div className="grid grid-cols-2 gap-4">
                                 {/* MKT Balance Card */}

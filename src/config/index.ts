@@ -8,6 +8,18 @@ export const WALLET_PROVIDER = process.env.NEXT_PUBLIC_WALLET_PROVIDER
 export const MONAD_USERNAME_API = process.env.MONAD_USERNAME_API_URL;
 export const MONAD_USERNAME_REGISTER_URL = process.env.NEXT_PUBLIC_MONAD_USERNAME_REGISTER_URL;
 
+export const getLeaderboardMode = (): 'farcaster' | 'monad-id' | 'full' => {
+  const provider = process.env.NEXT_PUBLIC_WALLET_PROVIDER;
+  
+  switch (provider) {
+    case 'rainbow':
+      return 'monad-id';
+    case 'farcaster':
+      return 'farcaster';
+    default:
+      return 'full';
+  }
+};
 
 if (!APP_URL) {
   throw new Error('APP_URL is not defined')
