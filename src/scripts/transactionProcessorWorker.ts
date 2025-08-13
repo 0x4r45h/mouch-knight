@@ -210,7 +210,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(75_000),
+                        // gas: BigInt(75_000),
                     });
 
                     await prisma.gameOverRecord.update({
@@ -234,7 +234,7 @@ function createWorker() {
                         nonce,
                         maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
                         maxFeePerGas: fees.maxFeePerGas,
-                        gas: BigInt(100_000),
+                        // gas: BigInt(100_000),
                     });
 
                     await prisma.playerMove.update({
