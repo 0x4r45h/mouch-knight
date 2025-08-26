@@ -20,7 +20,14 @@ export default function RainbowWalletProvider({children}: WalletProviderProps) {
                  <RainbowKitProvider 
                     modalSize="compact"
                     theme={{
-                        shadows: {},
+                        shadows: {
+                            connectButton: 'none',
+                            dialog: 'none',
+                            profileDetailsAction: 'none',
+                            selectedOption: 'none',
+                            selectedWallet: 'none',
+                            walletLogo: 'none',
+                        },
                         blurs: {
                             modalOverlay: 'blur(4px)',
                         },
