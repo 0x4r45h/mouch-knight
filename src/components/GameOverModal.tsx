@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Modal } from "flowbite-react";
 import { sdk } from '@farcaster/frame-sdk';
 import { HiX } from 'react-icons/hi';
-import {MINI_APP_URL} from "@/config";
+import { APP_URL ,MINI_APP_URL, getLeaderboardMode} from "@/config";
 
 interface GameOverModalProps {
   show: boolean;
@@ -19,6 +19,8 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
   mkt, 
   highScore 
 }) => {
+  const leaderboardMode = getLeaderboardMode();
+
   const handleCastShare = async () => {
     try {
       const result = await sdk.actions.composeCast({ 
@@ -30,6 +32,17 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
       console.error('Error sharing to Farcaster:', error);
     }
   };
+
+  const handleXShare = () => {
+    const text = `🎮 I just scored ${score} in #MouchKnight! My highest score is ${highScore}. I earned ${mkt} MKT tokens! Can you beat my score? 🏆`;
+    const url = encodeURIComponent(`${APP_URL}`);
+    const tweetText = encodeURIComponent(text);
+    const xUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${url}`;
+    window.open(xUrl, '_blank');
+  };
+
+  const handleShare = leaderboardMode === 'monad-id' ? handleXShare : handleCastShare;
+  const shareButtonText = leaderboardMode === 'monad-id' ? 'Post on X' : 'Cast to Farcaster';
 
   return (
     <Modal dismissible show={show} onClose={onClose}>
@@ -76,9 +89,9 @@ const GameOverModal: React.FC<GameOverModalProps> = ({
           size="lg"
           color="primary"
           className="rounded disabled:opacity-50 bg-monad-berry"
-          onClick={handleCastShare}
+          onClick={handleShare}
         >
-          Cast to Farcaster
+          {shareButtonText}
         </Button>
         <Button 
           size="lg"
